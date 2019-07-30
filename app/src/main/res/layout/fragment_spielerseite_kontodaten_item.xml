@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SpielerseiteKontodatenFragment">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="126dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp">
+
+        <TextView
+            android:id="@+id/betrag_je_spieler2"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_gravity="start|top|left"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif"
+            android:text="@string/editText_buchungsbetrag"
+            android:textColor="#888888"
+            android:textSize="14sp" />
+
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:text="@string/switch_auszahlung"
+            android:textColor="#888888" />
+
+        <LinearLayout
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:focusableInTouchMode="true"
+            android:orientation="horizontal">
+
+            <eu.merscher.lbsvolleyball.NumericEditText
+                android:id="@+id/fragment_kontodaten_editText_addBuchung"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginBottom="16dp"
+                android:layout_weight="3"
+                android:digits="01234567890,"
+                android:ems="10"
+                android:hint="0,00"
+                android:inputType="number"
+                android:textAlignment="textEnd"
+                android:textSize="40sp" />
+
+            <TextView
+                android:id="@+id/spieltag_EUR_unten"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:layout_weight="0"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/editText_EUR"
+                android:textColor="#AE1732"
+                android:textSize="24sp" />
+
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fragment_spielerkonto_addButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:src="@drawable/add_white"
+            app:fabSize="mini" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="150dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="#AE1732">
+
+        <LinearLayout
+            android:id="@+id/relativeLayout1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="2dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:gravity="left"
+                android:padding="5dp"
+                android:text="@string/textView_buchung_datum"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:gravity="left"
+                android:padding="5dp"
+                android:text="@string/textView_buchung_betrag"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="16dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:gravity="left"
+                android:padding="5dp"
+                android:text="@string/textView_kto_saldo_neu"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="190dp"
+        android:layout_marginEnd="8dp">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ListView
+                    android:id="@+id/listView_buchungen"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:divider="@null" />
+            </LinearLayout>
+        </ScrollView>
+
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

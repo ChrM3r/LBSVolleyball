@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_spieltag_bottom"
+        android:enabled="true"
+        android:icon="@drawable/spieltag_icon"
+        android:title="@string/action_spieltag"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_spielerverwaltung_bottom"
+        android:enabled="true"
+        android:icon="@drawable/spielerverwaltung_icon"
+        android:title="@string/action_spielerverwaltungr"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_kontoverwaltung_bottom"
+        android:enabled="true"
+        android:icon="@drawable/kontoverwaltung_icon"
+        android:title="@string/action_kontoverwaltung"
+        app:showAsAction="ifRoom" />
+</menu>

@@ -1,0 +1,26 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+
+    android:layout_height="wrap_content"
+
+    android:layout_marginStart="8dp"
+
+    android:layout_marginEnd="8dp"
+
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+
+    android:paddingTop="@dimen/activity_vertical_margin"
+
+    tools:context=".SpieltagActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+
+        android:id="@+id/spieltag_activity_spielerauswahl_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </androidx.recyclerview.widget.RecyclerView>
+</RelativeLayout>

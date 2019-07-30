@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">LBS Volleyball</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_spieltag">Spieltag</string>
+    <string name="action_spielerverwaltungr">Spielerverwaltung</string>
+    <string name="action_kontoverwaltung">Kontoverwaltung</string>
+
+    <string name="editText_hint_name">Name</string>
+    <string name="editText_hint_vname">Vorname</string>
+    <string name="editText_hint_bdate">Geburtstag</string>
+    <string name="editText_hint_platzkosten">20,00</string>
+    <string name="textView_platzkosten">Platzkosten:</string>
+    <string name="textView_spieltag">Spieltag</string>
+    <string name="textView_spielerverwaltung">Spielerverwaltung</string>
+    <string name="textView_who_played">Wer hat gespielt?</string>
+    <string name="textView_betrag__pro_spieler">Betrag je Spieler</string>
+    <string name="textView_buchung_betrag">Betrag</string>
+    <string name="textView_buchung_datum">Datum</string>
+    <string name="textView_kto_saldo_neu">Kontosaldo</string>
+    <string name="textView_kto_saldo_aktuell">Aktueller Kontostand:</string>
+    <string name="textView_teilnahmen">Trainingsteilnahmen:</string>
+    <string name="tab_grunddaten">Grunddaten</string>
+    <string name="tab_kontodaten">Kontoübersicht</string>
+
+    <string name="textView_foto">Foto:</string>
+
+    <string name="editText_buchungsbetrag">Geld einzahlen:</string>
+    <string name="editText_EUR">EUR</string>
+    <string name="button_kontouebersicht">Kontoübersicht</string>
+    <string name="button_buchung_hinzufügen">Spieltag buchen!</string>
+    <string name="button_buchen">Buchen!</string>
+    <string name="button_foto">Foto auswählen</string>
+
+
+    <string name="button_add_player">+</string>
+
+    <string name="editText_errorMessage">Das Feld darf nicht leer sein.</string>
+
+    <string name="cab_delete">Einträge löschen</string>
+
+    <string name="cab_change">Eintrag ändern</string>
+    <string name="cab_checked_string">ausgewählt</string>
+
+    <string name="dialog_title">Daten ändern</string>
+    <string name="dialog_title_name">Name:</string>
+    <string name="dialog_title_vname">Vorname:</string>
+    <string name="dialog_title_bdate">Geburtstag:</string>
+    <string name="dialog_button_positive">Ändern</string>
+    <string name="dialog_button_negative">Abbrechen</string>
+
+    <string name="dialog_title_add">Spieler anlegen</string>
+    <string name="dialog_button_positive_add">Anlegen</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

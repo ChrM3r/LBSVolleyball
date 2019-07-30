@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="2dp"
+    android:layout_marginBottom="2dp">
+
+    <TextView
+        android:id="@+id/list_item_string"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:fontFamily="@font/alegreya_sans_sc"
+        android:paddingLeft="8dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/textView_kto_saldo"
+        android:layout_width="229dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_toStartOf="@+id/add_btn"
+        android:layout_toEndOf="@+id/list_item_string" />
+
+    <Button
+        android:id="@+id/add_btn"
+        android:layout_width="150dp"
+        android:layout_height="35dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="#E6E6E6"
+        android:drawableStart="@drawable/kontouebersicht"
+        android:fontFamily="sans-serif-light"
+        android:text="@string/button_kontouebersicht"
+        android:textAllCaps="false"
+        android:textColor="#141414" />
+
+</RelativeLayout>
