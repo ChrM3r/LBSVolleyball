@@ -1,7 +1,7 @@
 package eu.merscher.lbsvolleyball;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +18,13 @@ public class SpielerVerwaltungAdapter extends BaseAdapter implements ListAdapter
     private ArrayList<Spieler> spielerList = new ArrayList<Spieler>();
     private ArrayList<String> spielerNamen = new ArrayList<String>();
     private ArrayList<String> spielerGeburtstage = new ArrayList<String>();
-    private ArrayList<String> spielerFotos = new ArrayList<String>();
+    private ArrayList<Bitmap> spielerFotos = new ArrayList<Bitmap>();
 
     private Context context;
     private ListView spielerListView;
 
 
-    public SpielerVerwaltungAdapter(ArrayList<Spieler> spielerList, ArrayList<String> spielerNamen, ArrayList<String> spielerFotos, ArrayList<String> spielerGeburtstage, Context context) {
+    public SpielerVerwaltungAdapter(ArrayList<Spieler> spielerList, ArrayList<String> spielerNamen, ArrayList<Bitmap> spielerFotos, ArrayList<String> spielerGeburtstage, Context context) {
         this.spielerList = spielerList;
         this.spielerNamen = spielerNamen;
         this.spielerFotos = spielerFotos;
@@ -63,17 +63,19 @@ public class SpielerVerwaltungAdapter extends BaseAdapter implements ListAdapter
 
         ImageView spielerBild = view.findViewById(R.id.spielerBild);
 
-        if (spielerFotos.get(position).equals("avatar_m"))
+
+        if (spielerList.get(position).getFoto().equals("avatar_m"))
             spielerBild.setImageResource(R.drawable.avatar_m);
 
-        else if (spielerFotos.get(position).equals("avatar_f"))
+        else if (spielerList.get(position).getFoto().equals("avatar_f"))
             spielerBild.setImageResource(R.drawable.avatar_f);
 
         else
-            spielerBild.setImageBitmap(BitmapFactory.decodeFile(spielerFotos.get(position)));
+            spielerBild.setImageBitmap(spielerFotos.get(position));
 
 
         return view;
+
     }
 
 

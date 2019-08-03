@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="25dp"
     android:clickable="true"
+    android:focusable="true"
     android:focusableInTouchMode="true"
     android:orientation="vertical">
 
@@ -22,21 +23,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="5sp"
-        android:layout_marginRight="5sp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="Max" />
+        android:text="Max"
+        app:autoSizeMaxTextSize="100sp"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeStepGranularity="2sp"
+        app:autoSizeTextType="uniform" />
 
     <TextView
         android:id="@+id/activity_spieltag_spielerauswahl_item_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="5sp"
-        android:layout_marginRight="5sp"
         android:layout_weight="1"
         android:gravity="center"
-        android:inputType="text"
-        android:text="Mustermann" />
+        android:text="Mustermann"
+        app:autoSizeMaxTextSize="100sp"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeStepGranularity="2sp"
+        app:autoSizeTextType="uniform" />
 
     <CheckBox
         android:id="@+id/activity_spieltag_spielerauswahl_item_checkbox"

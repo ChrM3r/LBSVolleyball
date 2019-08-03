@@ -3,6 +3,8 @@ package eu.merscher.lbsvolleyball;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Comparator;
+
 
 public class Spieler implements Parcelable, Comparable<Spieler> {
 
@@ -110,6 +112,14 @@ public class Spieler implements Parcelable, Comparable<Spieler> {
 
     public void setMail(String mail) {
         this.mail = mail;
+    }
+
+    public class FirstNameSorter implements Comparator<Spieler> {
+
+        @Override
+        public int compare(Spieler o1, Spieler o2) {
+            return o1.getVname().compareTo(o2.getVname());
+        }
     }
 
     @Override

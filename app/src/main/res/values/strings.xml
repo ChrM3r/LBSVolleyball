@@ -25,6 +25,8 @@
 
     <string name="textView_foto">Foto:</string>
     <string name="switch_auszahlung">Auszahlung</string>
+    <string name="switch_kostenlos">Kostenlos</string>
+
 
     <string name="editText_buchungsbetrag">Buchung anlegen</string>
     <string name="editText_EUR">EUR</string>

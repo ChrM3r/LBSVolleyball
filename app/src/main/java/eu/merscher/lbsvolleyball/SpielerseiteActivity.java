@@ -1,10 +1,16 @@
 package eu.merscher.lbsvolleyball;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -50,16 +56,15 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
         findViewsById();
         bottomNavBarInitialisieren();
 
-        buchungDataSource = new BuchungDataSource(this);
-
+        buchungDataSource = BuchungDataSource.getInstance();
         buchungDataSource.open();
+
         buchungList = buchungDataSource.getAllBuchungZuSpieler(spieler);
         if (spieler.getHat_buchung_mm() == null)
             kto_saldo_neu = 0;
         else
             kto_saldo_neu = buchungDataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
 
-        buchungDataSource.close();
         teilnahmen = spieler.getTeilnahmen();
 
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
@@ -141,14 +146,36 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    Log.d("focus", "touchevent");
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+
+        return super.dispatchTouchEvent(event);
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
+        //    buchungDataSource.open();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        //    buchungDataSource.close();
     }
 }

@@ -36,8 +36,8 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = inflate.inflate(R.layout.fragment_spielerverwaltung_edit_spieler_item, parent, false);
-        spielerDataSource = new SpielerDataSource(context);
-        buchungDataSource = new BuchungDataSource(context);
+        spielerDataSource = SpielerDataSource.getInstance();
+        buchungDataSource = BuchungDataSource.getInstance();
         return new ViewHolder(view);
     }
 

@@ -1,5 +1,6 @@
 package eu.merscher.lbsvolleyball;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,8 @@ import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+
+import static eu.merscher.lbsvolleyball.SpieltagActivity.resources;
 
 public class SpieltagActivitySpielerauswahlFragmentAdapter extends RecyclerView.Adapter<SpieltagActivitySpielerauswahlViewHolder> {
 
@@ -36,14 +39,21 @@ public class SpieltagActivitySpielerauswahlFragmentAdapter extends RecyclerView.
         holder.textViewName.setText(spielerList.get(position).getName());
         holder.textViewVname.setText(spielerList.get(position).getVname());
 
-        if (spielerList.get(position).getFoto().equals("avatar_m"))
-            holder.spielerBild.setImageResource(R.drawable.avatar_m);
+        Bitmap spielerBildOriginal;
+        Bitmap spielerBildScaled;
+        Spieler spieler = spielerList.get(position);
 
-        else if (spielerList.get(position).getFoto().equals("avatar_f"))
-            holder.spielerBild.setImageResource(R.drawable.avatar_f);
+        if (spieler.getFoto().equals("avatar_m"))
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
 
+        else if (spieler.getFoto().equals("avatar_f"))
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
         else
-            holder.spielerBild.setImageBitmap(BitmapFactory.decodeFile(spielerList.get(position).getFoto()));
+            spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
+
+        spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 100);
+        holder.spielerBild.setImageBitmap(spielerBildScaled);
+
 
         holder.spielerBild.setOnClickListener(new View.OnClickListener() {
             @Override

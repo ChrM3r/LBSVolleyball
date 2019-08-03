@@ -1,12 +1,13 @@
 package eu.merscher.lbsvolleyball;
 
 import android.content.Context;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,6 +29,8 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
     private BuchungDataSource buchungDataSource;
     private LayoutInflater inflate;
     private SpielerKontoListViewAdapter spielerKontoListViewAdapter;
+    private boolean auszahlung = false;
+    private ViewHolder holder;
 
     SpielerseiteKontodatenFragmentAdapter(Context context, ArrayList<Buchung> buchungList, Spieler spieler) {
         this.inflate = LayoutInflater.from(context);
@@ -46,8 +49,31 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        buchungDataSource = new BuchungDataSource(context);
-        spielerDataSource = new SpielerDataSource(context);
+        this.holder = holder;
+        buchungDataSource = BuchungDataSource.getInstance();
+        spielerDataSource = SpielerDataSource.getInstance();
+
+        holder.auszahlungSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    auszahlung = isChecked;
+                    setAuszahlungInText(holder);
+                } else {
+                    auszahlung = false;
+                    setAuszahlungInText(holder);
+                }
+            }
+        });
+
+        holder.editTextAddBuchung.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+
+                Utils.formatNumericEditText(holder.editTextAddBuchung);
+                setAuszahlungInText(holder);
+            }
+        });
 
         holder.buttonAddBuchung.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,11 +82,8 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                 Toast toastError;
                 if (holder.editTextAddBuchung.getText().toString().isEmpty()) {
                     toastError = Toast.makeText(context, "Es wurde kein Betrag zum Buchen erfasst!", Toast.LENGTH_SHORT);
-                    toastError.setGravity(Gravity.CENTER, 0, 0);
-
                     toastError.show();
                 } else {
-
 
                     DecimalFormat df = new DecimalFormat("0.00");
 
@@ -82,29 +105,30 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                         kto_saldo_alt = buchung.getKto_saldo_neu(); //der vorherige Kto_Saldo_neu ist der neue Kto_Saldo_alt
                         kto_saldo_neu = kto_saldo_alt + bu_btr;
-
                         buchungDataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()));
 
                     } else { //Wenn keine Buchung vorhaden ist, ist der Startsaldo 0
 
+
                         kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
                         kto_saldo_neu = kto_saldo_alt + bu_btr;
-
                         buchungDataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()));
-                        spielerDataSource.updateHatBuchungenMM(spieler);
+
                     }
+                    spielerDataSource.updateHatBuchungenMM(spieler);
+
 
                     Toast toast = Toast.makeText(context, "Buchung angelegt", Toast.LENGTH_SHORT);
                     toast.show();
 
                     spielerKontoListViewAdapter.updateBuchungen(buchungDataSource.getAllBuchungZuSpieler(spieler));
-
                     buchungDataSource.close();
                     spielerDataSource.close();
 
                     holder.editTextAddBuchung.setText("");
                     holder.editTextAddBuchung.clearFocus();
                     holder.buttonAddBuchung.requestFocus();
+                    holder.auszahlungSwitch.setChecked(false);
                 }
             }
 
@@ -119,12 +143,35 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         return 1;
     }
 
+    private void setAuszahlungInText(ViewHolder holder) {
+
+        String s = holder.editTextAddBuchung.getText().toString();
+        if (auszahlung) {
+            if (!s.isEmpty()) {
+                if (!s.contains("-"))
+                    s = "-" + s;
+                holder.editTextAddBuchung.setText(s);
+            }
+        } else {
+            if (!s.isEmpty()) {
+                if (s.contains("-"))
+                    s = s.replace("-", "");
+                holder.editTextAddBuchung.setText(s);
+            }
+        }
+    }
+
+
+    public interface OnAddBuchungClickListener {
+        void onAddBuchungClick(String kto_saldo_neu);
+    }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         ListView buchungListView;
         EditText editTextAddBuchung;
         FloatingActionButton buttonAddBuchung;
+        Switch auszahlungSwitch;
 
 
         ViewHolder(View view) {
@@ -132,12 +179,10 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             buchungListView = view.findViewById(R.id.listView_buchungen);
             editTextAddBuchung = view.findViewById(R.id.fragment_kontodaten_editText_addBuchung);
             buttonAddBuchung = view.findViewById(R.id.fragment_spielerkonto_addButton);
+            auszahlungSwitch = view.findViewById(R.id.fragment_kontodaten_editText_switch);
+
         }
 
-    }
-
-    public interface OnAddBuchungClickListener {
-        void onAddBuchungClick(String kto_saldo_neu);
     }
 
 }

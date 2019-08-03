@@ -1,16 +1,14 @@
 package eu.merscher.lbsvolleyball;
 
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.SparseBooleanArray;
-import android.view.ActionMode;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -21,34 +19,22 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class SpielerVerwaltungActivity extends AppCompatActivity {
 
-    private static final int GALLERY_REQUEST_CODE = 1;
-    private SpielerDataSource spielerDataSource;
     public static final String LOG_TAG = SpielerVerwaltungActivity.class.getSimpleName();
 
 
-    private String userFotoAlsString;
-    private ImageView spielerBild;
+    private static String userFotoAlsString;
+    private static ArrayList<Bitmap> spielerFotos = new ArrayList<>();
+    private static ArrayList<String> spielerNamen = new ArrayList<>();
+    private static ArrayList<String> spielerGeburtstage = new ArrayList<>();
+    private static Resources resources;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_spielerverwaltung);
-        spielerDataSource = new SpielerDataSource(this);
-        showAllListEntries();
-        spielerAddButton();
-
-        Toolbar toolbar = findViewById(R.id.activity_spielerverwaltung_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Spielerverwaltung");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        initializeContextualActionBar();
-        bottomNavBarInitialisieren();
+    public static void setSpielerFotos(Bitmap b) {
+        spielerFotos.add(b);
     }
 
     @Override
@@ -98,6 +84,32 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         });
     }
 
+    public static void setSpielerNamen(String s) {
+        spielerNamen.add(s);
+    }
+
+    public static void setSpielerGeburtstage(String s) {
+        spielerGeburtstage.add(s);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_spielerverwaltung);
+        resources = getResources();
+        showAllListEntries();
+        spielerAddButton();
+
+        Toolbar toolbar = findViewById(R.id.activity_spielerverwaltung_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Spielerverwaltung");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        initializeContextualActionBar();
+        bottomNavBarInitialisieren();
+    }
+
     private void initializeContextualActionBar() {
 
         final ListView spielerListView = findViewById(R.id.listview_spieler);
@@ -107,139 +119,130 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                spielerDataSource.open();
-                ArrayList<Spieler> spielerList = spielerDataSource.getAllSpielerAlphabetischName();
-                spielerDataSource.close();
-
-                Spieler spieler = spielerList.get(position);
-
-                Intent data = new Intent(SpielerVerwaltungActivity.this, SpielerseiteActivity.class);
-                data.putExtra("spieler", new Gson().toJson(spieler));
-                SpielerVerwaltungActivity.this.startActivity(data);
-            }
-        });
-
-        spielerListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-
-            int selCount = 0;
-
-            // In dieser Callback-Methode zählen wir die ausgewählen Listeneinträge mit
-            // und fordern ein Aktualisieren der Contextual Action Bar mit invalidate() an
-            @Override
-            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                if (checked) {
-                    selCount++;
-                } else {
-                    selCount--;
-                }
-                //spielerListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-                String cabTitle = selCount + " " + getString(R.string.cab_checked_string);
-                mode.setTitle(cabTitle);
-                mode.invalidate();
-            }
-
-            // In dieser Callback-Methode legen wir die CAB-Menüeinträge an
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                getMenuInflater().inflate(R.menu.menu_contextual_action_bar, menu);
-                return true;
-            }
-
-            // In dieser Callback-Methode reagieren wir auf den invalidate() Aufruf
-            // Wir lassen das Edit-Symbol verschwinden, wenn mehr als 1 Eintrag ausgewählt ist
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                MenuItem item = menu.findItem(R.id.cab_change);
-                if (selCount == 1) {
-                    item.setVisible(true);
-                } else {
-                    item.setVisible(false);
-                }
-
-                return true;
-            }
-
-            // In dieser Callback-Methode reagieren wir auf Action Item-Klicks
-            // Je nachdem ob das Löschen- oder Ändern-Symbol angeklickt wurde
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                boolean returnValue = true;
-
-                spielerDataSource.open();
-
-                SparseBooleanArray touchedSpielerPositions = spielerListView.getCheckedItemPositions();
-                ArrayList<Spieler> spielerList = spielerDataSource.getAllSpieler();
-
-                switch (item.getItemId()) {
-                    case R.id.cab_delete:
-                        for (int i = 0; i < touchedSpielerPositions.size(); i++) {
-                            boolean isChecked = touchedSpielerPositions.valueAt(i);
-                            if (isChecked) {
-                                int postitionInListView = touchedSpielerPositions.keyAt(i);
-
-                                Spieler spieler = spielerList.get(postitionInListView);
-                                spielerDataSource.deleteSpieler(spieler);
-                            }
-                        }
-                        showAllListEntries();
-                        mode.finish();
-                        break;
-
-                    case R.id.cab_change:
-                        Log.d(LOG_TAG, "Eintrag ändern");
-                        for (int i = 0; i < touchedSpielerPositions.size(); i++) {
-                            boolean isChecked = touchedSpielerPositions.valueAt(i);
-                            if (isChecked) {
-
-                                int postitionInListView = touchedSpielerPositions.keyAt(i);
-                                Spieler spieler = spielerList.get(postitionInListView);
-
-                            }
-                        }
-
-                        mode.finish();
-                        break;
-
-                    default:
-                        returnValue = false;
-                        break;
-                }
-                spielerDataSource.close();
-                return returnValue;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                selCount = 0;
+                new GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity.this, position).execute();
             }
         });
     }
-
 
     private void showAllListEntries() {
 
-        final ListView spielerListView = findViewById(R.id.listview_spieler);
+        new GetSpielerAndSetAdapterAsyncTask(this).execute();
+    }
 
-        spielerDataSource.open();
-        ArrayList<Spieler> spielerList = spielerDataSource.getAllSpielerAlphabetischName();
-        spielerDataSource.close();
-        ArrayList<String> spielerNamen = new ArrayList<>();
-        ArrayList<String> spielerFotos = new ArrayList<>();
-        ArrayList<String> spielerGeburtstage = new ArrayList<>();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //spielerDataSource.open();
+    }
 
-        for (Spieler s : spielerList) {
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //spielerDataSource.close();
+    }
 
-            spielerNamen.add(s.getVname() + " " + s.getName());
-            spielerFotos.add(s.getFoto());
-            spielerGeburtstage.add(s.getBdate());
 
-            userFotoAlsString = null;
+    static class GetSpielerAndSetAdapterAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
+
+
+        public WeakReference<SpielerVerwaltungActivity> activityReference;
+        private ArrayList<Spieler> spielerList = new ArrayList<>();
+
+        GetSpielerAndSetAdapterAsyncTask(SpielerVerwaltungActivity context) {
+            activityReference = new WeakReference<>(context);
+
         }
 
-        SpielerVerwaltungAdapter adapter = new SpielerVerwaltungAdapter(spielerList, spielerNamen, spielerFotos, spielerGeburtstage, this);
-        spielerListView.setAdapter(adapter);
+        @Override
+        protected ArrayList<Spieler> doInBackground(Void... args) {
+
+            SpielerDataSource spielerDataSource = SpielerDataSource.getInstance();
+            spielerDataSource.open();
+
+            spielerList = spielerDataSource.getAllSpielerAlphabetischName();
+            spielerNamen.clear();
+            spielerFotos.clear();
+            spielerGeburtstage.clear();
+
+            for (Spieler s : spielerList) {
+
+                Bitmap spielerBildOriginal;
+                Bitmap spielerBildScaled;
+
+                if (s.getFoto().equals("avatar_m"))
+                    spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+                else if (s.getFoto().equals("avatar_f"))
+                    spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
+                else
+                    spielerBildOriginal = BitmapFactory.decodeFile(s.getFoto());
+
+                spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 100);
+
+                SpielerVerwaltungActivity.setSpielerFotos(spielerBildScaled);
+                SpielerVerwaltungActivity.setSpielerNamen(s.getVname() + " " + s.getName());
+                SpielerVerwaltungActivity.setSpielerGeburtstage(s.getBdate());
+
+            }
+
+            return spielerList;
+        }
+
+        @Override
+        public void onPostExecute(ArrayList<Spieler> result) {
+
+            SpielerVerwaltungActivity activity = activityReference.get();
+
+            if (activity == null || activity.isFinishing()) return;
+
+            final ListView spielerListView = activity.findViewById(R.id.listview_spieler);
+            SpielerVerwaltungAdapter adapter = new SpielerVerwaltungAdapter(result, spielerNamen, spielerFotos, spielerGeburtstage, activity.getApplicationContext());
+            spielerListView.setAdapter(adapter);
+            userFotoAlsString = null;
 
 
+        }
     }
+
+    static class GetSpielerAndStartSpielerseiteAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
+
+
+        public WeakReference<SpielerVerwaltungActivity> activityReference;
+        private int position;
+        private ArrayList<Spieler> spielerList = new ArrayList<>();
+
+        GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity context, int position) {
+            activityReference = new WeakReference<>(context);
+            this.position = position;
+
+        }
+
+        @Override
+        protected ArrayList<Spieler> doInBackground(Void... args) {
+
+            SpielerDataSource spielerDataSource = SpielerDataSource.getInstance();
+            spielerDataSource.open();
+
+            spielerList = spielerDataSource.getAllSpielerAlphabetischName();
+            return spielerList;
+        }
+
+        @Override
+        public void onPostExecute(ArrayList<Spieler> result) {
+
+            SpielerVerwaltungActivity activity = activityReference.get();
+
+            if (activity == null || activity.isFinishing()) return;
+
+            spielerList = result;
+
+            Spieler spieler = spielerList.get(position);
+
+            Intent data = new Intent(activity, SpielerseiteActivity.class);
+            data.putExtra("spieler", new Gson().toJson(spieler));
+            activity.startActivity(data);
+
+        }
+    }
+
 }
 

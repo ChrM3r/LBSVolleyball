@@ -13,8 +13,24 @@ public class BuchungDataSource {
 
     private static final String LOG_TAG = BuchungDataSource.class.getSimpleName();
 
+    private static BuchungDataSource instance;
+    private int mOpenCounter;
     private SQLiteDatabase database;
     private BuchungDbHelper dbHelper;
+
+    public static synchronized void initializeInstance(Context context) {
+        if (instance == null) {
+            instance = new BuchungDataSource(context);
+        }
+    }
+
+    public static synchronized BuchungDataSource getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(BuchungDataSource.class.getSimpleName() +
+                    " is not initialized, call initialize(..) method first.");
+        }
+        return instance;
+    }
 
     //Array mit allen Spaltennamen der Tabelle
     private String[] columns = {
@@ -35,14 +51,20 @@ public class BuchungDataSource {
     }
 
     public void open() {
-        Log.d(LOG_TAG, "Eine Referenz auf die Datenbank wird jetzt angefragt.");
-        database = dbHelper.getWritableDatabase();
-        Log.d(LOG_TAG, "Datenbank-Referenz erhalten. Pfad zur Datenbank: " + database.getPath());
+        mOpenCounter++;
+        if (mOpenCounter == 1) {
+            Log.d(LOG_TAG, "Eine Referenz auf die Datenbank wird jetzt angefragt.");
+            database = dbHelper.getWritableDatabase();
+            Log.d(LOG_TAG, "Datenbank-Referenz erhalten. Pfad zur Datenbank: " + database.getPath());
+        }
     }
 
     public void close() {
-        dbHelper.close();
-        Log.d(LOG_TAG, "Datenbank mit Hilfe des DbHelpers geschlossen.");
+        mOpenCounter--;
+        if (mOpenCounter == 1) {
+            dbHelper.close();
+            Log.d(LOG_TAG, "Datenbank mit Hilfe des DbHelpers geschlossen.");
+        }
     }
 
     //Buchung in Datenbank anlegen und gleichzeit als Objekt bereitstellen
@@ -108,7 +130,6 @@ public class BuchungDataSource {
         while (!cursor.isAfterLast()) {
             Buchung = cursorToBuchung(cursor);
             BuchungList.add(Buchung);
-            Log.d(LOG_TAG, "ID: " + Buchung.getBu_id() + ", Inhalt: " + Buchung.toString());
             cursor.moveToNext();
         }
 
@@ -133,7 +154,6 @@ public class BuchungDataSource {
         while (!cursor.isAfterLast()) {
             Buchung = cursorToBuchung(cursor);
             BuchungList.add(Buchung);
-            Log.d(LOG_TAG, "ID: " + Buchung.getBu_id() + ", Inhalt: " + Buchung.toString());
             cursor.moveToNext();
         }
 
@@ -153,7 +173,6 @@ public class BuchungDataSource {
 
         cursor.moveToLast();
         Buchung buchung = cursorToBuchung(cursor);
-        Log.d(LOG_TAG, "ID: " + buchung.getBu_id() + ", Inhalt: " + buchung.toString());
 
         cursor.close();
 

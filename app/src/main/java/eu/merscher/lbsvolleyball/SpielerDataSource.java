@@ -13,8 +13,24 @@ public class SpielerDataSource {
 
     private static final String LOG_TAG = SpielerDataSource.class.getSimpleName();
 
+    private static SpielerDataSource instance;
+    private int mOpenCounter;
     private SQLiteDatabase database;
     private SpielerDbHelper dbHelper;
+
+    public static synchronized void initializeInstance(Context context) {
+        if (instance == null) {
+            instance = new SpielerDataSource(context);
+        }
+    }
+
+    public static synchronized SpielerDataSource getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(SpielerDataSource.class.getSimpleName() +
+                    " is not initialized, call initialize(..) method first.");
+        }
+        return instance;
+    }
 
     //Array mit allen Spaltennamen der Tabelle
     private String[] columns = {
@@ -34,14 +50,21 @@ public class SpielerDataSource {
     }
 
     public void open() {
-        Log.d(LOG_TAG, "Eine Referenz auf die Datenbank wird jetzt angefragt.");
-        database = dbHelper.getWritableDatabase();
-        Log.d(LOG_TAG, "Datenbank-Referenz erhalten. Pfad zur Datenbank: " + database.getPath());
+        mOpenCounter++;
+        if (mOpenCounter == 1) {
+            Log.d(LOG_TAG, "Eine Referenz auf die Datenbank wird jetzt angefragt.");
+            database = dbHelper.getWritableDatabase();
+            Log.d(LOG_TAG, "Datenbank-Referenz erhalten. Pfad zur Datenbank: " + database.getPath());
+        }
     }
 
+
     public void close() {
-        dbHelper.close();
-        Log.d(LOG_TAG, "Datenbank mit Hilfe des DbHelpers geschlossen.");
+        mOpenCounter--;
+        if (mOpenCounter == 1) {
+            dbHelper.close();
+            Log.d(LOG_TAG, "Datenbank mit Hilfe des DbHelpers geschlossen.");
+        }
     }
 
     //Spieler in Datenbank anlegen und gleichzeit als Objekt bereitstellen
@@ -117,13 +140,17 @@ public class SpielerDataSource {
     //Spieler Teilnahmen updaten
     public Spieler updateTeilnahmenSpieler(Spieler s) {
 
+        Cursor cursor = database.query(SpielerDbHelper.TABLE_SPIELER_DATA,
+                columns, SpielerDbHelper.COLUMN_UID + "=" + s.getU_id(),
+                null, null, null, null);
 
-        int teilnahmen = s.getTeilnahmen();
-        System.out.println("QQQQQQQQQQQQQQQQ######################################" + " " + teilnahmen);
-        if (teilnahmen == 0)
-            teilnahmen = 1;
-        else
-            teilnahmen += 1;
+        cursor.moveToFirst();
+
+        int idTeilnahmen = cursor.getColumnIndex(SpielerDbHelper.COLUMN_TEILNAHMEN);
+        int teilnahmen = cursor.getInt(idTeilnahmen);
+        cursor.close();
+
+        teilnahmen++;
 
         ContentValues values = new ContentValues();
         values.put(SpielerDbHelper.COLUMN_NAME, s.getName());
@@ -140,16 +167,16 @@ public class SpielerDataSource {
                 SpielerDbHelper.COLUMN_UID + "=" + s.getU_id(),
                 null);
 
-        Cursor cursor = database.query(SpielerDbHelper.TABLE_SPIELER_DATA,
+        Cursor cursor1 = database.query(SpielerDbHelper.TABLE_SPIELER_DATA,
                 columns, SpielerDbHelper.COLUMN_UID + "=" + s.getU_id(),
                 null, null, null, null);
 
-        cursor.moveToFirst();
-        Spieler spieler = cursorToSpieler(cursor);
+        cursor1.moveToFirst();
+        Spieler spieler = cursorToSpieler(cursor1);
 
         System.out.println("QQQQQQQQQQQQQQQQ######################################" + " " + spieler.getTeilnahmen());
 
-        cursor.close();
+        cursor1.close();
 
         return spieler;
     }
@@ -228,13 +255,13 @@ public class SpielerDataSource {
         String name = cursor.getString(idName);
         String vname = cursor.getString(idVname);
         String bdate = cursor.getString(idBdate);
-        int teinahmen = cursor.getInt(idTeilnahmen);
+        int teilnahmen = cursor.getInt(idTeilnahmen);
         long u_id = cursor.getLong(idIndex);
         String foto = cursor.getString(idFoto);
         String mail = cursor.getString(idMail);
         String hat_buchung_mm = cursor.getString(idHatBuchungMM);
 
-        return new Spieler(u_id, name, vname, bdate, teinahmen, foto, mail, hat_buchung_mm);
+        return new Spieler(u_id, name, vname, bdate, teilnahmen, foto, mail, hat_buchung_mm);
 
     }
     //Alle Spieler aus Datenbank in eine Liste
@@ -307,7 +334,7 @@ public class SpielerDataSource {
         return spielerList;
     }
 
-    public ArrayList<Spieler> getAllSpielerAufsteigendTeilnahme() {
+    public ArrayList<Spieler> getAllSpielerAbsteigendTeilnahme() {
 
         ArrayList<Spieler> spielerList = new ArrayList<>();
 
@@ -326,6 +353,7 @@ public class SpielerDataSource {
         cursor.close();
 
         Collections.sort(spielerList, new Utils().new SortTeilnahmen());
+        Collections.reverse(spielerList);
 
         return spielerList;
     }

@@ -21,7 +21,7 @@ public class NumericEditText extends EditText {
     private final String LEADING_ZERO_FILTER_REGEX = "^0+(?!$)";
     private String mDefaultText = null;
     private String mPreviousText = "";
-    private String mNumberFilterRegex = "[^\\d\\" + DECIMAL_SEPARATOR + "]";
+    private String mNumberFilterRegex = "[^\\d\\" + DECIMAL_SEPARATOR + "]" + "-";
     private char mDecimalSeparator = DECIMAL_SEPARATOR;
     private boolean hasCustomDecimalSeparator = false;
     private List<NumericValueWatcher> mNumericListeners = new ArrayList<NumericValueWatcher>();
