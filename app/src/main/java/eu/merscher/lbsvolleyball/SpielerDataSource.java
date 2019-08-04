@@ -14,9 +14,25 @@ public class SpielerDataSource {
     private static final String LOG_TAG = SpielerDataSource.class.getSimpleName();
 
     private static SpielerDataSource instance;
+    private final SpielerDbHelper dbHelper;
+    //Array mit allen Spaltennamen der Tabelle
+    private final String[] columns = {
+            SpielerDbHelper.COLUMN_UID,
+            SpielerDbHelper.COLUMN_NAME,
+            SpielerDbHelper.COLUMN_VNAME,
+            SpielerDbHelper.COLUMN_BDATE,
+            SpielerDbHelper.COLUMN_TEILNAHMEN,
+            SpielerDbHelper.COLUMN_FOTO,
+            SpielerDbHelper.COLUMN_MAIL,
+            SpielerDbHelper.COLUMN_HAT_BUCHUNG_MM
+    };
     private int mOpenCounter;
     private SQLiteDatabase database;
-    private SpielerDbHelper dbHelper;
+
+    public SpielerDataSource(Context context) {
+        Log.d(LOG_TAG, "Unsere DataSource erzeugt jetzt den dbHelper.");
+        dbHelper = new SpielerDbHelper(context);
+    }
 
     public static synchronized void initializeInstance(Context context) {
         if (instance == null) {
@@ -27,26 +43,9 @@ public class SpielerDataSource {
     public static synchronized SpielerDataSource getInstance() {
         if (instance == null) {
             throw new IllegalStateException(SpielerDataSource.class.getSimpleName() +
-                    " is not initialized, call initialize(..) method first.");
+                    " ist nicht initialisiert. Erst Instanz erzeugen");
         }
         return instance;
-    }
-
-    //Array mit allen Spaltennamen der Tabelle
-    private String[] columns = {
-            SpielerDbHelper.COLUMN_UID,
-            SpielerDbHelper.COLUMN_NAME,
-            SpielerDbHelper.COLUMN_VNAME,
-            SpielerDbHelper.COLUMN_BDATE,
-            SpielerDbHelper.COLUMN_TEILNAHMEN,
-            SpielerDbHelper.COLUMN_FOTO,
-            SpielerDbHelper.COLUMN_MAIL,
-            SpielerDbHelper.COLUMN_HAT_BUCHUNG_MM
-    };
-
-    public SpielerDataSource(Context context) {
-        Log.d(LOG_TAG, "Unsere DataSource erzeugt jetzt den dbHelper.");
-        dbHelper = new SpielerDbHelper(context);
     }
 
     public void open() {
@@ -137,6 +136,7 @@ public class SpielerDataSource {
 
         return spieler;
     }
+
     //Spieler Teilnahmen updaten
     public Spieler updateTeilnahmenSpieler(Spieler s) {
 
@@ -173,8 +173,6 @@ public class SpielerDataSource {
 
         cursor1.moveToFirst();
         Spieler spieler = cursorToSpieler(cursor1);
-
-        System.out.println("QQQQQQQQQQQQQQQQ######################################" + " " + spieler.getTeilnahmen());
 
         cursor1.close();
 
@@ -277,7 +275,7 @@ public class SpielerDataSource {
         cursor.moveToFirst();
         Spieler spieler;
 
-        while(!cursor.isAfterLast()) {
+        while (!cursor.isAfterLast()) {
             spieler = cursorToSpieler(cursor);
             spielerList.add(spieler);
             cursor.moveToNext();

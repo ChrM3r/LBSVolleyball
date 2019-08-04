@@ -158,15 +158,27 @@
     </androidx.cardview.widget.CardView>
 
     <Button
-        android:id="@+id/fragement_edit_spieler_button"
+        android:id="@+id/fragment_edit_spieler_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="235dp"
+        android:layout_marginTop="230dp"
         android:layout_marginEnd="8dp"
         android:backgroundTint="#AE1732"
         android:shadowRadius="2"
         android:text="@string/button_spieler_aendern"
+        android:textColor="@android:color/white" />
+
+    <Button
+        android:id="@+id/fragment_edit_spieler_loeschen_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="290dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="#AE1732"
+        android:shadowRadius="2"
+        android:text="@string/button_spieler_loeschen"
         android:textColor="@android:color/white" />
 
 </FrameLayout>

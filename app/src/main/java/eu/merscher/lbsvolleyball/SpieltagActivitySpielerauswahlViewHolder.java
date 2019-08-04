@@ -10,10 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class SpieltagActivitySpielerauswahlViewHolder extends RecyclerView.ViewHolder {
 
-    public TextView textViewName;
-    public TextView textViewVname;
-    public ImageView spielerBild;
-    public CheckBox checkBox;
+    public final TextView textViewName;
+    public final TextView textViewVname;
+    public final ImageView spielerBild;
+    public final CheckBox checkBox;
 
 
     public SpieltagActivitySpielerauswahlViewHolder(View v) {

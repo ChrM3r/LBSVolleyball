@@ -16,9 +16,6 @@ public class SpielerseiteKontodatenFragment extends Fragment {
 
     private ArrayList<Buchung> buchungList;
     private Spieler spieler;
-    private View view;
-    private SpielerseiteKontodatenFragmentAdapter adapter;
-    private RecyclerView recyclerView;
 
     public SpielerseiteKontodatenFragment() {
     }
@@ -43,14 +40,14 @@ public class SpielerseiteKontodatenFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         //Spieler spieler;
-        view = inflater.inflate(R.layout.fragment_spielerseite_grunddaten_kontodaten, container, false);
+        View view = inflater.inflate(R.layout.fragment_spielerseite_grunddaten_kontodaten, container, false);
 
         //spieler = getArguments().getParcelable("spieler");
         //ArrayList<Buchung> buchungList = getArguments().getParcelableArrayList("buchungList");
         //onAddBuchungClickListenerInFragment = getArguments().getParcelable("test");
 
-        adapter = new SpielerseiteKontodatenFragmentAdapter(getActivity(), buchungList, spieler);
-        recyclerView = view.findViewById(R.id.fragment_spielerseite_recyclerView);
+        SpielerseiteKontodatenFragmentAdapter adapter = new SpielerseiteKontodatenFragmentAdapter(getActivity(), buchungList, spieler);
+        RecyclerView recyclerView = view.findViewById(R.id.fragment_spielerseite_recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);

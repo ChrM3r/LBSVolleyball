@@ -30,6 +30,15 @@ public class Buchung implements Parcelable {
         this.bu_date = bu_date;
     }
 
+    public Buchung(Parcel in) {
+        this.bu_id = in.readLong();
+        this.u_id = in.readLong();
+        this.bu_btr = in.readDouble();
+        this.kto_saldo_alt = in.readDouble();
+        this.kto_saldo_neu = in.readDouble();
+        this.bu_date = in.readString();
+    }
+
     public long getBu_id() {
         return bu_id;
     }
@@ -78,17 +87,8 @@ public class Buchung implements Parcelable {
         this.bu_date = bu_date;
     }
 
-    public String toString(Buchung buchung){
-        return (buchung.getBu_date() + "     " + String.format("%.2f", buchung.getBu_btr()) + "€     " + String.format("%.2f", buchung.getKto_saldo_neu())+ "€");
-    }
-
-    public Buchung(Parcel in) {
-        this.bu_id = in.readLong();
-        this.u_id = in.readLong();
-        this.bu_btr = in.readDouble();
-        this.kto_saldo_alt = in.readDouble();
-        this.kto_saldo_neu = in.readDouble();
-        this.bu_date = in.readString();
+    public String toString(Buchung buchung) {
+        return (buchung.getBu_date() + "     " + String.format("%.2f", buchung.getBu_btr()) + "€     " + String.format("%.2f", buchung.getKto_saldo_neu()) + "€");
     }
 
     @Override

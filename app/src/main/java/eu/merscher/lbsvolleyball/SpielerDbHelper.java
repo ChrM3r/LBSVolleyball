@@ -9,7 +9,6 @@ import android.util.Log;
 public class SpielerDbHelper extends SQLiteOpenHelper {
 
 
-    private static final String LOG_TAG = SpielerDbHelper.class.getSimpleName();
     protected static final String DB_NAME = "spieler_data.db";
     protected static final int DB_VERSION = 1;
     protected static final String TABLE_SPIELER_DATA = "spieler_data";
@@ -21,7 +20,6 @@ public class SpielerDbHelper extends SQLiteOpenHelper {
     protected static final String COLUMN_FOTO = "foto";
     protected static final String COLUMN_MAIL = "mail";
     protected static final String COLUMN_HAT_BUCHUNG_MM = "hat_buchung_mm";
-
     protected static final String SQL_CREATE =
             "CREATE TABLE " + TABLE_SPIELER_DATA +
                     "(" + COLUMN_UID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -32,9 +30,7 @@ public class SpielerDbHelper extends SQLiteOpenHelper {
                     COLUMN_FOTO + " TEXT NOT NULL," +
                     COLUMN_MAIL + " TEXT," +
                     COLUMN_HAT_BUCHUNG_MM + " TEXT);";
-
-
-
+    private static final String LOG_TAG = SpielerDbHelper.class.getSimpleName();
 
 
     public SpielerDbHelper(Context context) {
@@ -48,8 +44,7 @@ public class SpielerDbHelper extends SQLiteOpenHelper {
         try {
             Log.d(LOG_TAG, "Die Tabelle wird mit SQL-Befehl: " + SQL_CREATE + " angelegt.");
             db.execSQL(SQL_CREATE);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             Log.e(LOG_TAG, "Fehler beim Anlegen der Tabelle: " + ex.getMessage());
         }
     }

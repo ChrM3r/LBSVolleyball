@@ -13,7 +13,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,34 +32,31 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 
 public class SpieltagActivity extends AppCompatActivity implements SpieltagActivitySpielerauswahlFragment.OnSpielerClickListenerInFragment {
 
-    //DB-Schreib-Aktionen
-    public static final int CREATE_SPIELER = 1;
-    public static final int DELETE_SPIELER = 2;
-    public static final int UPDATE_SPIELER = 3;
-    public static final int UPDATE_SPIELER_TEILNAHMEN = 4;
-    public static final int UPDATE_SPIELER_FOTO = 5;
-    public static final int UPDATE_SPIELER_HATBUCHUNGMM = 6;
-    //DB-Lese-Aktionen
-    public static final int GET_ALL_SPIELER = 7;
-    public static final int GET_ALL_SPIELER_ALPHA_NAME = 8;
-    public static final int GET_ALL_SPIELER_ALPHA_VNAME = 9;
-    public static final int GET_ALL_SPIELER_TEILNAHME = 10;
-    public static ArrayList<Spieler> selectedSpieler = new ArrayList<>();
+    public static final ArrayList<Spieler> selectedSpieler = new ArrayList<>();
+    private static final DecimalFormat df = new DecimalFormat("0.00");
     public static Resources resources;
-    private static ArrayList<Spieler> spielerList;
-    private static DecimalFormat df = new DecimalFormat("0.00");
-    private SpielerDataSource spielerDataSource;
+    public static Context context;
     private Button buttonAddSpieltag;
     private NumericEditText editTextPlatzkosten;
     private TextView betragJeSpieler;
+    private Switch kostenlosSwitch;
+    private Boolean kostenlos = false;
     private Fragment fragment;
     private FragmentManager fm;
-    private BuchungDataSource buchungDataSource;
-    private float platzkosten = 0;
+    private float platzkosten;
     private double bu_btr;
 
     //Statische Methoden
@@ -76,17 +75,13 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
         selectedSpieler.remove(spieler);
     }
 
-    public static void clearSelectedSpieler() {
-        selectedSpieler.clear();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_spieltag);
 
         resources = getResources();
+        context = getApplicationContext();
 
         findViewsById();
         bottomNavBarInitialisieren();
@@ -94,16 +89,32 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
         editTextPlatzkosten.setGravity(Gravity.END);
 
         SpielerDataSource.initializeInstance(this);
-        //spielerDataSource = SpielerDataSource.getInstance();
-
         BuchungDataSource.initializeInstance(this);
-        buchungDataSource = BuchungDataSource.getInstance();
 
-//        spielerDataSource.open();
-        buchungDataSource.open();
 
         new SpielerauswahlBefuellenAsyncTask(this).execute();
 
+        //Kostenlos-Switch
+
+        kostenlosSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+
+                if (isChecked) {
+                    kostenlos = isChecked;
+                    betragJeSpieler.setText("0,00");
+                    editTextPlatzkosten.setText("");
+                    editTextPlatzkosten.setEnabled(false);
+                    editTextPlatzkosten.setFocusable(false);
+                } else {
+                    kostenlos = false;
+                    editTextPlatzkosten.setEnabled(true);
+                    editTextPlatzkosten.setFocusableInTouchMode(true);
+                    setBetragJeSpieler();
+                }
+            }
+        });
         //Toolbar
         Toolbar toolbar = findViewById(R.id.activity_spieltag_toolbar);
         setSupportActionBar(toolbar);
@@ -128,10 +139,10 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
 
             }
         });
-
-
     }
 
+
+    //Fokus des Edittexts ändern wenn Touch außerhalb des Edittext-Bereiches
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
 
@@ -159,6 +170,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
         buttonAddSpieltag = findViewById(R.id.activity_spieltag_button_add_spieltag);
         betragJeSpieler = findViewById(R.id.activity_spieltag_textview_betrag_je_spieler);
         editTextPlatzkosten = findViewById(R.id.activity_spieltag_editText_platzkosten);
+        kostenlosSwitch = findViewById(R.id.activity_spieltag_kostenlosSwitch);
 
     }
 
@@ -198,6 +210,8 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
 
         if (!editTextPlatzkosten.getText().toString().isEmpty())
             platzkosten = Float.parseFloat(editTextPlatzkosten.getText().toString().replace(',', '.'));
+        else
+            platzkosten = 0;
 
         InputMethodManager inputMethodManager;
         inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -206,7 +220,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
 
-        if (selectedSpieler.size() > 0 && platzkosten > 0) {
+        if (selectedSpieler.size() > 0 && platzkosten > 0 && !kostenlos) {
 
             bu_btr = platzkosten / selectedSpieler.size();
 
@@ -216,6 +230,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             for (Spieler s : selectedSpieler) {
 
                 new SpieltagBuchenAsyncTask(this, s).execute();
+
             }
 
             new SpielerauswahlBefuellenAsyncTask(this).execute();
@@ -224,7 +239,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             toast.show();
             editTextPlatzkosten.setText("");
             betragJeSpieler.setText("0,00");
-
+            kostenlosSwitch.setChecked(false);
             selectedSpieler.clear();
 
         } else if (selectedSpieler.size() <= 0) {
@@ -232,17 +247,36 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             Toast toast = Toast.makeText(this, "Es wurde kein Spieler ausgewählt.", Toast.LENGTH_SHORT);
             toast.show();
 
-        } else {
+        } else if (platzkosten <= 0 && !kostenlos) {
 
             Toast toast = Toast.makeText(this, "Die Platzkosten wurden nicht erfasst", Toast.LENGTH_SHORT);
             toast.show();
-        }
 
+        } else if (platzkosten > 0 && kostenlos) {
+
+            Toast toast = Toast.makeText(this, "Es wurden Platzkosten erfasst, obwohl >Kostenlos< gewählt wurde.", Toast.LENGTH_SHORT);
+            toast.show();
+
+        } else if (platzkosten <= 0 && kostenlos) {
+
+            for (Spieler s : selectedSpieler) {
+
+                new SpieltagBuchenAsyncTask(this, s).execute();
+            }
+
+            new SpielerauswahlBefuellenAsyncTask(this).execute();
+
+            Toast toast = Toast.makeText(this, "Der kostenlose Spieltag wurde gebucht. Trainigsteilnahmen aktualisiert", Toast.LENGTH_SHORT);
+            toast.show();
+
+            kostenlosSwitch.setChecked(false);
+            selectedSpieler.clear();
+        }
     }
 
     public void setBetragJeSpieler() {
 
-        if (!editTextPlatzkosten.getText().toString().isEmpty() && editTextPlatzkosten.getText().toString().charAt(0) != ',') {
+        if (!editTextPlatzkosten.getText().toString().isEmpty()) {
             double platzkosten = Double.valueOf(editTextPlatzkosten.getText().toString().replace(',', '.'));
             int anzahl = selectedSpieler.size();
 
@@ -250,7 +284,8 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
 
                 double betragDouble = platzkosten / anzahl;
                 betragJeSpieler.setText(df.format(betragDouble).replace('.', ','));
-            }
+            } else
+                betragJeSpieler.setText(df.format(platzkosten).replace('.', ','));
         } else
             betragJeSpieler.setText("0,00");
     }
@@ -258,7 +293,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
     static class SpielerauswahlBefuellenAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
 
 
-        public WeakReference<SpieltagActivity> activityReference;
+        public final WeakReference<SpieltagActivity> activityReference;
         private ArrayList<Spieler> spielerList = new ArrayList<>();
 
         SpielerauswahlBefuellenAsyncTask(SpieltagActivity context) {
@@ -285,34 +320,34 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             System.out.println("TESTASYNC");
             spielerList = result;
 
+            //Spielerauswahl
             if (activity.fragment == null) {
-                //Spielerauswahl
                 activity.fm = activity.getSupportFragmentManager();
-                activity.fragment = new SpieltagActivitySpielerauswahlFragment(spielerList, activity::onSpielerClickInFragment);
+                activity.fragment = new SpieltagActivitySpielerauswahlFragment(spielerList, activity);
 
                 activity.fm.beginTransaction().add(R.id.activity_spieltag_spielerauswahl_fragmentContainer, activity.fragment).commitAllowingStateLoss();
             } else {
-                activity.fm.beginTransaction().replace(R.id.activity_spieltag_spielerauswahl_fragmentContainer, new SpieltagActivitySpielerauswahlFragment(spielerList, activity::onSpielerClickInFragment)).commitAllowingStateLoss();
+                activity.fm.beginTransaction().replace(R.id.activity_spieltag_spielerauswahl_fragmentContainer, new SpieltagActivitySpielerauswahlFragment(spielerList, activity)).commitAllowingStateLoss();
 
             }
 
         }
     }
 
-    static class SpieltagBuchenAsyncTask extends AsyncTask<Void, Void, Void> {
+    static class SpieltagBuchenAsyncTask extends AsyncTask<Void, Void, Buchung> {
 
 
-        public WeakReference<SpieltagActivity> activityReference;
-        private Spieler s;
+        public final WeakReference<SpieltagActivity> activityReference;
+        private Spieler spieler;
 
-        SpieltagBuchenAsyncTask(SpieltagActivity context, Spieler s) {
+        SpieltagBuchenAsyncTask(SpieltagActivity context, Spieler spieler) {
             activityReference = new WeakReference<>(context);
-            this.s = s;
+            this.spieler = spieler;
         }
 
 
         @Override
-        protected Void doInBackground(Void... args) {
+        protected Buchung doInBackground(Void... args) {
 
             SpieltagActivity activity = activityReference.get();
             Calendar kalender = Calendar.getInstance();
@@ -328,30 +363,93 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
 
                 activity.bu_btr = activity.platzkosten / selectedSpieler.size();
 
-                if (s.getHat_buchung_mm() != null) {
+                if (spieler.getHat_buchung_mm() != null) {
 
-                    double kto_saldo_alt = buchungDataSource.getNeusteBuchungZuSpieler(s).getKto_saldo_neu();
+                    double kto_saldo_alt = buchungDataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
                     double kto_saldo_neu = kto_saldo_alt - activity.bu_btr;
 
-                    buchungDataSource.createBuchung(s.getU_id(), -activity.bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()));
-                    spielerDataSource.updateTeilnahmenSpieler(s);
+                    buchungDataSource.createBuchung(spieler.getU_id(), -activity.bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()));
+                    spieler = spielerDataSource.updateTeilnahmenSpieler(spieler);
 
                 } else {
 
                     double kto_saldo_neu = -activity.bu_btr;
-                    buchungDataSource.createBuchung(s.getU_id(), -activity.bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()));
-                    spielerDataSource.updateHatBuchungenMM(spielerDataSource.updateTeilnahmenSpieler(s));
+                    buchungDataSource.createBuchung(spieler.getU_id(), -activity.bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()));
+                    spieler = spielerDataSource.updateHatBuchungenMM(spielerDataSource.updateTeilnahmenSpieler(spieler));
+                }
+            } else
+                spieler = spielerDataSource.updateTeilnahmenSpieler(spieler);
+
+            return buchungDataSource.getNeusteBuchungZuSpieler(spieler);
+        }
+
+        @Override
+        public void onPostExecute(Buchung neusteBuchung) {
+
+            if (neusteBuchung.getKto_saldo_neu() < 5)
+                new EMailSendenAsyncTask(spieler, df.format(neusteBuchung.getKto_saldo_neu())).execute();
+        }
+
+    }
+
+    static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {
+
+
+        private final Spieler spieler;
+        private final String kontostand;
+
+        EMailSendenAsyncTask(Spieler spieler, String kontostand) {
+            this.spieler = spieler;
+            this.kontostand = kontostand;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... args) {
+
+            // SMTP Verbindung starten
+            final String username = "lbsvolleyball@merscher.eu";
+            final String password = "be1gvd1!b685+08787adklasdnl#++13nlandasd2";
+
+            Properties props = new Properties();
+
+            props.put("mail.smtp.host", "mail.merscher.eu");
+            props.put("mail.smtp.socketFactory.port", "465");
+            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.port", "465");
+
+            Session session = Session.getInstance(props,
+                    new javax.mail.Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(username, password);
+                        }
+                    });
+
+            System.out.println("MITTE");
+            // Nachricht:
+            String to = spieler.getMail();
+            String from = "LBSVolleyball@merscher.eu";
+            String subject = "Kontostand niedrig";
+            Message msg = new MimeMessage(session);
+
+            if (!to.isEmpty()) {
+                try {
+                    msg.setFrom(new InternetAddress(from));
+                    msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+                    msg.setSubject(subject);
+
+                    msg.setText("Hi " + spieler.getVname()
+                            + ",\n\nder Kontostand deines Spielerkontos beträgt " + kontostand
+                            + "€. Bitte zahle demnächst wieder etwas ein.\n\nVielen Dank und sportliche Grüße\nLBS Volleyball App-Admin");
+
+                    Transport.send(msg);
+                } catch (MessagingException e) {
+                    e.printStackTrace();
                 }
             }
             return null;
         }
-
-        @Override
-        public void onPostExecute(Void v) {
-
-            System.out.println("TESTASYNC2");
-
-        }
-
     }
+
 }

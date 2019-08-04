@@ -16,8 +16,6 @@ public class SpieltagActivitySpielerauswahlFragment extends Fragment implements 
 
 
     private ArrayList<Spieler> spielerList;
-    private static ArrayList<Spieler> spielerListStatic;
-    private View rootView;
     private OnSpielerClickListenerInFragment onSpielerClickListenerInFragment;
 
     public SpieltagActivitySpielerauswahlFragment() {
@@ -46,7 +44,7 @@ public class SpieltagActivitySpielerauswahlFragment extends Fragment implements 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        rootView = inflater.inflate(R.layout.activity_spieltag_spielerauswahl, container, false);
+        View rootView = inflater.inflate(R.layout.activity_spieltag_spielerauswahl, container, false);
 
         RecyclerView recyclerView = rootView.findViewById(R.id.spieltag_activity_spielerauswahl_recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -54,7 +52,7 @@ public class SpieltagActivitySpielerauswahlFragment extends Fragment implements 
         recyclerView.setHasFixedSize(true);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
-        spielerListStatic = spielerList;
+        ArrayList<Spieler> spielerListStatic = spielerList;
         if (spielerList != null) {
 
             if (spielerList.size() > 0) {

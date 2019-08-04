@@ -15,11 +15,11 @@ import java.util.ArrayList;
 
 public class SpielerKontoListViewAdapter extends BaseAdapter {
 
+    private static final DecimalFormat df = new DecimalFormat("0.00");
     private ArrayList<Buchung> buchungList;
     private Activity activity;
     private Fragment fragment;
     private Context context;
-    private static DecimalFormat df = new DecimalFormat("0.00");
 
 
     public SpielerKontoListViewAdapter(Activity activity, ArrayList<Buchung> buchungList) {
@@ -53,12 +53,6 @@ public class SpielerKontoListViewAdapter extends BaseAdapter {
     @Override
     public long getItemId(int position) {
         return position;
-    }
-
-    private class ViewHolder {
-        TextView buchungDatum;
-        TextView buchungBetrag;
-        TextView ktoSaldoNeu;
     }
 
     @Override
@@ -96,5 +90,11 @@ public class SpielerKontoListViewAdapter extends BaseAdapter {
     public void updateBuchungen(ArrayList<Buchung> list) {
         this.buchungList = list;
         notifyDataSetChanged();
+    }
+
+    private class ViewHolder {
+        TextView buchungDatum;
+        TextView buchungBetrag;
+        TextView ktoSaldoNeu;
     }
 }

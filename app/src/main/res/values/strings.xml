@@ -35,8 +35,8 @@
     <string name="button_buchen">Buchen!</string>
     <string name="button_foto">Foto auswählen</string>
     <string name="button_spieler_anlegen">Spieler anlegen</string>
-    <string name="button_spieler_aendern">Spieler ändern</string>
-
+    <string name="button_spieler_aendern">Speichern</string>
+    <string name="button_spieler_loeschen">Spieler löschen</string>
 
 
     <string name="button_add_player">+</string>

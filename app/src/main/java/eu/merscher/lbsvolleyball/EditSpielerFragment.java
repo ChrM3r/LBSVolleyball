@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class EditSpielerFragment extends Fragment {
 
-    private Spieler spieler;
+    private final Spieler spieler;
 
     public EditSpielerFragment(Spieler spieler) {
         this.spieler = spieler;

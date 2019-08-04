@@ -9,8 +9,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 public class EditSpielerActivityPagerAdapter extends FragmentPagerAdapter {
 
-    private Context context;
-    private Spieler spieler;
+    private final Context context;
+    private final Spieler spieler;
 
 
     public EditSpielerActivityPagerAdapter(Context context, Spieler spieler, FragmentManager fm) {
@@ -36,12 +36,10 @@ public class EditSpielerActivityPagerAdapter extends FragmentPagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         // Generate title based on item position
-        switch (position) {
-            case 0:
-                return context.getString(R.string.tab_grunddaten);
-            default:
-                return null;
+        if (position == 0) {
+            return context.getString(R.string.tab_grunddaten);
         }
+        return null;
     }
 
 

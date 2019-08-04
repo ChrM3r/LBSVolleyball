@@ -16,15 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NumericEditText extends EditText {
-    private final char GROUPING_SEPARATOR = '.';
     private final char DECIMAL_SEPARATOR = ',';
-    private final String LEADING_ZERO_FILTER_REGEX = "^0+(?!$)";
+    private final List<NumericValueWatcher> mNumericListeners = new ArrayList<NumericValueWatcher>();
     private String mDefaultText = null;
     private String mPreviousText = "";
     private String mNumberFilterRegex = "[^\\d\\" + DECIMAL_SEPARATOR + "]" + "-";
     private char mDecimalSeparator = DECIMAL_SEPARATOR;
     private boolean hasCustomDecimalSeparator = false;
-    private List<NumericValueWatcher> mNumericListeners = new ArrayList<NumericValueWatcher>();
     private final TextWatcher mTextWatcher = new TextWatcher() {
         private boolean validateLock = false;
 
@@ -168,6 +166,7 @@ public class NumericEditText extends EditText {
      */
     private String format(final String original) {
         final String[] parts = original.split("\\" + mDecimalSeparator, -1);
+        String LEADING_ZERO_FILTER_REGEX = "^0+(?!$)";
         String number = parts[0] // since we split with limit -1 there will always be at least 1 part
                 .replaceAll(mNumberFilterRegex, "")
                 .replaceFirst(LEADING_ZERO_FILTER_REGEX, "");
@@ -175,6 +174,7 @@ public class NumericEditText extends EditText {
         if (!hasCustomDecimalSeparator) {
 // add grouping separators, need to reverse back and forth since Java regex does not support
 // right to left matching
+            char GROUPING_SEPARATOR = '.';
             number = StringUtils.reverse(
                     StringUtils.reverse(number).replaceAll("(.{3})", "$1" + GROUPING_SEPARATOR));
 // remove leading grouping separator if any

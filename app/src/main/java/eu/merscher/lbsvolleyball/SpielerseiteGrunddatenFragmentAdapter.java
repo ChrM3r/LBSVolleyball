@@ -13,16 +13,15 @@ import java.text.DecimalFormat;
 public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<SpielerseiteGrunddatenFragmentAdapter.ViewHolder> implements SpielerseiteKontodatenFragmentAdapter.OnAddBuchungClickListener {
 
 
-    private static DecimalFormat df = new DecimalFormat("0.00");
-    private Grunddaten grunddaten;
-    private LayoutInflater inflate;
-    private Context context;
+    private static final DecimalFormat df = new DecimalFormat("0.00");
+    private final Grunddaten grunddaten;
+    private final LayoutInflater inflate;
     private ViewHolder holder;
 
 
     public SpielerseiteGrunddatenFragmentAdapter(Context context, Grunddaten grunddaten) {
         this.inflate = LayoutInflater.from(context);
-        this.context = context;
+        Context context1 = context;
         this.grunddaten = grunddaten;
     }
 
@@ -64,12 +63,12 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewName;
-        TextView textViewVname;
-        TextView textViewBdate;
-        TextView textViewMail;
-        TextView textViewKtoSaldo;
-        TextView textViewTeilnahmen;
+        final TextView textViewName;
+        final TextView textViewVname;
+        final TextView textViewBdate;
+        final TextView textViewMail;
+        final TextView textViewKtoSaldo;
+        final TextView textViewTeilnahmen;
 
         ViewHolder(View view) {
             super(view);

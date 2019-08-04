@@ -181,7 +181,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <EditText
+            <eu.merscher.lbsvolleyball.NumericEditText
                 android:id="@+id/fragment_add_editText_AddBuchung"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

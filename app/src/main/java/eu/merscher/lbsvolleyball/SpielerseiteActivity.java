@@ -2,10 +2,14 @@ package eu.merscher.lbsvolleyball;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,31 +28,29 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import static eu.merscher.lbsvolleyball.SpieltagActivity.resources;
 
 
 public class SpielerseiteActivity extends AppCompatActivity implements View.OnClickListener {
 
 
-    private BuchungDataSource buchungDataSource;
-
     private static Spieler spieler;
-    private static double kto_saldo_neu;
-    private static int teilnahmen;
-    private ArrayList<Spieler> spielerList = new ArrayList<>();
-    private ArrayList<Buchung> buchungList = new ArrayList<>();
     private ImageView spielerBild;
     private FloatingActionButton editSpielerButton;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    private androidx.appcompat.widget.Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbar;
-    private SpielerseiteActivityPagerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spielerseite);
+
+        Context context = getApplicationContext();
 
         spieler = new Gson().fromJson(getIntent().getStringExtra("spieler"), Spieler.class);
         setTitle(spieler.getVname() + " " + spieler.getName());
@@ -56,16 +58,17 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
         findViewsById();
         bottomNavBarInitialisieren();
 
-        buchungDataSource = BuchungDataSource.getInstance();
+        BuchungDataSource buchungDataSource = BuchungDataSource.getInstance();
         buchungDataSource.open();
 
-        buchungList = buchungDataSource.getAllBuchungZuSpieler(spieler);
+        ArrayList<Buchung> buchungList = buchungDataSource.getAllBuchungZuSpieler(spieler);
+        double kto_saldo_neu;
         if (spieler.getHat_buchung_mm() == null)
             kto_saldo_neu = 0;
         else
             kto_saldo_neu = buchungDataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
 
-        teilnahmen = spieler.getTeilnahmen();
+        int teilnahmen = spieler.getTeilnahmen();
 
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
@@ -75,16 +78,39 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        //Displaygröße ermittlen
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+
+        //Spielerbild skalieren und setzen
+        Bitmap spielerBildOriginal;
+        Bitmap spielerBildScaled;
+        Uri uri;
+
+
         if (spieler.getFoto().equals("avatar_m"))
-            spielerBild.setImageResource(R.drawable.avatar_m);
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
 
         else if (spieler.getFoto().equals("avatar_f"))
-            spielerBild.setImageResource(R.drawable.avatar_f);
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
+        else {
+            spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
+            try {
+                uri = Uri.fromFile(new File(spieler.getFoto()));
+                spielerBildOriginal = Utils.handleSamplingAndRotationBitmap(context, uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-        else
-            spielerBild.setImageBitmap(BitmapFactory.decodeFile(spieler.getFoto()));
 
-        adapter = new SpielerseiteActivityPagerAdapter(this, spieler, buchungList, kto_saldo_neu, teilnahmen, getSupportFragmentManager());
+        spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        spielerBild.setImageBitmap(spielerBildScaled);
+
+        //Pager mit Fragmenten erzeugen
+        SpielerseiteActivityPagerAdapter adapter = new SpielerseiteActivityPagerAdapter(this, spieler, buchungList, kto_saldo_neu, teilnahmen, getSupportFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -106,7 +132,6 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
         collapsingToolbar = findViewById(R.id.htab_collapse_toolbar);
         editSpielerButton = findViewById(R.id.activity_spielerseite_edit_spieler_button);
         tabLayout = findViewById(R.id.htab_tabs);
-
 
 
     }
@@ -131,19 +156,18 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
             }
         });
     }
+
     public void onClick(View v) {
 
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -165,17 +189,5 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
         }
 
         return super.dispatchTouchEvent(event);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //    buchungDataSource.open();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //    buchungDataSource.close();
     }
 }

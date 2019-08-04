@@ -12,11 +12,25 @@ import java.util.ArrayList;
 public class BuchungDataSource {
 
     private static final String LOG_TAG = BuchungDataSource.class.getSimpleName();
-
+    private static final DecimalFormat df = new DecimalFormat("0.00");
     private static BuchungDataSource instance;
+    private final BuchungDbHelper dbHelper;
+    //Array mit allen Spaltennamen der Tabelle
+    private final String[] columns = {
+            BuchungDbHelper.COLUMN_BUID,
+            BuchungDbHelper.COLUMN_UID,
+            BuchungDbHelper.COLUMN_BUBTR,
+            BuchungDbHelper.COLUMN_KTOSLDALT,
+            BuchungDbHelper.COLUMN_KTOSLDNEU,
+            BuchungDbHelper.COLUMN_BU_DATE
+    };
     private int mOpenCounter;
     private SQLiteDatabase database;
-    private BuchungDbHelper dbHelper;
+
+    public BuchungDataSource(Context context) {
+        Log.d(LOG_TAG, "Unsere DataSource erzeugt jetzt den dbHelper.");
+        dbHelper = new BuchungDbHelper(context);
+    }
 
     public static synchronized void initializeInstance(Context context) {
         if (instance == null) {
@@ -30,24 +44,6 @@ public class BuchungDataSource {
                     " is not initialized, call initialize(..) method first.");
         }
         return instance;
-    }
-
-    //Array mit allen Spaltennamen der Tabelle
-    private String[] columns = {
-            BuchungDbHelper.COLUMN_BUID,
-            BuchungDbHelper.COLUMN_UID,
-            BuchungDbHelper.COLUMN_BUBTR,
-            BuchungDbHelper.COLUMN_KTOSLDALT,
-            BuchungDbHelper.COLUMN_KTOSLDNEU,
-            BuchungDbHelper.COLUMN_BU_DATE
-    };
-
-    private static DecimalFormat df = new DecimalFormat("0.00");
-
-
-    public BuchungDataSource(Context context) {
-        Log.d(LOG_TAG, "Unsere DataSource erzeugt jetzt den dbHelper.");
-        dbHelper = new BuchungDbHelper(context);
     }
 
     public void open() {
@@ -74,6 +70,31 @@ public class BuchungDataSource {
         ContentValues values = new ContentValues();
 
         values.put(BuchungDbHelper.COLUMN_UID, u_id);
+        values.put(BuchungDbHelper.COLUMN_BUBTR, bu_btr);
+        values.put(BuchungDbHelper.COLUMN_KTOSLDALT, kto_saldo_alt);
+        values.put(BuchungDbHelper.COLUMN_KTOSLDNEU, kto_saldo_neu);
+        values.put(BuchungDbHelper.COLUMN_BU_DATE, bu_date);
+
+        long insertId = database.insert(BuchungDbHelper.TABLE_BUCHUNG_DATA, null, values);
+
+        Cursor cursor = database.query(BuchungDbHelper.TABLE_BUCHUNG_DATA,
+                columns, BuchungDbHelper.COLUMN_BUID + "=" + insertId,
+                null, null, null, null);
+
+        cursor.moveToFirst();
+        Buchung Buchung = cursorToBuchung(cursor);
+        cursor.close();
+
+        return Buchung;
+    }
+
+    //Buchung in Datenbank anlegen und gleichzeit als Objekt bereitstellen
+
+    public Buchung createBuchungAufTeamkonto(double bu_btr, double kto_saldo_alt, double kto_saldo_neu, String bu_date) {
+
+        ContentValues values = new ContentValues();
+
+        values.put(BuchungDbHelper.COLUMN_UID, -1);
         values.put(BuchungDbHelper.COLUMN_BUBTR, bu_btr);
         values.put(BuchungDbHelper.COLUMN_KTOSLDALT, kto_saldo_alt);
         values.put(BuchungDbHelper.COLUMN_KTOSLDNEU, kto_saldo_neu);
@@ -173,6 +194,54 @@ public class BuchungDataSource {
 
         cursor.moveToLast();
         Buchung buchung = cursorToBuchung(cursor);
+
+        cursor.close();
+
+        return buchung;
+    }
+
+
+    //Alle Buchungen eines Spielers aus Datenbank in eine Liste
+
+    public ArrayList<Buchung> getAllBuchungZuTeamkonto() {
+
+
+        ArrayList<Buchung> BuchungList = new ArrayList<>();
+
+        Cursor cursor = database.query(BuchungDbHelper.TABLE_BUCHUNG_DATA,
+                columns, BuchungDbHelper.COLUMN_UID + "=" + -1, null, null, null, BuchungDbHelper.COLUMN_BUID + " DESC");
+
+        cursor.moveToFirst();
+        Buchung Buchung;
+
+        while (!cursor.isAfterLast()) {
+            Buchung = cursorToBuchung(cursor);
+            BuchungList.add(Buchung);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return BuchungList;
+    }
+
+    //Neuste Buchung aus Datenbank in eine Liste
+
+    public Buchung getNeusteBuchungZuTeamkonto() {
+
+
+        Cursor cursor = database.query(BuchungDbHelper.TABLE_BUCHUNG_DATA,
+                columns, BuchungDbHelper.COLUMN_UID + "=" + -1,
+                null, null, null, BuchungDbHelper.COLUMN_BUID);
+
+        cursor.moveToLast();
+
+        Buchung buchung;
+        if (cursor.getCount() > 0)
+            buchung = cursorToBuchung(cursor);
+        else
+            buchung = null;
+
 
         cursor.close();
 

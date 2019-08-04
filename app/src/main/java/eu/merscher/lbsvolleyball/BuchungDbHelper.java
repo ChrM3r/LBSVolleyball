@@ -8,7 +8,6 @@ import android.util.Log;
 public class BuchungDbHelper extends SQLiteOpenHelper {
 
 
-    private static final String LOG_TAG = BuchungDbHelper.class.getSimpleName();
     public static final String DB_NAME = "buchung_data.db";
     public static final int DB_VERSION = 1;
     public static final String TABLE_BUCHUNG_DATA = "buchung_data";
@@ -26,6 +25,7 @@ public class BuchungDbHelper extends SQLiteOpenHelper {
                     COLUMN_KTOSLDALT + " INTEGER NOT NULL, " +
                     COLUMN_KTOSLDNEU + " INTEGER NOT NULL," +
                     COLUMN_BU_DATE + " TEXT NOT NULL);";
+    private static final String LOG_TAG = BuchungDbHelper.class.getSimpleName();
 
 
     public BuchungDbHelper(Context context) {

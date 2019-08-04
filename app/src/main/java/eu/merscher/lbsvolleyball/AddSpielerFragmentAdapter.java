@@ -19,9 +19,8 @@ import java.util.Random;
 public class AddSpielerFragmentAdapter extends RecyclerView.Adapter<AddSpielerFragmentAdapter.ViewHolder> {
 
 
-    private static DecimalFormat df = new DecimalFormat("0.00");
-    private LayoutInflater inflate;
-    private Context context;
+    private final LayoutInflater inflate;
+    private final Context context;
     private SpielerDataSource spielerDataSource;
     private BuchungDataSource buchungDataSource;
     private ItemClickListener itemClickListener;
@@ -62,12 +61,12 @@ public class AddSpielerFragmentAdapter extends RecyclerView.Adapter<AddSpielerFr
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        EditText editTextName;
-        EditText editTextVname;
-        EditText editTextBdate;
-        EditText editTextMail;
+        final EditText editTextName;
+        final EditText editTextVname;
+        final EditText editTextBdate;
+        final EditText editTextMail;
+        final Button buttonSpielerAnlegen;
         EditText editTextAddBuchung;
-        Button buttonSpielerAnlegen;
 
         ViewHolder(final View view) {
             super(view);
@@ -80,6 +79,15 @@ public class AddSpielerFragmentAdapter extends RecyclerView.Adapter<AddSpielerFr
 
             editTextAddBuchung = view.findViewById(R.id.fragment_add_editText_AddBuchung);
 
+            //Textformat Platzkosten
+            editTextAddBuchung.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    Utils.formatNumericEditText(editTextAddBuchung);
+                }
+            });
+
+            //Spieler anlegen
             buttonSpielerAnlegen.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -170,4 +178,6 @@ public class AddSpielerFragmentAdapter extends RecyclerView.Adapter<AddSpielerFr
                 itemClickListener.onItemClick(view, getAdapterPosition());
         }
     }
+
+
 }

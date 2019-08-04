@@ -15,12 +15,11 @@ import java.util.ArrayList;
 
 public class SpielerVerwaltungAdapter extends BaseAdapter implements ListAdapter {
 
+    private final Context context;
     private ArrayList<Spieler> spielerList = new ArrayList<Spieler>();
     private ArrayList<String> spielerNamen = new ArrayList<String>();
     private ArrayList<String> spielerGeburtstage = new ArrayList<String>();
     private ArrayList<Bitmap> spielerFotos = new ArrayList<Bitmap>();
-
-    private Context context;
     private ListView spielerListView;
 
 

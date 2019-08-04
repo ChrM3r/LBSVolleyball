@@ -10,11 +10,11 @@ import java.util.ArrayList;
 
 public class SpielerseiteActivityPagerAdapter extends FragmentPagerAdapter {
 
-    private Spieler spieler;
-    private ArrayList<Buchung> buchungList;
-    private double kto_saldo_neu;
-    private int teilnahmen;
-    private Context context;
+    private final Spieler spieler;
+    private final ArrayList<Buchung> buchungList;
+    private final double kto_saldo_neu;
+    private final int teilnahmen;
+    private final Context context;
 
     public SpielerseiteActivityPagerAdapter(Context context, Spieler spieler, ArrayList<Buchung> buchungList, double kto_saldo_neu, int teilnahmen, FragmentManager fm) {
         super(fm);

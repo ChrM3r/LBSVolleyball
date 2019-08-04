@@ -39,6 +39,17 @@ public class Spieler implements Parcelable, Comparable<Spieler> {
 
     }
 
+    public Spieler(Parcel in) {
+        this.u_id = in.readLong();
+        this.name = in.readString();
+        this.vname = in.readString();
+        this.bdate = in.readString();
+        this.mail = in.readString();
+        this.foto = in.readString();
+        this.teilnahmen = in.readInt();
+        this.hat_buchung_mm = in.readString();
+    }
+
     public long getU_id() {
         return u_id;
     }
@@ -79,17 +90,6 @@ public class Spieler implements Parcelable, Comparable<Spieler> {
         this.teilnahmen = teilnahmen;
     }
 
-    public Spieler(Parcel in) {
-        this.u_id = in.readLong();
-        this.name = in.readString();
-        this.vname = in.readString();
-        this.bdate = in.readString();
-        this.mail = in.readString();
-        this.foto = in.readString();
-        this.teilnahmen = in.readInt();
-        this.hat_buchung_mm = in.readString();
-    }
-
     public String getFoto() {
         return foto;
     }
@@ -114,14 +114,6 @@ public class Spieler implements Parcelable, Comparable<Spieler> {
         this.mail = mail;
     }
 
-    public class FirstNameSorter implements Comparator<Spieler> {
-
-        @Override
-        public int compare(Spieler o1, Spieler o2) {
-            return o1.getVname().compareTo(o2.getVname());
-        }
-    }
-
     @Override
     public int compareTo(Spieler spieler) {
         return this.name.compareTo(spieler.getName());
@@ -144,10 +136,17 @@ public class Spieler implements Parcelable, Comparable<Spieler> {
         dest.writeString(this.hat_buchung_mm);
     }
 
-
     @Override
     public String toString() {
         return vname + " " + name;
+    }
+
+    public class FirstNameSorter implements Comparator<Spieler> {
+
+        @Override
+        public int compare(Spieler o1, Spieler o2) {
+            return o1.getVname().compareTo(o2.getVname());
+        }
     }
 }
 

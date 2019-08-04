@@ -1,14 +1,21 @@
 package eu.merscher.lbsvolleyball;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +27,12 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+
+import static eu.merscher.lbsvolleyball.SpieltagActivity.context;
 
 
 public class AddSpielerActivity extends AppCompatActivity implements View.OnClickListener {
@@ -52,9 +65,11 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
         spielerFoto = findViewById(R.id.spielerbild_groß_add_edit);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
+
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
 
         spielerFoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,8 +87,6 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
 
         AddSpielerActivityPagerAdapter adapter = new AddSpielerActivityPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(adapter);
-
-
         tabLayout.setupWithViewPager(viewPager);
     }
 
@@ -113,17 +126,6 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-
     //Bild aus Galerie auswählen und auf das Ergebnis reagieren
 
     private void bildAusGalerieAuswaehlen() {
@@ -141,25 +143,53 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (resultCode == Activity.RESULT_OK)
-            switch (requestCode) {
-                case 1:
-                    Uri selectedImage = data.getData();
+            if (requestCode == 1) {
+                Uri selectedImage = data.getData();
 
-                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
-                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                    cursor.moveToFirst();
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+                cursor.moveToFirst();
 
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 
-                    userFotoAlsString = cursor.getString(columnIndex);
+                userFotoAlsString = cursor.getString(columnIndex);
 
-                    spielerFoto.setImageBitmap(BitmapFactory.decodeFile(userFotoAlsString));
+                Uri uri;
+                Bitmap spielerBild = BitmapFactory.decodeFile(userFotoAlsString);
 
-                    cursor.close();
-                    break;
+                try {
+                    uri = Uri.fromFile(new File(userFotoAlsString));
+                    spielerBild = Utils.handleSamplingAndRotationBitmap(context, uri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
+                spielerFoto.setImageBitmap(spielerBild);
+                cursor.close();
             }
 
+    }
+
+
+    //Fokus des Edittexts ändern wenn Touch außerhalb des Edittext-Bereiches
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    Log.d("focus", "touchevent");
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+
+        return super.dispatchTouchEvent(event);
     }
 
 }

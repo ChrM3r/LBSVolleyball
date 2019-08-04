@@ -3,10 +3,13 @@ package eu.merscher.lbsvolleyball;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -21,12 +24,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.File;
+import java.io.IOException;
+
+import static eu.merscher.lbsvolleyball.SpieltagActivity.context;
+import static eu.merscher.lbsvolleyball.SpieltagActivity.resources;
+
 
 public class EditSpielerActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     private static String userFotoAlsString = null;
-    private Spieler spieler;
     private ImageView spielerBild;
 
     public static String getUserFotoAlsString() {
@@ -46,7 +54,7 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
 
         bottomNavBarInitialisieren();
 
-        spieler = getIntent().getExtras().getParcelable("spieler");
+        Spieler spieler = getIntent().getExtras().getParcelable("spieler");
 
         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit);
         Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit);
@@ -78,14 +86,34 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
 
+        //Displaygröße ermittlen
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+
+        //Spielerbild skalieren und setzen
+        Bitmap spielerBildOriginal;
+        Bitmap spielerBildScaled;
+        Uri uri;
+
         if (spieler.getFoto().equals("avatar_m"))
-            spielerBild.setImageResource(R.drawable.avatar_m);
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
 
         else if (spieler.getFoto().equals("avatar_f"))
-            spielerBild.setImageResource(R.drawable.avatar_f);
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
+        else {
+            spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
+            try {
+                uri = Uri.fromFile(new File(spieler.getFoto()));
+                spielerBildOriginal = Utils.handleSamplingAndRotationBitmap(context, uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-        else
-            spielerBild.setImageBitmap(BitmapFactory.decodeFile(spieler.getFoto()));
+        spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        spielerBild.setImageBitmap(spielerBildScaled);
     }
 
     private void bottomNavBarInitialisieren() {
@@ -114,24 +142,11 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
+        return super.onOptionsItemSelected(item);
     }
 
 

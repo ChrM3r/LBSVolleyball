@@ -1,6 +1,7 @@
 package eu.merscher.lbsvolleyball;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,19 +19,27 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<SpielerseiteKontodatenFragmentAdapter.ViewHolder> {
 
 
-    private ArrayList<Buchung> buchungList;
+    private final ArrayList<Buchung> buchungList;
+    private final Context context;
+    private final LayoutInflater inflate;
     private Spieler spieler;
-    private Context context;
     private SpielerDataSource spielerDataSource;
     private BuchungDataSource buchungDataSource;
-    private LayoutInflater inflate;
     private SpielerKontoListViewAdapter spielerKontoListViewAdapter;
     private boolean auszahlung = false;
-    private ViewHolder holder;
 
     SpielerseiteKontodatenFragmentAdapter(Context context, ArrayList<Buchung> buchungList, Spieler spieler) {
         this.inflate = LayoutInflater.from(context);
@@ -49,7 +58,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        this.holder = holder;
+        ViewHolder holder1 = holder;
         buchungDataSource = BuchungDataSource.getInstance();
         spielerDataSource = SpielerDataSource.getInstance();
 
@@ -97,10 +106,12 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                     SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy");
 
 
+                    System.out.println(spieler.getName() + " " + spieler.getHat_buchung_mm() + " " + spieler.getTeilnahmen());
                     buchungDataSource.open();
                     spielerDataSource.open();
                     if (spieler.getHat_buchung_mm() != null) { //Wenn Buchungen für den Spieler vorhanden sind...
 
+                        System.out.println("1");
                         Buchung buchung = buchungDataSource.getNeusteBuchungZuSpieler(spieler);
 
                         kto_saldo_alt = buchung.getKto_saldo_neu(); //der vorherige Kto_Saldo_neu ist der neue Kto_Saldo_alt
@@ -109,21 +120,22 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                     } else { //Wenn keine Buchung vorhaden ist, ist der Startsaldo 0
 
+                        System.out.println("2");
 
                         kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
                         kto_saldo_neu = kto_saldo_alt + bu_btr;
                         buchungDataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()));
 
                     }
-                    spielerDataSource.updateHatBuchungenMM(spieler);
+                    spieler = spielerDataSource.updateHatBuchungenMM(spieler);
 
+                    if (kto_saldo_neu < 5)
+                        new EMailSendenAsyncTask(spieler, df.format(kto_saldo_neu)).execute();
 
                     Toast toast = Toast.makeText(context, "Buchung angelegt", Toast.LENGTH_SHORT);
                     toast.show();
 
                     spielerKontoListViewAdapter.updateBuchungen(buchungDataSource.getAllBuchungZuSpieler(spieler));
-                    buchungDataSource.close();
-                    spielerDataSource.close();
 
                     holder.editTextAddBuchung.setText("");
                     holder.editTextAddBuchung.clearFocus();
@@ -166,12 +178,72 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         void onAddBuchungClick(String kto_saldo_neu);
     }
 
+    private static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {
+
+
+        private final Spieler spieler;
+        private final String kontostand;
+
+        EMailSendenAsyncTask(Spieler spieler, String kontostand) {
+            this.spieler = spieler;
+            this.kontostand = kontostand;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... args) {
+
+            // SMTP Verbindung starten
+            final String username = "lbsvolleyball@merscher.eu";
+            final String password = "be1gvd1!b685+08787adklasdnl#++13nlandasd2";
+
+            Properties props = new Properties();
+
+            props.put("mail.smtp.host", "mail.merscher.eu");
+            props.put("mail.smtp.socketFactory.port", "465");
+            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.port", "465");
+
+            Session session = Session.getInstance(props,
+                    new javax.mail.Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(username, password);
+                        }
+                    });
+
+
+            // Nachricht:
+            String to = spieler.getMail();
+            String from = "LBSVolleyball@merscher.eu";
+            String subject = "Kontostand niedrig";
+            Message msg = new MimeMessage(session);
+
+            if (!to.isEmpty()) {
+                try {
+                    msg.setFrom(new InternetAddress(from));
+                    msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+                    msg.setSubject(subject);
+
+                    msg.setText("Hi " + spieler.getVname()
+                            + ",\n\nder Kontostand deines Spielerkontos beträgt " + kontostand
+                            + "€. Bitte zahle demnächst wieder etwas ein.\n\nVielen Dank und sportliche Grüße\nLBS Volleyball App-Admin");
+
+                    Transport.send(msg);
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        ListView buchungListView;
-        EditText editTextAddBuchung;
-        FloatingActionButton buttonAddBuchung;
-        Switch auszahlungSwitch;
+        final ListView buchungListView;
+        final EditText editTextAddBuchung;
+        final FloatingActionButton buttonAddBuchung;
+        final Switch auszahlungSwitch;
 
 
         ViewHolder(View view) {
@@ -184,5 +256,4 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         }
 
     }
-
 }
