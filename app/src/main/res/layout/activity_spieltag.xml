@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            tools:context=".SpieltagActivity">
+            tools:context=".controller.SpieltagActivity">
 
 
             <androidx.appcompat.widget.Toolbar
@@ -55,7 +55,7 @@
                     android:focusableInTouchMode="true"
                     android:orientation="horizontal">
 
-                    <eu.merscher.lbsvolleyball.NumericEditText
+                    <eu.merscher.lbsvolleyball.utilities.NumericEditText
                         android:id="@+id/activity_spieltag_editText_platzkosten"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

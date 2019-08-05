@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddSpielerFragment">
+    tools:context=".controller.AddSpielerFragment">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -181,7 +181,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <eu.merscher.lbsvolleyball.NumericEditText
+            <eu.merscher.lbsvolleyball.utilities.NumericEditText
                 android:id="@+id/fragment_add_editText_AddBuchung"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

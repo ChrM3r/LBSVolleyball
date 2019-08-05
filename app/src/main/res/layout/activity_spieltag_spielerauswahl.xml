@@ -14,7 +14,7 @@
 
     android:paddingTop="@dimen/activity_vertical_margin"
 
-    tools:context=".SpieltagActivity">
+    tools:context=".controller.SpieltagActivity">
 
     <androidx.recyclerview.widget.RecyclerView
 
