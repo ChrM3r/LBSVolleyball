@@ -140,7 +140,6 @@ public class BuchungDataSource {
         int idIst_manuell_mm = cursor.getColumnIndex(BuchungDbHelper.COLUMN_IST_MANUELL_MM);
         int idIst_tunier_mm = cursor.getColumnIndex(BuchungDbHelper.COLUMN_IST_TUNIER_MM);
 
-
         long u_id = cursor.getLong(idUid);
         double bu_btr = cursor.getDouble(idBu_btr);
         double kto_saldo_alt = cursor.getDouble(idKto_saldo_alt);
@@ -151,8 +150,8 @@ public class BuchungDataSource {
         String ist_manuell_mm = cursor.getString(idIst_manuell_mm);
         String ist_tunier_mm = cursor.getString(idIst_tunier_mm);
 
-
         return new Buchung(bu_id, u_id, bu_btr, kto_saldo_alt, kto_saldo_neu, bu_date, ist_training_mm, ist_manuell_mm, ist_tunier_mm);
+
 
     }
     //Alle Buchung aus Datenbank in eine Liste
@@ -211,8 +210,12 @@ public class BuchungDataSource {
                 columns, BuchungDbHelper.COLUMN_UID + "=" + spieler.getU_id(),
                 null, null, null, BuchungDbHelper.COLUMN_BUID);
 
-        cursor.moveToLast();
-        Buchung buchung = cursorToBuchung(cursor);
+        Buchung buchung;
+        if (cursor.moveToLast()) {
+            cursor.moveToLast();
+            buchung = cursorToBuchung(cursor);
+        } else
+            buchung = new Buchung(-999, -999, null, null, null, null, null, null, null);
 
         cursor.close();
 

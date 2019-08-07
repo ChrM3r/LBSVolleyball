@@ -15,7 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -24,7 +23,6 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
@@ -39,7 +37,7 @@ import eu.merscher.lbsvolleyball.utilities.Utils;
 import static eu.merscher.lbsvolleyball.controller.SpieltagActivity.resources;
 
 
-public class EditSpielerActivity extends AppCompatActivity implements View.OnClickListener {
+public class EditSpielerActivity extends AppCompatActivity implements View.OnClickListener, EditSpielerFragment.OnEditFinish {
 
 
     private static String userFotoAlsString = null;
@@ -54,13 +52,17 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    public void onEditFinish() {
+        System.out.println("JO HIER ISSER DAS ANDERE MAL");
+
+        this.finish();
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_spieler);
 
         setTitle(R.string.button_spieler_aendern);
-
-        bottomNavBarInitialisieren();
 
         Spieler spieler = getIntent().getExtras().getParcelable("spieler");
 
@@ -101,6 +103,9 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
         int width = size.x;
 
         //Spielerbild skalieren und setzen
+
+        userFotoAlsString = null;
+
         Bitmap spielerBildOriginal;
         Bitmap spielerBildScaled;
         Uri uri;
@@ -112,42 +117,26 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
             spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
         else {
             spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
-            try {
-                uri = Uri.fromFile(new File(spieler.getFoto()));
-                spielerBildOriginal = Utils.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
-        spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        if (spielerBildOriginal != null)
+            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        else {
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        }
         spielerBild.setImageBitmap(spielerBildScaled);
     }
 
-    private void bottomNavBarInitialisieren() {
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_spieltag_bottom:
-                        Intent intent1 = new Intent(EditSpielerActivity.this, SpieltagActivity.class);
-                        EditSpielerActivity.this.startActivity(intent1);
-                        break;
-                    case R.id.action_spielerverwaltung_bottom:
-                        Intent intent2 = new Intent(EditSpielerActivity.this, SpielerVerwaltungActivity.class);
-                        EditSpielerActivity.this.startActivity(intent2);
-                        break;
-                }
-                return true;
-            }
-        });
-    }
 
     public void onClick(View v) {
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -193,6 +182,7 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
                     try {
                         uri = Uri.fromFile(new File(userFotoAlsString));
                         spielerBildNeu = Utils.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
+                        userFotoAlsString = Utils.bildSpeichern(getApplicationContext(), spielerBildNeu);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

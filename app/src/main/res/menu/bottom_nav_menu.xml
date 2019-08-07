@@ -4,13 +4,13 @@
     <item
         android:id="@+id/action_spieltag_bottom"
         android:enabled="true"
-        android:icon="@drawable/spieltag_icon"
+        android:icon="@drawable/icon_spieltag"
         android:title="@string/action_spieltag"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_spielerverwaltung_bottom"
         android:enabled="true"
-        android:icon="@drawable/spielerverwaltung_icon"
+        android:icon="@drawable/icon_spieler"
         android:title="@string/action_spielerverwaltungr"
         app:showAsAction="ifRoom" />
 </menu>

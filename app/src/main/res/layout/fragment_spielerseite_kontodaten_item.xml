@@ -40,7 +40,7 @@
             android:focusableInTouchMode="true"
             android:orientation="horizontal">
 
-            <eu.merscher.lbsvolleyball.utilities.NumericEditText
+            <EditText
                 android:id="@+id/fragment_kontodaten_editText_addBuchung"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -48,10 +48,12 @@
                 android:layout_marginTop="28dp"
                 android:layout_marginBottom="16dp"
                 android:layout_weight="3"
+                android:autoText="false"
                 android:digits="01234567890,"
                 android:ems="10"
                 android:hint="0,00"
                 android:inputType="number"
+                android:singleLine="true"
                 android:textAlignment="textEnd"
                 android:textSize="40sp" />
 
@@ -76,7 +78,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:clickable="true"
-            android:src="@drawable/add_white"
+            android:src="@drawable/icon_plus_white"
             app:fabSize="mini" />
     </androidx.cardview.widget.CardView>
 
@@ -93,50 +95,95 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/fragment_spielerseite_kontodaten_item_ueberschrift1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="2dp"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:gravity="left"
-                android:padding="5dp"
-                android:text="@string/textView_buchung_datum"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:textSize="16sp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/fragment_spielerseite_kontodaten_item_ueberschrift2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:gravity="left"
-                android:padding="5dp"
-                android:text="@string/textView_buchung_betrag"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/fragment_spielerseite_kontodaten_item_ueberschrift1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="@android:color/transparent"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:text="@string/textView_buchung_datum"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    app:autoSizeMaxTextSize="14sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeTextType="uniform" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/fragment_spielerseite_kontodaten_item_ueberschrift3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="16dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/fragment_spielerseite_kontodaten_item_ueberschrift2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="@android:color/transparent"
+                    android:padding="5dp"
+                    android:text="@string/textView_buchung_betrag"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/fragment_spielerseite_kontodaten_item_ueberschrift3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="left"
+                    android:padding="5dp"
+                    android:text="@string/textView_kto_saldo_neu"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:autoSizeMaxTextSize="14sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeTextType="uniform" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:gravity="left"
-                android:padding="5dp"
-                android:text="@string/textView_kto_saldo_neu"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:textSize="16sp" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/fragment_spielerseite_kontodaten_item_ueberschrift4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="left"
+                    android:padding="5dp"
+                    android:text="@string/textView_buchung_typ"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:autoSizeMaxTextSize="14sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeTextType="uniform" />
+            </LinearLayout>
 
 
         </LinearLayout>
@@ -149,11 +196,6 @@
         android:layout_marginTop="190dp"
         android:layout_marginEnd="8dp">
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -162,12 +204,32 @@
                 <ListView
                     android:id="@+id/listView_buchungen"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    android:divider="@null" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:divider="@null"
+                    android:nestedScrollingEnabled="false">
+
+                </ListView>
+
+                <ImageButton
+                    android:id="@+id/mehrBuchungen"
+                    android:layout_width="match_parent"
+                    android:layout_height="24dp"
+                    android:background="@android:color/white"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/icon_down_arrow" />
+
+                <TextView
+                    android:id="@+id/mehrBuchungenText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="TextView"
+                    android:textColor="#888888" />
             </LinearLayout>
-        </ScrollView>
 
     </androidx.cardview.widget.CardView>
 </FrameLayout>

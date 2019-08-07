@@ -2,15 +2,19 @@ package eu.merscher.lbsvolleyball.utilities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
@@ -176,6 +180,40 @@ public class Utils {
         return rotatedImg;
     }
 
+    public static String bildSpeichern(Context context, Bitmap bitmap) {
+
+        ContextWrapper cw = new ContextWrapper(context);
+        File ordner = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+        if (!ordner.exists()) {
+            ordner.mkdir();
+        }
+        File pfad = new File(ordner, "temp.png");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(pfad);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+        } catch (Exception e) {
+            Log.d("BILD_SPEICHERN", e.getMessage(), e);
+        }
+        return pfad.getAbsolutePath();
+    }
+
+    public static String bildNachSpielerBenennen(Context context, Spieler spieler) {
+        ContextWrapper cw = new ContextWrapper(context);
+        File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+        File bildAlt = new File(spieler.getFoto());
+        File bildNeu = new File(directory, spieler.getU_id() + "_" + spieler.getName() + ".png");
+
+        bildAlt.renameTo(bildNeu);
+
+        return bildNeu.getAbsolutePath();
+    }
+
     public class SortName implements Comparator<Spieler> {
         @Override
         public int compare(Spieler s1, Spieler s2) {
@@ -196,6 +234,5 @@ public class Utils {
             return s1.getTeilnahmen() - s2.getTeilnahmen();
         }
     }
-
 
 }

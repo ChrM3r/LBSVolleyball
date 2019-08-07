@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Random;
 
 import eu.merscher.lbsvolleyball.R;
@@ -115,6 +116,7 @@ public class AddSpielerFragment extends Fragment {
                         String vname = editTextVname.getText().toString();
                         String bdate = editTextBdate.getText().toString();
                         String mail = editTextMail.getText().toString();
+
                         String userFotoAlsString = AddSpielerActivity.getUserFotoAlsString();
 
                         if (TextUtils.isEmpty(name)) {
@@ -138,7 +140,9 @@ public class AddSpielerFragment extends Fragment {
                         if (userFotoAlsString != null && TextUtils.isEmpty(mail)) {
 
                             neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, userFotoAlsString, null, null);
-                            System.out.println("FALL 1");
+                            AddSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(getContext(), neuerSpieler));
+                            spielerDataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
+
                         } else if (userFotoAlsString == null && TextUtils.isEmpty(mail)) {
 
                             final int random = new Random().nextInt();
@@ -156,9 +160,9 @@ public class AddSpielerFragment extends Fragment {
                                 neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, "avatar_f", mail, null);
                         } else {
                             neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, userFotoAlsString, mail, null);
+                            AddSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(getContext(), neuerSpieler));
+                            spielerDataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
                         }
-
-                        spielerDataSource.close();
 
                         AddSpielerActivity.setUserFotoAlsString(null);
 
@@ -172,7 +176,7 @@ public class AddSpielerFragment extends Fragment {
 
 
                             Calendar kalender = Calendar.getInstance();
-                            SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy");
+                            SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
                             buchungDataSource.open();
                             spielerDataSource.open();
@@ -180,12 +184,11 @@ public class AddSpielerFragment extends Fragment {
                             kto_saldo_neu = kto_saldo_alt + bu_btr;
                             buchungDataSource.createBuchung(neuerSpieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
                             spielerDataSource.updateHatBuchungenMM(neuerSpieler);
-                            buchungDataSource.close();
                             spielerDataSource.close();
                         }
 
                         Intent intent = new Intent(context, SpielerVerwaltungActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        getActivity().finish();
                         context.startActivity(intent);
                     }
 

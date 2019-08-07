@@ -25,9 +25,11 @@ import eu.merscher.lbsvolleyball.database.BuchungDataSource;
 import eu.merscher.lbsvolleyball.database.SpielerDataSource;
 import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
+import eu.merscher.lbsvolleyball.utilities.Utils;
+
+import static eu.merscher.lbsvolleyball.controller.EditSpielerFragment.onLoeschenClick;
 
 public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpielerFragmentAdapter.ViewHolder> {
-
 
     private static final DecimalFormat df = new DecimalFormat("0.00");
     private static Buchung neusteSpielerBuchung;
@@ -36,7 +38,6 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
     private final Context context;
     private final Spieler spieler;
     private ItemClickListener itemClickListener;
-
 
     EditSpielerFragmentAdapter(Context context, Spieler spieler) {
         this.inflate = LayoutInflater.from(context);
@@ -60,21 +61,19 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
         return 1;
     }
 
-    // allows clicks events to be caught
     void setClickListener(ItemClickListener itemClickListener) {
         this.itemClickListener = itemClickListener;
     }
 
-    // parent activity will implement this method to respond to click events
+
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }
 
-
     static class SpielerLoeschenAsyncTask extends AsyncTask<Void, Void, Void> {
 
         private final Spieler spieler;
-
+        private final OnLoeschenClick onLoeschenClick = EditSpielerFragment.getOnLoeschenClick();
 
         SpielerLoeschenAsyncTask(Spieler spieler) {
             this.spieler = spieler;
@@ -91,6 +90,15 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
             return null;
         }
 
+        @Override
+        protected void onPostExecute(Void v) {
+            onLoeschenClick.onLoeschenClick();
+        }
+
+
+        public interface OnLoeschenClick {
+            void onLoeschenClick();
+        }
     }
 
     static class SetBuchungenAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -125,7 +133,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
 
     }
 
-    static class SpielerUpdateAsyncTask extends AsyncTask<Void, Void, Void> {
+    static class SpielerUpdateAsyncTask extends AsyncTask<Void, Void, Spieler> {
 
 
         public final WeakReference<EditSpielerFragmentAdapter> activityReference;
@@ -137,6 +145,9 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
         private final String userFotoAlsString;
         private final String foto;
         private final String mail;
+
+        private OnSpeichernClick onSpeichernClick = EditSpielerFragment.getOnSpeichernClick();
+
 
 
         SpielerUpdateAsyncTask(EditSpielerFragmentAdapter context, Spieler spieler, String name, String vname, String bdate, String userFotoAlsString, String foto, String mail) {
@@ -152,16 +163,21 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
         }
 
         @Override
-        protected Void doInBackground(Void... args) {
+        protected Spieler doInBackground(Void... args) {
 
             SpielerDataSource spielerDataSource = SpielerDataSource.getInstance();
             spielerDataSource.open();
 
-            if (userFotoAlsString != null && TextUtils.isEmpty(mail)) {
+            Spieler updatedSpieler = spieler;
 
-                spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), userFotoAlsString, null, spieler.getHat_buchung_mm());
-                System.out.println("FALL 1");
-            } else if (userFotoAlsString == null && TextUtils.isEmpty(mail)) {
+            if (EditSpielerActivity.getUserFotoAlsString() != null && TextUtils.isEmpty(mail)) {
+
+                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), userFotoAlsString, null, spieler.getHat_buchung_mm());
+                EditSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(activityReference.get().context, updatedSpieler));
+                spielerDataSource.updateFotoSpieler(updatedSpieler, EditSpielerActivity.getUserFotoAlsString());
+                EditSpielerActivity.setUserFotoAlsString(null);
+
+            } else if (EditSpielerActivity.getUserFotoAlsString() == null && TextUtils.isEmpty(mail)) {
 
                 final int random = new Random().nextInt();
                 if (random % 2 == 0)
@@ -169,24 +185,35 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                 else
                     spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), foto, null, spieler.getHat_buchung_mm());
 
-            } else {
+            } else if (EditSpielerActivity.getUserFotoAlsString() != null && !TextUtils.isEmpty(mail)) {
 
-                spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), userFotoAlsString, mail, spieler.getHat_buchung_mm());
+                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), EditSpielerActivity.getUserFotoAlsString(), mail, spieler.getHat_buchung_mm());
+                EditSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(activityReference.get().context, updatedSpieler));
+                spielerDataSource.updateFotoSpieler(updatedSpieler, EditSpielerActivity.getUserFotoAlsString());
+                EditSpielerActivity.setUserFotoAlsString(null);
+            } else
+                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), spieler.getFoto(), mail, spieler.getHat_buchung_mm());
 
-            }
-            return null;
+            return updatedSpieler;
         }
 
         @Override
-        public void onPostExecute(Void v) {
+        public void onPostExecute(Spieler spieler) {
 
             EditSpielerFragmentAdapter activity = activityReference.get();
             if (activity == null) return;
 
 
-            AddSpielerActivity.setUserFotoAlsString(null);
-            Intent intent = new Intent(activity.context, SpielerVerwaltungActivity.class);
-            activity.context.startActivity(intent);
+            EditSpielerActivity.setUserFotoAlsString(null);
+            Intent data = new Intent(activity.context, SpielerseiteActivity.class);
+            data.putExtra("spieler", spieler);
+            activity.context.startActivity(data);
+            onSpeichernClick.onSpeichernClick();
+
+        }
+
+        public interface OnSpeichernClick {
+            void onSpeichernClick();
         }
     }
 
@@ -242,7 +269,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
 
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    protected class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final EditText editTextName;
         final EditText editTextVname;
         final EditText editTextBdate;
@@ -304,40 +331,49 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
 
                     neusteSpielerBuchung = buchungDataSource.getNeusteBuchungZuSpieler(spieler);
 
-                    if (neusteSpielerBuchung.getKto_saldo_neu() > 0) {
+                    if (neusteSpielerBuchung.getBu_id() != -999) {
+                        if (neusteSpielerBuchung.getKto_saldo_neu() > 0) {
 
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
 
-                        dialog.setIcon(R.drawable.kontoverwaltung_icon)
-                                .setMessage(spieler.getVname() + " " + spieler.getName() + " hat einen Kontostand von " + df.format(neusteSpielerBuchung.getKto_saldo_neu()) + "€. Der Betrag wird auf das Teamkonto überwiesen.")
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialoginterface, int i) {
+                            dialog.setIcon(R.drawable.icon_euro)
+                                    .setMessage(spieler.getVname() + " " + spieler.getName() + " hat einen Kontostand von " + df.format(neusteSpielerBuchung.getKto_saldo_neu()) + "€. Der Betrag wird auf das Teamkonto überwiesen.")
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialoginterface, int i) {
 
-                                        new BuchenAsyncTask(EditSpielerFragmentAdapter.this, spieler).execute();
-                                        new SpielerLoeschenAsyncTask(spieler).execute();
+                                            new BuchenAsyncTask(EditSpielerFragmentAdapter.this, spieler).execute();
+                                            new SpielerLoeschenAsyncTask(spieler).execute();
+                                            onLoeschenClick.onLoeschenClick();
 
-                                        Intent intent = new Intent(context, SpielerVerwaltungActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        context.startActivity(intent);
-                                    }
-                                })
-                                .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialoginterface, int i) {
-                                        dialoginterface.cancel();
-                                    }
-                                }).show();
-                    } else if (neusteSpielerBuchung.getKto_saldo_neu() < 0) {
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
 
-                        dialog.setIcon(R.drawable.kontoverwaltung_icon)
-                                .setMessage(spieler.getVname() + " " + spieler.getName() + " hat einen Kontostand von " + df.format(neusteSpielerBuchung.getKto_saldo_neu()) + "€. Bitte Konto vorher ausgleichen.")
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialoginterface, int i) {
-                                        dialoginterface.cancel();
-                                    }
-                                }).show();
-                    } else
+                                            Intent intent = new Intent(context, SpielerVerwaltungActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            context.startActivity(intent);
+                                        }
+                                    })
+                                    .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialoginterface, int i) {
+                                            dialoginterface.cancel();
+                                        }
+                                    }).show();
+                        } else if (neusteSpielerBuchung.getKto_saldo_neu() < 0) {
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+
+                            dialog.setIcon(R.drawable.icon_euro)
+                                    .setMessage(spieler.getVname() + " " + spieler.getName() + " hat einen Kontostand von " + df.format(neusteSpielerBuchung.getKto_saldo_neu()) + "€. Bitte Konto vorher ausgleichen.")
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialoginterface, int i) {
+                                            dialoginterface.cancel();
+                                        }
+                                    }).show();
+                        }
+                    } else {
                         new SpielerLoeschenAsyncTask(spieler).execute();
+                        onLoeschenClick.onLoeschenClick();
+
+                        Intent intent = new Intent(context, SpielerseiteActivity.class);
+                        context.startActivity(intent);
+                    }
 
                 }
             });
@@ -348,7 +384,11 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
         public void onClick(View view) {
             if (itemClickListener != null)
                 itemClickListener.onItemClick(view, getAdapterPosition());
+
         }
+
+
     }
+
 
 }

@@ -1,12 +1,15 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -16,8 +19,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -26,35 +30,58 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
-import com.google.gson.Gson;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.BuchungDataSource;
 import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
-import eu.merscher.lbsvolleyball.utilities.Utils;
-
-import static eu.merscher.lbsvolleyball.controller.SpieltagActivity.resources;
 
 
-public class SpielerseiteActivity extends AppCompatActivity implements View.OnClickListener {
+public class SpielerseiteActivity extends AppCompatActivity implements EditSpielerFragment.OnEditFinish {
 
 
     private static Spieler spieler;
     private ImageView spielerBild;
     private FloatingActionButton editSpielerButton;
+    public static Resources resources;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private CollapsingToolbarLayout collapsingToolbar;
+    public static ArrayList<Buchung> buchungList;
+    private static EditSpielerFragment.OnEditFinish onEditFinish;
+    private FloatingActionButton exportKontoButton;
 
+    public static ArrayList<Buchung> getBuchungList() {
+        return buchungList;
+    }
+
+    public static void setBuchungList(ArrayList<Buchung> buchungList) {
+        SpielerseiteActivity.buchungList = buchungList;
+    }
+
+    public static EditSpielerFragment.OnEditFinish getOnEditFinish() {
+        return onEditFinish;
+    }
+
+    @Override
+    public void onEditFinish() {
+        this.finish();
+        System.out.println("JO HIER ISSER");
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,16 +89,17 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
 
         Context context = getApplicationContext();
 
-        spieler = new Gson().fromJson(getIntent().getStringExtra("spieler"), Spieler.class);
+        onEditFinish = this;
+        resources = getResources();
+        spieler = getIntent().getParcelableExtra("spieler");
         setTitle(spieler.getVname() + " " + spieler.getName());
 
         findViewsById();
-        bottomNavBarInitialisieren();
 
         BuchungDataSource buchungDataSource = BuchungDataSource.getInstance();
         buchungDataSource.open();
 
-        ArrayList<Buchung> buchungList = buchungDataSource.getAllBuchungZuSpieler(spieler);
+        buchungList = buchungDataSource.getAllBuchungZuSpieler(spieler);
         double kto_saldo_neu;
         if (spieler.getHat_buchung_mm() == null)
             kto_saldo_neu = 0;
@@ -107,22 +135,55 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
             spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
         else {
             spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
-            try {
-                uri = Uri.fromFile(new File(spieler.getFoto()));
-                spielerBildOriginal = Utils.handleSamplingAndRotationBitmap(context, uri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
-
-        spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        if (spielerBildOriginal != null)
+            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        else {
+            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+        }
         spielerBild.setImageBitmap(spielerBildScaled);
 
         //Pager mit Fragmenten erzeugen
         SpielerseiteActivityPagerAdapter adapter = new SpielerseiteActivityPagerAdapter(this, spieler, buchungList, kto_saldo_neu, teilnahmen, getSupportFragmentManager());
-        viewPager.setAdapter(adapter);
-        tabLayout.setupWithViewPager(viewPager);
+
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                animateFab(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                animateFab(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+
 
         editSpielerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,6 +194,36 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
                 SpielerseiteActivity.this.startActivity(intent);
             }
         });
+
+        exportKontoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                AlertDialog.Builder dialog = new AlertDialog.Builder(SpielerseiteActivity.this);
+
+                dialog.setTitle("Kontoverlauf-Export")
+                        .setMessage("Kontoverlauf von "
+                                + spieler.getVname() + " " + spieler.getName()
+                                + " wird an " + spieler.getMail() + " gesendet.")
+                        .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                new SpielerseiteActivity.EMailSendenAsyncTask(spieler, buchungList).execute();
+                                Toast toast = Toast.makeText(getApplicationContext(), "Der Kontoverlauf wurde per Mail zugestellt", Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                        }).show();
+
+            }
+        });
+        viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     private void findViewsById() {
@@ -142,34 +233,29 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
         collapsingToolbar = findViewById(R.id.htab_collapse_toolbar);
         editSpielerButton = findViewById(R.id.activity_spielerseite_edit_spieler_button);
         tabLayout = findViewById(R.id.htab_tabs);
+        exportKontoButton = findViewById(R.id.activity_spielerseite_export_konto);
 
 
     }
 
-    private void bottomNavBarInitialisieren() {
-
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_spieltag_bottom:
-                        Intent intent1 = new Intent(SpielerseiteActivity.this, SpieltagActivity.class);
-                        SpielerseiteActivity.this.startActivity(intent1);
-                        break;
-                    case R.id.action_spielerverwaltung_bottom:
-                        Intent intent2 = new Intent(SpielerseiteActivity.this, SpielerVerwaltungActivity.class);
-                        SpielerseiteActivity.this.startActivity(intent2);
-                        break;
-                }
-                return true;
-            }
-        });
-    }
-
-    public void onClick(View v) {
+    private void animateFab(int position) {
+        switch (position) {
+            case 0:
+                editSpielerButton.show();
+                exportKontoButton.hide();
+                break;
+            case 1:
+                editSpielerButton.hide();
+                exportKontoButton.show();
+                break;
+            default:
+                editSpielerButton.show();
+                exportKontoButton.hide();
+                break;
+        }
 
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -200,6 +286,7 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
 
         return super.dispatchTouchEvent(event);
     }
+
 
     public class SpielerseiteActivityPagerAdapter extends FragmentPagerAdapter {
 
@@ -254,5 +341,73 @@ public class SpielerseiteActivity extends AppCompatActivity implements View.OnCl
             }
         }
     }
+
+    static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {
+
+
+        private final Spieler spieler;
+        private final ArrayList<Buchung> buchungList;
+
+        EMailSendenAsyncTask(Spieler spieler, ArrayList<Buchung> buchungList) {
+            this.spieler = spieler;
+            this.buchungList = buchungList;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... args) {
+
+            // SMTP Verbindung starten
+            final String username = "lbsvolleyball@merscher.eu";
+            final String password = "be1gvd1!b685+08787adklasdnl#++13nlandasd2";
+
+            Properties props = new Properties();
+
+            props.put("mail.smtp.host", "mail.merscher.eu");
+            props.put("mail.smtp.socketFactory.port", "465");
+            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.port", "465");
+
+            Session session = Session.getInstance(props,
+                    new javax.mail.Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(username, password);
+                        }
+                    });
+
+            // Nachricht:
+            String to = spieler.getMail();
+            String from = "LBSVolleyball@merscher.eu";
+            String subject = "Kontoverlauf";
+            Message msg = new MimeMessage(session);
+
+            if (to != null) {
+                try {
+                    msg.setFrom(new InternetAddress(from));
+                    msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
+                    msg.setSubject(subject);
+
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    for (Buchung b : buchungList) {
+                        stringBuilder.append(b + "\n");
+                    }
+
+                    msg.setText("Hi " + spieler.getVname()
+                            + "\nanbei erhälst du die Übersicht aller deiner Buchungen im LBS Volleyballteam: \n\n\n"
+                            + "Datum       Betrag      Kontostand\n\n"
+                            + stringBuilder + "\n"
+                            + "Sportliche Grüße\nLBS Volleyball-App");
+
+                    Transport.send(msg);
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+    }
+
 
 }

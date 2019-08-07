@@ -1,43 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<TableLayout
 
     xmlns:android="http://schemas.android.com/apk/res/android"
 
     android:id="@+id/relativeLayout1"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="24dp"
+    android:stretchColumns="1,2,3,4">
 
-    <TextView
-        android:id="@+id/datum"
+    <TableRow
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:singleLine="true"
-        android:text="@string/textView_buchung_datum" />
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/betrag"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:singleLine="true"
-        android:text="@string/textView_buchung_betrag" />
+        <TextView
+            android:id="@+id/datum"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_gravity="start"
+            android:paddingStart="24dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:singleLine="true"
+            android:text="@string/textView_buchung_datum" />
 
-    <TextView
-        android:id="@+id/saldo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:backgroundTint="#AE1732"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:singleLine="true"
-        android:text="@string/textView_kto_saldo_neu"
-        android:textAlignment="center" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/betrag"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_gravity="end"
+            android:paddingTop="3dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="3dp"
+            android:singleLine="true"
+            android:text="@string/textView_buchung_betrag" />
+
+
+        <TextView
+            android:id="@+id/saldo"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_gravity="end"
+            android:backgroundTint="#AE1732"
+            android:paddingTop="3dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="3dp"
+            android:singleLine="true"
+            android:text="@string/textView_kto_saldo_neu"
+            android:textAlignment="center" />
+
+        <ImageView
+            android:id="@+id/typ"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_column="4"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:scaleType="centerInside"
+            android:textAlignment="center" />
+    </TableRow>
+</TableLayout>

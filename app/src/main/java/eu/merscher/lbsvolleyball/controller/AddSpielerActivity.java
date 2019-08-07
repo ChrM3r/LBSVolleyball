@@ -2,12 +2,14 @@ package eu.merscher.lbsvolleyball.controller;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -18,7 +20,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -27,29 +28,34 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.utilities.Utils;
 
 
-public class AddSpielerActivity extends AppCompatActivity implements View.OnClickListener {
+public class AddSpielerActivity extends AppCompatActivity {
 
     private static String userFotoAlsString = null;
     private ImageView spielerFoto;
 
-    public static String getUserFotoAlsString() {
+    protected static String getUserFotoAlsString() {
         return userFotoAlsString;
     }
 
-    public static void setUserFotoAlsString(String s) {
+    protected static void setUserFotoAlsString(String s) {
         userFotoAlsString = s;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -58,8 +64,6 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_add_spieler);
 
         setTitle(R.string.button_spieler_anlegen);
-
-        bottomNavBarInitialisieren();
 
         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit);
         Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit);
@@ -94,30 +98,7 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
         tabLayout.setupWithViewPager(viewPager);
     }
 
-    private void bottomNavBarInitialisieren() {
-
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_spieltag_bottom:
-                        Intent intent1 = new Intent(AddSpielerActivity.this, SpieltagActivity.class);
-                        AddSpielerActivity.this.startActivity(intent1);
-                        break;
-                    case R.id.action_spielerverwaltung_bottom:
-                        Intent intent2 = new Intent(AddSpielerActivity.this, SpielerVerwaltungActivity.class);
-                        AddSpielerActivity.this.startActivity(intent2);
-                        break;
-                }
-                return true;
-            }
-        });
-    }
-
-    public void onClick(View v) {
-    }
-
+    //Zurück-Button
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -127,6 +108,42 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (resultCode == Activity.RESULT_OK)
+            switch (requestCode) {
+                case 1:
+                Uri selectedImage = data.getData();
+
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+
+                userFotoAlsString = cursor.getString(columnIndex);
+
+                Bitmap spielerBild = BitmapFactory.decodeFile(userFotoAlsString);
+
+                try {
+                    spielerBild = Utils.handleSamplingAndRotationBitmap(getApplicationContext(), selectedImage);
+                    new UserFotoUmspeichernAsyncTask(this, spielerBild).execute();
+
+                    ContextWrapper cw = new ContextWrapper(getApplicationContext());
+                    File ordner = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+                    userFotoAlsString = ordner.getAbsolutePath() + File.separator + "temp.png";
+                    Log.d("Foto auswaehlen", userFotoAlsString);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                spielerFoto.setImageBitmap(spielerBild);
+                cursor.close();
+            }
+
     }
 
 
@@ -143,35 +160,25 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
 
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    private static class UserFotoUmspeichernAsyncTask extends AsyncTask<Void, Void, Void> {
 
-        if (resultCode == Activity.RESULT_OK)
-            if (requestCode == 1) {
-                Uri selectedImage = data.getData();
 
-                String[] filePathColumn = {MediaStore.Images.Media.DATA};
-                Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                cursor.moveToFirst();
+        private final WeakReference<AddSpielerActivity> activityReference;
+        private Bitmap spielerBild;
 
-                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+        public UserFotoUmspeichernAsyncTask(AddSpielerActivity context, Bitmap spielerBild) {
+            activityReference = new WeakReference<>(context);
+            this.spielerBild = spielerBild;
 
-                userFotoAlsString = cursor.getString(columnIndex);
+        }
 
-                Uri uri;
-                Bitmap spielerBild = BitmapFactory.decodeFile(userFotoAlsString);
+        @Override
+        public Void doInBackground(Void... args) {
 
-                try {
-                    uri = Uri.fromFile(new File(userFotoAlsString));
-                    spielerBild = Utils.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                spielerFoto.setImageBitmap(spielerBild);
-                cursor.close();
-            }
-
+            userFotoAlsString = Utils.bildSpeichern(activityReference.get().getApplicationContext(), spielerBild);
+            Log.d("ASyncBild", "Bild gespeichert");
+            return null;
+        }
     }
 
 
@@ -196,7 +203,7 @@ public class AddSpielerActivity extends AppCompatActivity implements View.OnClic
         return super.dispatchTouchEvent(event);
     }
 
-
+    //Pager-Adapter zum Setzen der Inhalte
     public class AddSpielerActivityPagerAdapter extends FragmentPagerAdapter {
 
         private final Context context;

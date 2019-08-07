@@ -48,18 +48,20 @@ import eu.merscher.lbsvolleyball.database.BuchungDataSource;
 import eu.merscher.lbsvolleyball.database.SpielerDataSource;
 import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
-import eu.merscher.lbsvolleyball.utilities.NumericEditText;
 import eu.merscher.lbsvolleyball.utilities.Utils;
 
 
 public class SpieltagActivity extends AppCompatActivity implements SpieltagActivitySpielerauswahlFragment.OnSpielerClickListenerInFragment {
+
+
+    private static boolean shouldExecuteOnResume;
 
     public static ArrayList<Spieler> selectedSpieler = new ArrayList<>();
     private static final DecimalFormat df = new DecimalFormat("0.00");
     public static Resources resources;
     public SpieltagActivity context;
     private Button buttonAddSpieltag;
-    private NumericEditText editTextPlatzkosten;
+    private EditText editTextPlatzkosten;
     private TextView betragJeSpieler;
     private Switch kostenlosSwitch;
     private Boolean kostenlos = false;
@@ -103,7 +105,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
         BuchungDataSource.initializeInstance(this);
 
 
-        new SpielerauswahlBefuellenAsyncTask(this).execute();
+        new SpielerauswahlBefuellenAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         //Kostenlos-Switch
 
@@ -238,7 +240,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
                 new SpieltagBuchenAsyncTask(this, s).execute();
             }
 
-            new SpielerauswahlBefuellenAsyncTask(this).execute();
+            new SpielerauswahlBefuellenAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             Toast toast = Toast.makeText(this, "Der Spieltag wurde gebucht.", Toast.LENGTH_SHORT);
             toast.show();
@@ -268,7 +270,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
                 new SpieltagBuchenAsyncTask(this, s).execute();
             }
 
-            new SpielerauswahlBefuellenAsyncTask(this).execute();
+            new SpielerauswahlBefuellenAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             Toast toast = Toast.makeText(this, "Der kostenlose Spieltag wurde gebucht. Trainigsteilnahmen aktualisiert", Toast.LENGTH_SHORT);
             toast.show();
@@ -280,11 +282,14 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
     @Override
     public void onResume() {
         super.onResume();
-        kostenlosSwitch.setChecked(false);
-        editTextPlatzkosten.setText("");
-        betragJeSpieler.setText(getResources().getText(R.string.betrag_0));
-        new SpielerauswahlBefuellenAsyncTask(this).execute();
-        selectedSpieler.clear();
+        if (shouldExecuteOnResume) {
+            kostenlosSwitch.setChecked(false);
+            editTextPlatzkosten.setText("");
+            betragJeSpieler.setText(getResources().getText(R.string.betrag_0));
+            new SpielerauswahlBefuellenAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            selectedSpieler.clear();
+        } else
+            shouldExecuteOnResume = true;
     }
 
     public void setBetragJeSpieler() {
@@ -337,7 +342,6 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             if (activity.fragment == null) {
                 activity.fm = activity.getSupportFragmentManager();
                 activity.fragment = new SpieltagActivitySpielerauswahlFragment(activityReference.get(), spielerList, activity);
-
                 activity.fm.beginTransaction().add(R.id.activity_spieltag_spielerauswahl_fragmentContainer, activity.fragment).commitAllowingStateLoss();
             } else {
                 activity.fm.beginTransaction().replace(R.id.activity_spieltag_spielerauswahl_fragmentContainer, new SpieltagActivitySpielerauswahlFragment(activityReference.get(), spielerList, activity)).commitAllowingStateLoss();

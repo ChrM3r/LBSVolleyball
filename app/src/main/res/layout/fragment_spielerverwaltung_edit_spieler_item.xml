@@ -166,7 +166,7 @@
         android:layout_marginEnd="8dp"
         android:backgroundTint="#AE1732"
         android:shadowRadius="2"
-        android:text="@string/button_spieler_aendern"
+        android:text="@string/button_speichern"
         android:textColor="@android:color/white" />
 
     <Button

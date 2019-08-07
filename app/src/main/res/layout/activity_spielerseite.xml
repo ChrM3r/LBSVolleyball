@@ -76,23 +76,28 @@
         android:layout_gravity="bottom|end"
         android:layout_marginTop="245dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="75dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
         android:scaleType="fitEnd"
-        android:src="@drawable/edit_button"
+        android:src="@drawable/icon_edit"
         android:tint="@android:color/white"
         app:fabSize="normal" />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/activity_spielerseite_export_konto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="false"
-        android:layout_gravity="bottom"
-        app:itemBackground="@android:color/white"
-        app:itemIconTint="@android:color/black"
-        app:itemTextColor="@android:color/black"
-        app:menu="@menu/bottom_nav_menu" />
+        android:layout_gravity="bottom|end"
+        android:layout_marginTop="245dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:scaleType="fitEnd"
+        android:src="@drawable/icon_export_doc"
+        android:tint="@android:color/white"
+        android:visibility="gone"
+        app:fabSize="normal" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

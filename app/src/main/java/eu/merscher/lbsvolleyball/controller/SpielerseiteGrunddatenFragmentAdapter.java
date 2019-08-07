@@ -14,14 +14,19 @@ import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Grunddaten;
 import eu.merscher.lbsvolleyball.model.Spieler;
 
-public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<SpielerseiteGrunddatenFragmentAdapter.ViewHolder> implements SpielerseiteKontodatenFragmentAdapter.OnAddBuchungClickListener {
+public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<SpielerseiteGrunddatenFragmentAdapter.ViewHolder> implements SpielerseiteKontodatenFragmentAdapter.OnBuchungListener {
 
 
     private static final DecimalFormat df = new DecimalFormat("0.00");
     private final Grunddaten grunddaten;
     private final LayoutInflater inflate;
     private ViewHolder holder;
+    private static SpielerseiteKontodatenFragmentAdapter.OnBuchungListener onBuchungListener;
 
+
+    public static SpielerseiteKontodatenFragmentAdapter.OnBuchungListener getOnBuchungListener() {
+        return onBuchungListener;
+    }
 
     public SpielerseiteGrunddatenFragmentAdapter(Context context, Grunddaten grunddaten) {
         this.inflate = LayoutInflater.from(context);
@@ -29,6 +34,10 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
         this.grunddaten = grunddaten;
     }
 
+    @Override
+    public void onBuchung(String saldo) {
+        holder.textViewKtoSaldo.setText(saldo.replace('.', ','));
+    }
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -40,6 +49,7 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         this.holder = holder;
+        onBuchungListener = this;
         String ktoSaldoAlsString = df.format(grunddaten.getKto_saldo_neu());
         String teilnahmenAlsString = String.valueOf(grunddaten.getTeilnahmen());
         Spieler spieler = grunddaten.getSpieler();
@@ -58,13 +68,6 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
         return 1;
     }
 
-    @Override
-    public void onAddBuchungClick(String kto_saldo_neu) {
-
-        System.out.println("HALOO***#############################################");
-        holder.textViewKtoSaldo.setText(kto_saldo_neu.replace('.', ','));
-
-    }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         final TextView textViewName;

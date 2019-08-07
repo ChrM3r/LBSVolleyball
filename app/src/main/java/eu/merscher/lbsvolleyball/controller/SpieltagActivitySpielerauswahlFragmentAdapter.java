@@ -13,15 +13,12 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
-import eu.merscher.lbsvolleyball.utilities.Utils;
 
 import static eu.merscher.lbsvolleyball.controller.SpieltagActivity.resources;
 
@@ -140,15 +137,14 @@ public class SpieltagActivitySpielerauswahlFragmentAdapter extends RecyclerView.
                 spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
             else {
                 spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
-                try {
-                    uri = Uri.fromFile(new File(spieler.getFoto()));
-                    spielerBildOriginal = Utils.handleSamplingAndRotationBitmap(activityReference.get(), uri);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
 
-            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 150);
+            if (spielerBildOriginal != null)
+                spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 150);
+            else {
+                spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+                spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 150);
+            }
 
             return spielerBildScaled;
         }

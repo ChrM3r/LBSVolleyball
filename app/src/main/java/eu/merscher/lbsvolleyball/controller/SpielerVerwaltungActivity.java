@@ -12,16 +12,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -29,17 +24,20 @@ import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.SpielerDataSource;
 import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
-import eu.merscher.lbsvolleyball.utilities.Utils;
 
 
 public class SpielerVerwaltungActivity extends AppCompatActivity {
 
+    private static boolean shouldExecuteOnResume;
+
     public static final String LOG_TAG = SpielerVerwaltungActivity.class.getSimpleName();
-    private static final ArrayList<Bitmap> spielerFotos = new ArrayList<>();
-    private static final ArrayList<String> spielerNamen = new ArrayList<>();
-    private static final ArrayList<String> spielerGeburtstage = new ArrayList<>();
+    private static ArrayList<Bitmap> spielerFotos = new ArrayList<>();
+    private static ArrayList<String> spielerNamen = new ArrayList<>();
+    private static ArrayList<String> spielerGeburtstage = new ArrayList<>();
     private static ArrayList<Spieler> spielerList = new ArrayList<>();
     private static Resources resources;
+    private static ListView spielerListView;
+
 
     public static void setSpielerFotos(Bitmap b) {
         spielerFotos.add(b);
@@ -57,6 +55,18 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         spielerList = list;
     }
 
+    public static SpielerVerwaltungAdapter getAdapter() {
+        return (SpielerVerwaltungAdapter) spielerListView.getAdapter();
+    }
+
+    public static void setAdapter(SpielerVerwaltungAdapter adapter) {
+        spielerListView.setAdapter(adapter);
+    }
+
+
+    public static ArrayList<Spieler> getSpielerList() {
+        return spielerList;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,15 +74,21 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         setContentView(R.layout.activity_spielerverwaltung);
 
         resources = getResources();
+        shouldExecuteOnResume = false;
 
-        new GetSpielerAndSetAdapterAsyncTask(this).execute();
+        spielerListView = findViewById(R.id.listview_spieler);
+
+        new GetSpielerAndSetAdapterAsyncTask(this, spielerListView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
 
         FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 Intent intent = new Intent(SpielerVerwaltungActivity.this, AddSpielerActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 SpielerVerwaltungActivity.this.startActivity(intent);
             }
         });
@@ -87,7 +103,6 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         }
 
         initializeContextualActionBar();
-        bottomNavBarInitialisieren();
     }
 
     @Override
@@ -100,52 +115,47 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
     }
 
 
-    private void bottomNavBarInitialisieren() {
-
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_spieltag_bottom:
-                        Intent intent1 = new Intent(SpielerVerwaltungActivity.this, SpieltagActivity.class);
-                        SpielerVerwaltungActivity.this.startActivity(intent1);
-                        SpielerVerwaltungActivity.this.finish();
-                        break;
-                    case R.id.action_spielerverwaltung_bottom:
-                        break;
-                }
-                return true;
-            }
-        });
-    }
 
     private void initializeContextualActionBar() {
 
         final ListView spielerListView = findViewById(R.id.listview_spieler);
-        spielerListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
         spielerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                new GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity.this, position).execute();
+                new GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity.this, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (shouldExecuteOnResume) {
+            SpielerVerwaltungAdapter adapter = getAdapter();
+            spielerListView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+            new GetSpielerAndSetAdapterAsyncTask(this, spielerListView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else
+            shouldExecuteOnResume = true;
+
+    }
 
     static class GetSpielerAndSetAdapterAsyncTask extends AsyncTask<Void, Void, Void> {
 
 
         public final WeakReference<SpielerVerwaltungActivity> activityReference;
+        private static ListView spielerListview;
 
-        GetSpielerAndSetAdapterAsyncTask(SpielerVerwaltungActivity context) {
+        GetSpielerAndSetAdapterAsyncTask(SpielerVerwaltungActivity context, ListView list) {
             activityReference = new WeakReference<>(context);
+            spielerListview = list;
         }
 
         @Override
         protected Void doInBackground(Void... args) {
+
 
             SpielerDataSource spielerDataSource = SpielerDataSource.getInstance();
             spielerDataSource.open();
@@ -155,7 +165,9 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
             spielerFotos.clear();
             spielerGeburtstage.clear();
 
+
             SpielerVerwaltungActivity.setSpielerList(spielerDataSource.getAllSpielerAlphabetischName());
+
 
             for (Spieler s : spielerList) {
 
@@ -169,21 +181,20 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
                     spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
                 else {
                     spielerBildOriginal = BitmapFactory.decodeFile(s.getFoto());
-                    try {
-                        uri = Uri.fromFile(new File(s.getFoto()));
-                        spielerBildOriginal = Utils.handleSamplingAndRotationBitmap(activityReference.get(), uri);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
 
-                spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 100);
+                if (spielerBildOriginal != null)
+                    spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 100);
+                else {
+                    spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+                    spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 100);
+                }
 
                 SpielerVerwaltungActivity.setSpielerFotos(spielerBildScaled);
                 SpielerVerwaltungActivity.setSpielerNamen(s.getVname() + " " + s.getName());
                 SpielerVerwaltungActivity.setSpielerGeburtstage(s.getBdate());
-
             }
+
             return null;
         }
 
@@ -195,12 +206,12 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
             if (activity == null || activity.isFinishing())
                 return;
 
-            final ListView spielerListView = activity.findViewById(R.id.listview_spieler);
 
+            ListView spielerListView = activity.findViewById(R.id.listview_spieler);
             SpielerVerwaltungAdapter adapter = new SpielerVerwaltungAdapter(spielerList, spielerNamen, spielerFotos, spielerGeburtstage, activity.getApplicationContext());
             spielerListView.setAdapter(adapter);
-
-
+            SpielerVerwaltungActivity.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
             String userFotoAlsString = null;
 
 
@@ -242,7 +253,7 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
             Spieler spieler = spielerList.get(position);
 
             Intent data = new Intent(activity, SpielerseiteActivity.class);
-            data.putExtra("spieler", new Gson().toJson(spieler));
+            data.putExtra("spieler", spieler);
             activity.startActivity(data);
 
         }
