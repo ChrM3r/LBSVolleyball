@@ -44,9 +44,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="3"
                     android:inputType="text"
+                    android:imeOptions="actionNext"
+                    android:nextFocusDown="@id/editText_name_add"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -79,6 +81,9 @@
                     android:layout_marginRight="8dp"
                     android:layout_weight="3"
                     android:inputType="text"
+                    android:imeOptions="actionNext"
+                    android:nextFocusUp="@id/editText_vname_add"
+                    android:nextFocusDown="@id/editText_bdate_add"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -112,6 +117,9 @@
                     android:digits="0123456789."
                     android:inputType="date"
                     android:maxLength="10"
+                    android:imeOptions="actionNext"
+                    android:nextFocusUp="@id/editText_name_add"
+                    android:nextFocusDown="@id/editText_mail_add"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -153,6 +161,9 @@
                 android:layout_marginEnd="8dp"
                 android:layout_weight="3"
                 android:inputType="text"
+                android:imeOptions="actionNext"
+                android:nextFocusUp="@id/editText_bdate_add"
+                android:nextFocusDown="@id/fragment_add_editText_AddBuchung"
                 android:textSize="16sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -194,6 +205,8 @@
                 android:hint="0,00"
                 android:inputType="number"
                 android:textAlignment="textEnd"
+                android:imeOptions="actionDone"
+                android:nextFocusUp="@id/editText_mail_add"
                 android:textSize="40sp" />
 
             <TextView

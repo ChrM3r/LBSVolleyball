@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -216,6 +217,7 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
                             public void onClick(DialogInterface dialog, int i) {
                                 new SpielerseiteActivity.EMailSendenAsyncTask(spieler, buchungList).execute();
                                 Toast toast = Toast.makeText(getApplicationContext(), "Der Kontoverlauf wurde per Mail zugestellt", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.BOTTOM, 0, 0);
                                 toast.show();
                             }
                         }).show();

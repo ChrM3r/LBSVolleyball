@@ -1,5 +1,6 @@
 package eu.merscher.lbsvolleyball.controller;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import eu.merscher.lbsvolleyball.R;
+import eu.merscher.lbsvolleyball.database.SpielerDataSource;
 import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
 
@@ -88,6 +90,44 @@ public class SpieltagActivitySpielerauswahlFragmentAdapter extends RecyclerView.
 
             }
         });
+
+
+        holder.spielerBild.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                new GetSpielerAndStartSpielerseiteAsyncTask(context, position).execute();
+                return true;
+            }
+        });
+
+
+//        holder.textViewName.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                new GetSpielerAndStartSpielerseiteAsyncTask(context, position).execute();
+//
+//                return true;
+//            }
+//        });
+//
+//        holder.textViewVname.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                new GetSpielerAndStartSpielerseiteAsyncTask(context, position).execute();
+//
+//                return true;
+//            }
+//        });
+//
+//        holder.checkBox.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                new GetSpielerAndStartSpielerseiteAsyncTask(context, position).execute();
+//
+//                return true;
+//            }
+//        });
+
     }
 
     @Override
@@ -174,4 +214,46 @@ public class SpieltagActivitySpielerauswahlFragmentAdapter extends RecyclerView.
             checkBox = v.findViewById(R.id.activity_spieltag_spielerauswahl_item_checkbox);
         }
     }
+
+    static class GetSpielerAndStartSpielerseiteAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
+
+
+        public final WeakReference<SpieltagActivity> activityReference;
+        private final int position;
+        private ArrayList<Spieler> spielerList = new ArrayList<>();
+
+        GetSpielerAndStartSpielerseiteAsyncTask(SpieltagActivity context, int position) {
+            activityReference = new WeakReference<>(context);
+            this.position = position;
+
+        }
+
+        @Override
+        protected ArrayList<Spieler> doInBackground(Void... args) {
+
+            SpielerDataSource spielerDataSource = SpielerDataSource.getInstance();
+            spielerDataSource.open();
+
+            spielerList = spielerDataSource.getAllSpielerAbsteigendTeilnahme();
+            return spielerList;
+        }
+
+        @Override
+        public void onPostExecute(ArrayList<Spieler> result) {
+
+            SpieltagActivity activity = activityReference.get();
+
+            if (activity == null || activity.isFinishing()) return;
+
+            spielerList = result;
+
+            Spieler spieler = spielerList.get(position);
+
+            Intent data = new Intent(activity, SpielerseiteActivity.class);
+            data.putExtra("spieler", spieler);
+            activity.startActivity(data);
+
+        }
+    }
+
 }

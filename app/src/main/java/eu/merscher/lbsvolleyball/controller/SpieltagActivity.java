@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -107,11 +109,14 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
 
         new SpielerauswahlBefuellenAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+
         //Kostenlos-Switch
 
         kostenlosSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                CardView cardView = findViewById(R.id.activity_spieltag_cardVieW_platzkosten);
 
 
                 if (isChecked) {
@@ -120,11 +125,26 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
                     editTextPlatzkosten.setText("");
                     editTextPlatzkosten.setEnabled(false);
                     editTextPlatzkosten.setFocusable(false);
+                    cardView.setLayoutParams(new LinearLayout.LayoutParams(
+                            cardView.getLayoutParams().width, 72));
+                    cardView.setMinimumHeight(72);
+                    LinearLayout.MarginLayoutParams layoutParams =
+                            (LinearLayout.MarginLayoutParams) cardView.getLayoutParams();
+                    layoutParams.setMargins(16, 16, 16, 0);
+                    cardView.requestLayout();
+
                 } else {
                     kostenlos = false;
                     editTextPlatzkosten.setEnabled(true);
                     editTextPlatzkosten.setFocusableInTouchMode(true);
                     setBetragJeSpieler();
+                    cardView.setLayoutParams(new LinearLayout.LayoutParams(
+                            cardView.getLayoutParams().width, 256));
+                    cardView.setMinimumHeight(256);
+                    LinearLayout.MarginLayoutParams layoutParams =
+                            (LinearLayout.MarginLayoutParams) cardView.getLayoutParams();
+                    layoutParams.setMargins(16, 16, 16, 0);
+                    cardView.requestLayout();
                 }
             }
         });
@@ -243,6 +263,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             new SpielerauswahlBefuellenAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             Toast toast = Toast.makeText(this, "Der Spieltag wurde gebucht.", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
             toast.show();
             editTextPlatzkosten.setText("");
             betragJeSpieler.setText(getResources().getText(R.string.betrag_0));
@@ -251,16 +272,19 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
         } else if (selectedSpieler.size() <= 0) {
 
             Toast toast = Toast.makeText(this, "Es wurde kein Spieler ausgewählt.", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
             toast.show();
 
         } else if (platzkosten <= 0 && !kostenlos) {
 
             Toast toast = Toast.makeText(this, "Die Platzkosten wurden nicht erfasst", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
             toast.show();
 
         } else if (platzkosten > 0 && kostenlos) {
 
             Toast toast = Toast.makeText(this, "Es wurden Platzkosten erfasst, obwohl >Kostenlos< gewählt wurde.", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
             toast.show();
 
         } else if (platzkosten <= 0 && kostenlos) {
@@ -273,6 +297,7 @@ public class SpieltagActivity extends AppCompatActivity implements SpieltagActiv
             new SpielerauswahlBefuellenAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             Toast toast = Toast.makeText(this, "Der kostenlose Spieltag wurde gebucht. Trainigsteilnahmen aktualisiert", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.BOTTOM, 0, 0);
             toast.show();
 
             kostenlosSwitch.setChecked(false);

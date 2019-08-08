@@ -61,7 +61,7 @@ public class AddSpielerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_spieler);
+        setContentView(R.layout.activity_add_edit_spieler);
 
         setTitle(R.string.button_spieler_anlegen);
 
@@ -69,6 +69,8 @@ public class AddSpielerActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit);
         TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit);
         FloatingActionButton fotoAddButton = findViewById(R.id.activity_add_edit_spieler_foto_button);
+        FloatingActionButton fotoLoeschenButton = findViewById(R.id.activity_add_edit_spieler_foto_loeschen_button);
+        fotoLoeschenButton.hide();
         ViewPager viewPager = findViewById(R.id.add_edit_viewpager);
         spielerFoto = findViewById(R.id.spielerbild_groß_add_edit);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);

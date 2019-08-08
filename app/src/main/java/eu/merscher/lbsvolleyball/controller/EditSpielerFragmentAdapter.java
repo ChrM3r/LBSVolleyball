@@ -1,6 +1,7 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -14,6 +15,7 @@ import android.widget.EditText;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -72,10 +74,13 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
 
     static class SpielerLoeschenAsyncTask extends AsyncTask<Void, Void, Void> {
 
+        public final WeakReference<EditSpielerFragmentAdapter> activityReference;
+
         private final Spieler spieler;
         private final OnLoeschenClick onLoeschenClick = EditSpielerFragment.getOnLoeschenClick();
 
-        SpielerLoeschenAsyncTask(Spieler spieler) {
+        SpielerLoeschenAsyncTask(EditSpielerFragmentAdapter context, Spieler spieler) {
+            activityReference = new WeakReference<>(context);
             this.spieler = spieler;
 
         }
@@ -87,12 +92,19 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
             spielerDataSource.open();
             spielerDataSource.deleteSpieler(spieler);
 
+            ContextWrapper cw = new ContextWrapper(activityReference.get().context);
+            File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+            File bild = new File(directory, spieler.getU_id() + "_" + spieler.getName() + ".png");
+            boolean geloescht = bild.delete();
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void v) {
+
             onLoeschenClick.onLoeschenClick();
+
         }
 
 
@@ -170,31 +182,58 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
 
             Spieler updatedSpieler = spieler;
 
-            if (EditSpielerActivity.getUserFotoAlsString() != null && TextUtils.isEmpty(mail)) {
-
-                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), userFotoAlsString, null, spieler.getHat_buchung_mm());
-                EditSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(activityReference.get().context, updatedSpieler));
-                spielerDataSource.updateFotoSpieler(updatedSpieler, EditSpielerActivity.getUserFotoAlsString());
-                EditSpielerActivity.setUserFotoAlsString(null);
+            if (EditSpielerActivity.getUserFotoAlsString() == null && !TextUtils.isEmpty(mail)) {
+                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), spieler.getFoto(), mail, spieler.getHat_buchung_mm());
 
             } else if (EditSpielerActivity.getUserFotoAlsString() == null && TextUtils.isEmpty(mail)) {
 
+                spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), foto, null, spieler.getHat_buchung_mm());
+
+            } else if (EditSpielerActivity.getUserFotoAlsString().equals("geloescht") && TextUtils.isEmpty(mail)) {
+
+                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), "avatar_m", null, spieler.getHat_buchung_mm());
+
+            } else if (EditSpielerActivity.getUserFotoAlsString().equals("geloescht") && !TextUtils.isEmpty(mail)) {
+
                 final int random = new Random().nextInt();
                 if (random % 2 == 0)
-                    spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), foto, null, spieler.getHat_buchung_mm());
+                    updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), "avatar_m", mail, spieler.getHat_buchung_mm());
                 else
-                    spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), foto, null, spieler.getHat_buchung_mm());
+                    updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), "avatar_f", mail, spieler.getHat_buchung_mm());
+            } else if (EditSpielerActivity.getUserFotoAlsString() != null && TextUtils.isEmpty(mail)) {
+
+                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), userFotoAlsString, null, spieler.getHat_buchung_mm());
+                EditSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(activityReference.get().context, updatedSpieler));
+                updatedSpieler = spielerDataSource.updateFotoSpieler(updatedSpieler, EditSpielerActivity.getUserFotoAlsString());
+                EditSpielerActivity.setUserFotoAlsString(null);
 
             } else if (EditSpielerActivity.getUserFotoAlsString() != null && !TextUtils.isEmpty(mail)) {
 
                 updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), EditSpielerActivity.getUserFotoAlsString(), mail, spieler.getHat_buchung_mm());
                 EditSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(activityReference.get().context, updatedSpieler));
-                spielerDataSource.updateFotoSpieler(updatedSpieler, EditSpielerActivity.getUserFotoAlsString());
+                updatedSpieler = spielerDataSource.updateFotoSpieler(updatedSpieler, EditSpielerActivity.getUserFotoAlsString());
                 EditSpielerActivity.setUserFotoAlsString(null);
-            } else
-                updatedSpieler = spielerDataSource.updateSpieler(spieler.getU_id(), name, vname, bdate, spieler.getTeilnahmen(), spieler.getFoto(), mail, spieler.getHat_buchung_mm());
 
-            return updatedSpieler;
+            }
+            System.out.println(EditSpielerActivity.getUserFotoAlsString() + "###############2");
+
+            if (EditSpielerActivity.getUserFotoAlsString() == null) {
+                ContextWrapper cw = new ContextWrapper(activityReference.get().context);
+
+                File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+                File bild = new File(directory, updatedSpieler.getU_id() + "_" + updatedSpieler.getName() + ".png");
+                String foto = bild.getAbsolutePath();
+
+                return new Spieler(updatedSpieler.getU_id(), updatedSpieler.getName(), updatedSpieler.getVname(),
+                        updatedSpieler.getBdate(), updatedSpieler.getTeilnahmen(),
+                        foto, updatedSpieler.getMail(), updatedSpieler.getHat_buchung_mm());
+            } else {
+                ContextWrapper cw = new ContextWrapper(activityReference.get().context);
+                File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+                File bild = new File(directory, spieler.getU_id() + "_" + spieler.getName() + ".png");
+                boolean geloescht = bild.delete();
+                return updatedSpieler;
+            }
         }
 
         @Override
@@ -205,9 +244,10 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
 
 
             EditSpielerActivity.setUserFotoAlsString(null);
-            Intent data = new Intent(activity.context, SpielerseiteActivity.class);
-            data.putExtra("spieler", spieler);
-            activity.context.startActivity(data);
+            Intent intent = new Intent(activity.context, SpielerseiteActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("spieler", spieler);
+            activity.context.startActivity(intent);
             onSpeichernClick.onSpeichernClick();
 
         }
@@ -342,7 +382,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                                         public void onClick(DialogInterface dialoginterface, int i) {
 
                                             new BuchenAsyncTask(EditSpielerFragmentAdapter.this, spieler).execute();
-                                            new SpielerLoeschenAsyncTask(spieler).execute();
+                                            new SpielerLoeschenAsyncTask(EditSpielerFragmentAdapter.this, spieler).execute();
                                             onLoeschenClick.onLoeschenClick();
 
 
@@ -368,7 +408,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                                     }).show();
                         }
                     } else {
-                        new SpielerLoeschenAsyncTask(spieler).execute();
+                        new SpielerLoeschenAsyncTask(EditSpielerFragmentAdapter.this, spieler).execute();
                         onLoeschenClick.onLoeschenClick();
 
                         Intent intent = new Intent(context, SpielerseiteActivity.class);

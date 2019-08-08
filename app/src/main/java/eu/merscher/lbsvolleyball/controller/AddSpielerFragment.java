@@ -137,13 +137,13 @@ public class AddSpielerFragment extends Fragment {
 
                         spielerDataSource.open();
 
-                        if (userFotoAlsString != null && TextUtils.isEmpty(mail)) {
+                        if (AddSpielerActivity.getUserFotoAlsString() != null && TextUtils.isEmpty(mail)) {
 
-                            neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, userFotoAlsString, null, null);
+                            neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, AddSpielerActivity.getUserFotoAlsString(), null, null);
                             AddSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(getContext(), neuerSpieler));
                             spielerDataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
 
-                        } else if (userFotoAlsString == null && TextUtils.isEmpty(mail)) {
+                        } else if (AddSpielerActivity.getUserFotoAlsString() == null && TextUtils.isEmpty(mail)) {
 
                             final int random = new Random().nextInt();
                             if (random % 2 == 0)
@@ -151,7 +151,7 @@ public class AddSpielerFragment extends Fragment {
                             else
                                 neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, "avatar_f", null, null);
 
-                        } else if (userFotoAlsString == null) {
+                        } else if (AddSpielerActivity.getUserFotoAlsString() == null) {
                             final int random = new Random().nextInt();
 
                             if (random % 2 == 0)
@@ -159,7 +159,7 @@ public class AddSpielerFragment extends Fragment {
                             else
                                 neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, "avatar_f", mail, null);
                         } else {
-                            neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, userFotoAlsString, mail, null);
+                            neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, AddSpielerActivity.getUserFotoAlsString(), mail, null);
                             AddSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(getContext(), neuerSpieler));
                             spielerDataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
                         }

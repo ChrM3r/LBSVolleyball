@@ -60,7 +60,7 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_spieler);
+        setContentView(R.layout.activity_add_edit_spieler);
 
         setTitle(R.string.button_spieler_aendern);
 
@@ -70,6 +70,7 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
         Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit);
         TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit);
         FloatingActionButton fotoAddButton = findViewById(R.id.activity_add_edit_spieler_foto_button);
+        FloatingActionButton fotoLoeschenButton = findViewById(R.id.activity_add_edit_spieler_foto_loeschen_button);
         ViewPager viewPager = findViewById(R.id.add_edit_viewpager);
         spielerBild = findViewById(R.id.spielerbild_groß_add_edit);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
@@ -89,6 +90,15 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onClick(View v) {
                 bildAusGalerieAuswaehlen();
+            }
+        });
+
+        fotoLoeschenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                spielerBild.setImageResource(R.drawable.avatar_m);
+                setUserFotoAlsString("geloescht");
+
             }
         });
 

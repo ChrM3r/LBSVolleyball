@@ -68,7 +68,19 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
                 android:clickable="true"
-                android:src="@drawable/icon_add_photo_small"
+                android:src="@drawable/icon_plus_white"
+                android:tint="@android:color/white"
+                app:fabSize="mini" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/activity_add_edit_spieler_foto_loeschen_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:src="@drawable/icon_delete_2"
                 android:tint="@android:color/white"
                 app:fabSize="mini" />
 

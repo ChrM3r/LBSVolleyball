@@ -113,6 +113,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                 Toast toastError;
                 if (holder.editTextAddBuchung.getText().toString().isEmpty()) {
                     toastError = Toast.makeText(context, "Es wurde kein Betrag zum Buchen erfasst!", Toast.LENGTH_SHORT);
+                    toastError.setGravity(Gravity.BOTTOM, 0, 0);
                     toastError.show();
                 } else {
 
@@ -155,6 +156,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                         new EMailSendenAsyncTask(spieler, df.format(kto_saldo_neu)).execute();
 
                     Toast toast = Toast.makeText(context, "Buchung angelegt", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 0);
                     toast.show();
 
                     ArrayList<Buchung> buchungListNeu = buchungDataSource.getAllBuchungZuSpieler(spieler);

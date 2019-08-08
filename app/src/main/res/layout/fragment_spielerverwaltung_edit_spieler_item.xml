@@ -47,6 +47,8 @@
                     android:layout_marginRight="8dp"
                     android:layout_weight="3"
                     android:inputType="text"
+                    android:imeOptions="actionNext"
+                    android:nextFocusDown="@id/editText_name_edit"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -69,6 +71,8 @@
                     android:inputType="text"
                     android:text="@string/dialog_title_name"
                     android:textColor="#888888"
+                    android:nextFocusUp="@id/editText_vname_edit"
+                    android:nextFocusDown="@id/editText_bdate_edit"
                     android:textSize="14sp" />
 
                 <EditText
@@ -79,6 +83,7 @@
                     android:layout_marginRight="8dp"
                     android:layout_weight="3"
                     android:inputType="text"
+                    android:imeOptions="actionNext"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -112,6 +117,8 @@
                     android:digits="0123456789."
                     android:inputType="date"
                     android:maxLength="10"
+                    android:imeOptions="actionNext"
+                    android:nextFocusUp="@id/editText_name_edit"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -153,6 +160,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_weight="3"
                 android:inputType="text"
+                android:imeOptions="actionDone"
                 android:textSize="16sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

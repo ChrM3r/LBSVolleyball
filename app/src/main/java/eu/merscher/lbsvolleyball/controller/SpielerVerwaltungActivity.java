@@ -119,7 +119,6 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
     private void initializeContextualActionBar() {
 
         final ListView spielerListView = findViewById(R.id.listview_spieler);
-
         spielerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -127,6 +126,7 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
                 new GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity.this, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
+
     }
 
     @Override
@@ -208,6 +208,7 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
 
 
             ListView spielerListView = activity.findViewById(R.id.listview_spieler);
+            spielerListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             SpielerVerwaltungAdapter adapter = new SpielerVerwaltungAdapter(spielerList, spielerNamen, spielerFotos, spielerGeburtstage, activity.getApplicationContext());
             spielerListView.setAdapter(adapter);
             SpielerVerwaltungActivity.setAdapter(adapter);
