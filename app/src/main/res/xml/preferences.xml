@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Allgemeines">
+
+        <EditTextPreference
+            android:defaultValue="0,00"
+            android:key="einstellungen_platzkosten"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="Hier kannst Du die Standard-Platzkosten für das Training erfassen."
+            android:title="Standard-Platzkosten" />
+        <ListPreference
+            android:entries="@array/sortierung"
+            android:entryValues="@array/sortierung_values"
+            android:key="einstellungen_sortierung_spielerauswahl"
+            android:title="Sortierung der Spielerauswahl"
+            app:allowDividerBelow="true"
+            app:summary="Hier legst du die Sortierreihenfolge der Spielerauswahl für Trainings und Tuniere fest." />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="key_switch_preference"
+            android:summary="Wechsel zwischen dem normalen und dem dunklen App-Theme."
+            android:title="Darkmode benutzen" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Auswertungen">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="key_checkbox_preference"
+            android:summary="Eine kurze Erklärung für die Benutzer."
+            android:title="Titel der Checkbox-Einstellung" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

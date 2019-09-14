@@ -39,46 +39,25 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import eu.merscher.lbsvolleyball.R;
-import eu.merscher.lbsvolleyball.database.BuchungDataSource;
-import eu.merscher.lbsvolleyball.database.SpielerDataSource;
+import eu.merscher.lbsvolleyball.database.DataSource;
 import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
-import eu.merscher.lbsvolleyball.utilities.Utils;
+import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<SpielerseiteKontodatenFragmentAdapter.ViewHolder> {
 
+    private DataSource dataSource;
 
     private final ArrayList<Buchung> buchungList;
     private final Context context;
     private final LayoutInflater inflate;
     private Spieler spieler;
-    private SpielerDataSource spielerDataSource;
-    private BuchungDataSource buchungDataSource;
-    private SpielerKontoListViewAdapter spielerKontoListViewAdapter;
-    private OnBuchungListener onBuchungListener;
-    private boolean auszahlung = false;
-    private boolean istAusgeklappt = false;
-
-    SpielerseiteKontodatenFragmentAdapter(Context context, ArrayList<Buchung> buchungList, Spieler spieler) {
-        this.inflate = LayoutInflater.from(context);
-        this.context = context;
-        this.buchungList = buchungList;
-        this.spieler = spieler;
-    }
-
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        View view = inflate.inflate(R.layout.fragment_spielerseite_kontodaten_item, parent, false);
-        return new ViewHolder(view);
-    }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         ViewHolder holder1 = holder;
-        buchungDataSource = BuchungDataSource.getInstance();
-        spielerDataSource = SpielerDataSource.getInstance();
+        dataSource = DataSource.getInstance();
 
         holder.ueberschrift1.setGravity(Gravity.CENTER);
         holder.ueberschrift2.setGravity(Gravity.CENTER);
@@ -101,7 +80,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
 
-                Utils.formatNumericEditText(holder.editTextAddBuchung);
+                Utilities.formatNumericEditText(holder.editTextAddBuchung);
                 setAuszahlungInText(holder);
             }
         });
@@ -130,16 +109,16 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
 
                     System.out.println(spieler.getName() + " " + spieler.getHat_buchung_mm() + " " + spieler.getTeilnahmen());
-                    buchungDataSource.open();
-                    spielerDataSource.open();
+                    dataSource.open();
+
                     if (spieler.getHat_buchung_mm() != null) { //Wenn Buchungen für den Spieler vorhanden sind...
 
                         System.out.println("1");
-                        Buchung buchung = buchungDataSource.getNeusteBuchungZuSpieler(spieler);
+                        Buchung buchung = dataSource.getNeusteBuchungZuSpieler(spieler);
 
                         kto_saldo_alt = buchung.getKto_saldo_neu(); //der vorherige Kto_Saldo_neu ist der neue Kto_Saldo_alt
                         kto_saldo_neu = kto_saldo_alt + bu_btr;
-                        buchungDataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
+                        dataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
 
                     } else { //Wenn keine Buchung vorhaden ist, ist der Startsaldo 0
 
@@ -147,10 +126,10 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                         kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
                         kto_saldo_neu = kto_saldo_alt + bu_btr;
-                        buchungDataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
+                        dataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
 
                     }
-                    spieler = spielerDataSource.updateHatBuchungenMM(spieler);
+                    spieler = dataSource.updateHatBuchungenMM(spieler);
 
                     if (kto_saldo_neu < 5)
                         new EMailSendenAsyncTask(spieler, df.format(kto_saldo_neu)).execute();
@@ -159,7 +138,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                     toast.setGravity(Gravity.BOTTOM, 0, 0);
                     toast.show();
 
-                    ArrayList<Buchung> buchungListNeu = buchungDataSource.getAllBuchungZuSpieler(spieler);
+                    ArrayList<Buchung> buchungListNeu = dataSource.getAllBuchungZuSpieler(spieler);
                     SpielerseiteActivity.setBuchungList(buchungListNeu);
 
                     if (buchungListNeu.size() > 5) {
@@ -219,7 +198,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                     //Kto_Saldo_Neu auf Grundseitenfragment aktualisieren
                     onBuchungListener = SpielerseiteGrunddatenFragmentAdapter.getOnBuchungListener();
-                    onBuchungListener.onBuchung(df.format(buchungDataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu()));
+                    onBuchungListener.onBuchung(df.format(dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu()));
 
                     holder.editTextAddBuchung.setText("");
                     holder.editTextAddBuchung.clearFocus();
@@ -297,6 +276,29 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
     }
 
+    private SpielerKontoListViewAdapter spielerKontoListViewAdapter;
+    private OnBuchungListener onBuchungListener;
+    private boolean auszahlung = false;
+    private boolean istAusgeklappt = false;
+
+    SpielerseiteKontodatenFragmentAdapter(Context context, ArrayList<Buchung> buchungList, Spieler spieler) {
+        this.inflate = LayoutInflater.from(context);
+        this.context = context;
+        this.buchungList = buchungList;
+        this.spieler = spieler;
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view = inflate.inflate(R.layout.fragment_spielerseite_kontodaten_item, parent, false);
+        return new ViewHolder(view);
+    }
+
+    public interface OnBuchungListener {
+        void onBuchung(String saldo);
+    }
+
     @Override
     public int getItemCount() {
         return 1;
@@ -321,9 +323,6 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
     }
 
 
-    public interface OnBuchungListener {
-        void onBuchung(String saldo);
-    }
 
     private static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {
 

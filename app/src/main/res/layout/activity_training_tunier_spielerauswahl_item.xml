@@ -4,6 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="25dp"
+    android:background="#FFFFFF"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
@@ -26,6 +27,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:text="Max"
+        android:textColor="#1B1B1B"
         app:autoSizeMaxTextSize="100sp"
         app:autoSizeMinTextSize="12sp"
         app:autoSizeStepGranularity="2sp"
@@ -39,9 +41,10 @@
         android:layout_weight="1"
         android:gravity="center"
         android:text="Mustermann"
+        android:textColor="#1B1B1B"
         app:autoSizeMaxTextSize="100sp"
         app:autoSizeMinTextSize="12sp"
-        app:autoSizeStepGranularity="2sp"
+        app:autoSizeStepGranularity="1sp"
         app:autoSizeTextType="uniform" />
 
     <CheckBox

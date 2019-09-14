@@ -18,13 +18,11 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Random;
 
 import eu.merscher.lbsvolleyball.R;
-import eu.merscher.lbsvolleyball.database.BuchungDataSource;
-import eu.merscher.lbsvolleyball.database.SpielerDataSource;
+import eu.merscher.lbsvolleyball.database.DataSource;
 import eu.merscher.lbsvolleyball.model.Spieler;
-import eu.merscher.lbsvolleyball.utilities.Utils;
+import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
 public class AddSpielerFragment extends Fragment {
@@ -53,8 +51,7 @@ public class AddSpielerFragment extends Fragment {
 
         private final LayoutInflater inflate;
         private final Context context;
-        private SpielerDataSource spielerDataSource;
-        private BuchungDataSource buchungDataSource;
+        private DataSource dataSource;
 
 
         AddSpielerFragmentAdapter(Context context) {
@@ -66,8 +63,7 @@ public class AddSpielerFragment extends Fragment {
         public AddSpielerFragment.AddSpielerFragmentAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
             View view = inflate.inflate(R.layout.fragment_spielerverwaltung_add_spieler_item, parent, false);
-            spielerDataSource = SpielerDataSource.getInstance();
-            buchungDataSource = BuchungDataSource.getInstance();
+            dataSource = DataSource.getInstance();
 
             return new AddSpielerFragment.AddSpielerFragmentAdapter.ViewHolder(view);
         }
@@ -104,7 +100,7 @@ public class AddSpielerFragment extends Fragment {
                 editTextAddBuchung.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                     @Override
                     public void onFocusChange(View v, boolean hasFocus) {
-                        Utils.formatNumericEditText(editTextAddBuchung);
+                        Utilities.formatNumericEditText(editTextAddBuchung);
                     }
                 });
 
@@ -135,33 +131,26 @@ public class AddSpielerFragment extends Fragment {
 
                         Spieler neuerSpieler;
 
-                        spielerDataSource.open();
+                        dataSource.open();
 
                         if (AddSpielerActivity.getUserFotoAlsString() != null && TextUtils.isEmpty(mail)) {
 
-                            neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, AddSpielerActivity.getUserFotoAlsString(), null, null);
-                            AddSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(getContext(), neuerSpieler));
-                            spielerDataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
+                            neuerSpieler = dataSource.createSpieler(name, vname, bdate, 0, AddSpielerActivity.getUserFotoAlsString(), null, null);
+                            AddSpielerActivity.setUserFotoAlsString(Utilities.bildNachSpielerBenennen(getContext(), neuerSpieler));
+                            neuerSpieler = dataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
 
                         } else if (AddSpielerActivity.getUserFotoAlsString() == null && TextUtils.isEmpty(mail)) {
 
-                            final int random = new Random().nextInt();
-                            if (random % 2 == 0)
-                                neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, "avatar_m", null, null);
-                            else
-                                neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, "avatar_f", null, null);
+                            neuerSpieler = dataSource.createSpieler(name, vname, bdate, 0, "avatar_m", null, null);
 
                         } else if (AddSpielerActivity.getUserFotoAlsString() == null) {
-                            final int random = new Random().nextInt();
 
-                            if (random % 2 == 0)
-                                neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, "avatar_m", mail, null);
-                            else
-                                neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, "avatar_f", mail, null);
+                            neuerSpieler = dataSource.createSpieler(name, vname, bdate, 0, "avatar_m", mail, null);
+
                         } else {
-                            neuerSpieler = spielerDataSource.createSpieler(name, vname, bdate, 0, AddSpielerActivity.getUserFotoAlsString(), mail, null);
-                            AddSpielerActivity.setUserFotoAlsString(Utils.bildNachSpielerBenennen(getContext(), neuerSpieler));
-                            spielerDataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
+                            neuerSpieler = dataSource.createSpieler(name, vname, bdate, 0, AddSpielerActivity.getUserFotoAlsString(), mail, null);
+                            AddSpielerActivity.setUserFotoAlsString(Utilities.bildNachSpielerBenennen(getContext(), neuerSpieler));
+                            neuerSpieler = dataSource.updateFotoSpieler(neuerSpieler, AddSpielerActivity.getUserFotoAlsString());
                         }
 
                         AddSpielerActivity.setUserFotoAlsString(null);
@@ -178,13 +167,11 @@ public class AddSpielerFragment extends Fragment {
                             Calendar kalender = Calendar.getInstance();
                             SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
-                            buchungDataSource.open();
-                            spielerDataSource.open();
                             kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
                             kto_saldo_neu = kto_saldo_alt + bu_btr;
-                            buchungDataSource.createBuchung(neuerSpieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
-                            spielerDataSource.updateHatBuchungenMM(neuerSpieler);
-                            spielerDataSource.close();
+                            dataSource.createBuchung(neuerSpieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
+                            dataSource.updateHatBuchungenMM(neuerSpieler);
+                            dataSource.close();
                         }
 
                         Intent intent = new Intent(context, SpielerVerwaltungActivity.class);

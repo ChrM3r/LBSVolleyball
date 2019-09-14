@@ -46,7 +46,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import eu.merscher.lbsvolleyball.R;
-import eu.merscher.lbsvolleyball.database.BuchungDataSource;
+import eu.merscher.lbsvolleyball.database.DataSource;
 import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
@@ -97,15 +97,15 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
 
         findViewsById();
 
-        BuchungDataSource buchungDataSource = BuchungDataSource.getInstance();
-        buchungDataSource.open();
+        DataSource dataSource = DataSource.getInstance();
+        dataSource.open();
 
-        buchungList = buchungDataSource.getAllBuchungZuSpieler(spieler);
+        buchungList = dataSource.getAllBuchungZuSpieler(spieler);
         double kto_saldo_neu;
         if (spieler.getHat_buchung_mm() == null)
             kto_saldo_neu = 0;
         else
-            kto_saldo_neu = buchungDataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
+            kto_saldo_neu = dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
 
         int teilnahmen = spieler.getTeilnahmen();
 

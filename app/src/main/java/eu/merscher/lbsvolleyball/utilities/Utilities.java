@@ -17,11 +17,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
+import de.siegmar.fastcsv.reader.CsvParser;
+import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.writer.CsvAppender;
+import de.siegmar.fastcsv.writer.CsvWriter;
 import eu.merscher.lbsvolleyball.model.Spieler;
 
-public class Utils {
+public class Utilities {
 
 
     public static void hideSoftKeyboard(Activity activity) {
@@ -69,8 +77,8 @@ public class Utils {
      */
     public static Bitmap handleSamplingAndRotationBitmap(Context context, Uri selectedImage)
             throws IOException {
-        int MAX_HEIGHT = 2048;
-        int MAX_WIDTH = 2048;
+        int MAX_HEIGHT = 1536;
+        int MAX_WIDTH = 1536;
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -184,16 +192,21 @@ public class Utils {
 
         ContextWrapper cw = new ContextWrapper(context);
         File ordner = cw.getDir("profilbilder", Context.MODE_PRIVATE);
-        if (!ordner.exists()) {
-            ordner.mkdir();
-        }
+
         File pfad = new File(ordner, "temp.png");
+        File pfad_klein = new File(ordner, "temp_klein.png");
 
         FileOutputStream fos = null;
+        FileOutputStream fos_klein = null;
         try {
             fos = new FileOutputStream(pfad);
+            fos_klein = new FileOutputStream(pfad_klein);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.close();
+            bitmap = BitmapScaler.scaleToFitWidth(bitmap, 200);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos_klein);
+            fos_klein.close();
+
         } catch (Exception e) {
             Log.d("BILD_SPEICHERN", e.getMessage(), e);
         }
@@ -203,17 +216,83 @@ public class Utils {
     public static String bildNachSpielerBenennen(Context context, Spieler spieler) {
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-        File bildAlt = new File(spieler.getFoto());
-        File bildNeu = new File(directory, spieler.getU_id() + "_" + spieler.getName() + ".png");
 
-        bildAlt.renameTo(bildNeu);
+        File bildAlt = new File(spieler.getFoto());
+        File bildAlt_klein = new File(spieler.getFoto().replace(".png", "_klein.png"));
+
+        File bildNeu = new File(directory, spieler.getU_id() + "_" + spieler.getName() + ".png");
+        File bildNeu_klein = new File(directory, spieler.getU_id() + "_" + spieler.getName() + "_klein.png");
+
+
+        boolean umbenannt = bildAlt.renameTo(bildNeu);
+        boolean umbenannt_klein = bildAlt_klein.renameTo(bildNeu_klein);
+        System.out.println(umbenannt);
+        System.out.println(umbenannt_klein);
 
         return bildNeu.getAbsolutePath();
     }
 
+    public static String bildNachNamensaenderungBenennen(Context context, Spieler spielerAlt, Spieler spielerNeu) {
+        ContextWrapper cw = new ContextWrapper(context);
+        File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+
+        File bildAlt = new File(spielerAlt.getFoto());
+        File bildAlt_klein = new File(spielerAlt.getFoto().replace(".png", "_klein.png"));
+
+        File bildNeu = new File(directory, spielerNeu.getU_id() + "_" + spielerNeu.getName() + ".png");
+        File bildNeu_klein = new File(directory, spielerNeu.getU_id() + "_" + spielerNeu.getName() + "_klein.png");
+
+
+        boolean umbenannt = bildAlt.renameTo(bildNeu);
+        boolean umbenannt_klein = bildAlt_klein.renameTo(bildNeu_klein);
+
+        return bildNeu.getAbsolutePath();
+    }
+
+    public static void csvExport(ArrayList<String> list, Context context) {
+
+        ContextWrapper cw = new ContextWrapper(context);
+        File directory = cw.getDir("export", Context.MODE_PRIVATE);
+        String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        File file = new File(baseDir, "spieler_export.csv");
+        CsvWriter csvWriter = new CsvWriter();
+
+        try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
+            // header
+            for (String string : list) {
+                csvAppender.appendLine(string);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static ArrayList<String> csvImport(Context context) {
+
+        ContextWrapper cw = new ContextWrapper(context);
+        File directory = cw.getDir("export", Context.MODE_PRIVATE);
+        String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        File file = new File(baseDir, "spieler_export.csv");
+
+        CsvReader csvReader = new CsvReader();
+        ArrayList<String> spielerListString = new ArrayList<>();
+
+        try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
+            CsvRow row;
+            while ((row = csvParser.nextRow()) != null) {
+
+                List<String> list = row.getFields();
+                for (String s : list) {
+                    spielerListString.add(s);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return spielerListString;
+    }
     public class SortName implements Comparator<Spieler> {
         @Override
         public int compare(Spieler s1, Spieler s2) {

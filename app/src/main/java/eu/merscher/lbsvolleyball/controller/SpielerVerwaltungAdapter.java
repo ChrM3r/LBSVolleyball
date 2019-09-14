@@ -65,16 +65,10 @@ public class SpielerVerwaltungAdapter extends BaseAdapter implements ListAdapter
 
         ImageView spielerBild = view.findViewById(R.id.spielerBild);
 
-
         if (spielerList.get(position).getFoto().equals("avatar_m"))
             spielerBild.setImageResource(R.drawable.avatar_m);
-
-        else if (spielerList.get(position).getFoto().equals("avatar_f"))
-            spielerBild.setImageResource(R.drawable.avatar_f);
-
         else
             spielerBild.setImageBitmap(spielerFotos.get(position));
-
 
         return view;
 

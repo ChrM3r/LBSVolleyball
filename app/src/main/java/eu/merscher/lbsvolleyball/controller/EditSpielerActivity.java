@@ -32,9 +32,9 @@ import java.io.IOException;
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
-import eu.merscher.lbsvolleyball.utilities.Utils;
+import eu.merscher.lbsvolleyball.utilities.Utilities;
 
-import static eu.merscher.lbsvolleyball.controller.SpieltagActivity.resources;
+import static eu.merscher.lbsvolleyball.controller.TrainingTunierActivity.resources;
 
 
 public class EditSpielerActivity extends AppCompatActivity implements View.OnClickListener, EditSpielerFragment.OnEditFinish {
@@ -53,8 +53,6 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onEditFinish() {
-        System.out.println("JO HIER ISSER DAS ANDERE MAL");
-
         this.finish();
     }
     @Override
@@ -122,9 +120,6 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
 
         if (spieler.getFoto().equals("avatar_m"))
             spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
-
-        else if (spieler.getFoto().equals("avatar_f"))
-            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
         else {
             spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
         }
@@ -191,8 +186,8 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
 
                     try {
                         uri = Uri.fromFile(new File(userFotoAlsString));
-                        spielerBildNeu = Utils.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
-                        userFotoAlsString = Utils.bildSpeichern(getApplicationContext(), spielerBildNeu);
+                        spielerBildNeu = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
+                        userFotoAlsString = Utilities.bildSpeichern(getApplicationContext(), spielerBildNeu);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

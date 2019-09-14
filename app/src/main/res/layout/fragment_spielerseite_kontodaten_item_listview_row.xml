@@ -23,7 +23,8 @@
             android:paddingTop="3dp"
             android:paddingBottom="3dp"
             android:singleLine="true"
-            android:text="@string/textView_buchung_datum" />
+            android:text="@string/textView_buchung_datum"
+            android:textColor="#1B1B1B" />
 
 
         <TextView
@@ -36,7 +37,8 @@
             android:paddingEnd="24dp"
             android:paddingBottom="3dp"
             android:singleLine="true"
-            android:text="@string/textView_buchung_betrag" />
+            android:text="@string/textView_buchung_betrag"
+            android:textColor="#1B1B1B" />
 
 
         <TextView
@@ -51,7 +53,8 @@
             android:paddingBottom="3dp"
             android:singleLine="true"
             android:text="@string/textView_kto_saldo_neu"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textColor="#1B1B1B" />
 
         <ImageView
             android:id="@+id/typ"

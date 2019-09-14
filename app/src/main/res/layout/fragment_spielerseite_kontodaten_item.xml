@@ -51,10 +51,12 @@
                 android:autoText="false"
                 android:digits="01234567890,"
                 android:ems="10"
+                android:fontFamily="sans-serif-light"
                 android:hint="0,00"
                 android:inputType="number"
                 android:singleLine="true"
                 android:textAlignment="textEnd"
+                android:textColor="#AE1732"
                 android:textSize="40sp" />
 
             <TextView

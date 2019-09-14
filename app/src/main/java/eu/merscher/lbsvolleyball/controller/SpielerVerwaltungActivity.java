@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -12,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -21,9 +21,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import eu.merscher.lbsvolleyball.R;
-import eu.merscher.lbsvolleyball.database.SpielerDataSource;
+import eu.merscher.lbsvolleyball.database.DataSource;
 import eu.merscher.lbsvolleyball.model.Spieler;
-import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
 
 
 public class SpielerVerwaltungActivity extends AppCompatActivity {
@@ -78,7 +77,9 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
 
         spielerListView = findViewById(R.id.listview_spieler);
 
-        new GetSpielerAndSetAdapterAsyncTask(this, spielerListView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        //new GetSpielerAndSetAdapterAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        getSpielerUndSetAdapter();
 
 
         FloatingActionButton fab = findViewById(R.id.floatingActionButton);
@@ -94,13 +95,10 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         });
 
         Toolbar toolbar = findViewById(R.id.activity_spielerverwaltung_toolbar);
-
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-            getSupportActionBar().setTitle("Spielerverwaltung");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getString(R.string.spielerverwaltung));
 
         initializeContextualActionBar();
     }
@@ -115,6 +113,47 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
     }
 
 
+    private void getSpielerUndSetAdapter() {
+        DataSource dataSource = DataSource.getInstance();
+        dataSource.open();
+
+        spielerList.clear();
+        spielerNamen.clear();
+        spielerFotos.clear();
+        spielerGeburtstage.clear();
+
+
+        SpielerVerwaltungActivity.setSpielerList(dataSource.getAllSpielerAlphabetischName());
+
+        System.out.println(spielerList + "in AsyncTask");
+
+        for (Spieler s : spielerList) {
+
+            Bitmap spielerBildOriginal;
+
+            if (s.getFoto().equals("avatar_m"))
+                spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+            else {
+                spielerBildOriginal = BitmapFactory.decodeFile(s.getFoto().replace(".png", "_klein.png"));
+            }
+
+            if (spielerBildOriginal == null)
+                spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+
+
+            SpielerVerwaltungActivity.setSpielerFotos(spielerBildOriginal);
+            SpielerVerwaltungActivity.setSpielerNamen(s.getVname() + " " + s.getName());
+            SpielerVerwaltungActivity.setSpielerGeburtstage(s.getBdate());
+
+        }
+
+        ListView spielerListView = findViewById(R.id.listview_spieler);
+        spielerListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
+        SpielerVerwaltungAdapter adapter = new SpielerVerwaltungAdapter(spielerList, spielerNamen, spielerFotos, spielerGeburtstage, getApplicationContext());
+        spielerListView.setAdapter(adapter);
+        SpielerVerwaltungActivity.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+    }
 
     private void initializeContextualActionBar() {
 
@@ -124,6 +163,7 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 new GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity.this, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
             }
         });
 
@@ -133,91 +173,12 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if (shouldExecuteOnResume) {
-            SpielerVerwaltungAdapter adapter = getAdapter();
-            spielerListView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-            new GetSpielerAndSetAdapterAsyncTask(this, spielerListView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            getSpielerUndSetAdapter();
         } else
             shouldExecuteOnResume = true;
 
     }
 
-    static class GetSpielerAndSetAdapterAsyncTask extends AsyncTask<Void, Void, Void> {
-
-
-        public final WeakReference<SpielerVerwaltungActivity> activityReference;
-        private static ListView spielerListview;
-
-        GetSpielerAndSetAdapterAsyncTask(SpielerVerwaltungActivity context, ListView list) {
-            activityReference = new WeakReference<>(context);
-            spielerListview = list;
-        }
-
-        @Override
-        protected Void doInBackground(Void... args) {
-
-
-            SpielerDataSource spielerDataSource = SpielerDataSource.getInstance();
-            spielerDataSource.open();
-
-            spielerList.clear();
-            spielerNamen.clear();
-            spielerFotos.clear();
-            spielerGeburtstage.clear();
-
-
-            SpielerVerwaltungActivity.setSpielerList(spielerDataSource.getAllSpielerAlphabetischName());
-
-
-            for (Spieler s : spielerList) {
-
-                Bitmap spielerBildOriginal;
-                Bitmap spielerBildScaled;
-                Uri uri;
-
-                if (s.getFoto().equals("avatar_m"))
-                    spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
-                else if (s.getFoto().equals("avatar_f"))
-                    spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_f);
-                else {
-                    spielerBildOriginal = BitmapFactory.decodeFile(s.getFoto());
-                }
-
-                if (spielerBildOriginal != null)
-                    spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 100);
-                else {
-                    spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
-                    spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, 100);
-                }
-
-                SpielerVerwaltungActivity.setSpielerFotos(spielerBildScaled);
-                SpielerVerwaltungActivity.setSpielerNamen(s.getVname() + " " + s.getName());
-                SpielerVerwaltungActivity.setSpielerGeburtstage(s.getBdate());
-            }
-
-            return null;
-        }
-
-        @Override
-        public void onPostExecute(Void v) {
-
-            SpielerVerwaltungActivity activity = activityReference.get();
-
-            if (activity == null || activity.isFinishing())
-                return;
-
-
-            ListView spielerListView = activity.findViewById(R.id.listview_spieler);
-            spielerListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
-            SpielerVerwaltungAdapter adapter = new SpielerVerwaltungAdapter(spielerList, spielerNamen, spielerFotos, spielerGeburtstage, activity.getApplicationContext());
-            spielerListView.setAdapter(adapter);
-            SpielerVerwaltungActivity.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-            String userFotoAlsString = null;
-
-
-        }
-    }
 
     static class GetSpielerAndStartSpielerseiteAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
 
@@ -235,10 +196,10 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         @Override
         protected ArrayList<Spieler> doInBackground(Void... args) {
 
-            SpielerDataSource spielerDataSource = SpielerDataSource.getInstance();
-            spielerDataSource.open();
+            DataSource dataSource = DataSource.getInstance();
+            dataSource.open();
 
-            spielerList = spielerDataSource.getAllSpielerAlphabetischName();
+            spielerList = dataSource.getAllSpielerAlphabetischName();
             return spielerList;
         }
 

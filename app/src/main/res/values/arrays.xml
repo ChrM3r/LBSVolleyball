@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sortierung">
+        <item>@string/sort_vorname</item>
+        <item>@string/sort_nachmane</item>
+        <item>@string/sort_teilnahmen</item>
+    </string-array>
+
+    <string-array name="sortierung_values">
+        <item>vname</item>
+        <item>name</item>
+        <item>teilnahmen</item>
+    </string-array>
+</resources>

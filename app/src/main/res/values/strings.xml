@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">LBS Volleyball</string>
 
-    <string name="action_spieltag">Spieltag</string>
-    <string name="action_spielerverwaltungr">Spielerverwaltung</string>
-    <string name="action_kontoverwaltung">Kontoverwaltung</string>
+    <string name="spieltag">Spieltag</string>
+    <string name="spielerverwaltung">Spielerverwaltung</string>
+    <string name="trainingsuebersicht">Trainingsübersicht</string>
+    <string name="einstellungen">Einstellungen</string>
+    <string name="export">Export</string>
+    <string name="import_nav">Import</string>
 
     <string name="editText_hint_name">Name</string>
     <string name="editText_hint_vname">Vorname</string>
@@ -11,9 +14,11 @@
     <string name="editText_mail">E-Mail</string>
     <string name="editText_hint_platzkosten">20,00</string>
     <string name="textView_platzkosten">Platzkosten</string>
+    <string name="textView_tunierkosten">Tunierkosten</string>
     <string name="textView_spieltag">Spieltag</string>
     <string name="textView_spielerverwaltung">Spielerverwaltung</string>
-    <string name="textView_who_played">Wer hat gespielt?</string>
+    <string name="textView_wer_gespielt">Wer hat gespielt?</string>
+    <string name="textView_wo_gespielt">Wo wurde gespielt?</string>
     <string name="textView_betrag_pro_spieler">Betrag je Spieler</string>
     <string name="textView_buchung_betrag">Betrag</string>
     <string name="textView_buchung_datum">Datum</string>
@@ -21,8 +26,17 @@
     <string name="textView_kto_saldo_neu">Kontosaldo</string>
     <string name="textView_kto_saldo_aktuell">Aktueller Kontostand:</string>
     <string name="textView_teilnahmen">Trainingsteilnahmen:</string>
+    <string name="textView_keine_spieler">Es sind noch keine Spieler eingerichtet.</string>
+
+    <string name="sort_vorname">Vorname</string>
+    <string name="sort_nachmane">Nachname</string>
+    <string name="sort_teilnahmen">Teilnahmen</string>
+
+
     <string name="tab_grunddaten">Grunddaten</string>
     <string name="tab_kontodaten">Kontoübersicht</string>
+    <string name="tab_training">Training</string>
+    <string name="tab_tunier">Tunier</string>
 
     <string name="textView_foto">Foto:</string>
     <string name="switch_auszahlung">Auszahlung</string>
@@ -33,6 +47,7 @@
     <string name="editText_EUR">EUR</string>
     <string name="button_kontouebersicht">Kontoübersicht</string>
     <string name="button_buchung_hinzufügen">Spieltag buchen!</string>
+    <string name="button_tunier_buchen">Tunier buchen!</string>
     <string name="button_buchen">Buchen!</string>
     <string name="button_foto">Foto auswählen</string>
     <string name="button_spieler_anlegen">Spieler anlegen</string>
@@ -64,6 +79,8 @@
     <string name="eine_weitere_Buchungen">Es ist %d weitere Buchung vorhanden"</string>
     <string name="weitere_Buchungen">Es sind %d weitere Buchungen vorhanden"</string>
     <string name="keine_weiteren_Buchungen">Es sind keine weiteren Buchungen vorhanden"</string>
-
+    <string name="dialogMessage_Ausgleichen">%s %s hat einen Kontostand von %s€. Bitte Konto vorher ausgleichen.</string>
+    <string name="dialogMessage_wirklichLoeschen">Soll %s %s wirklich gelöscht werden? Diese Aktion kann nicht widerrufen werden.</string>
+    <string name="dialogMessage_BuchenBeiLoeschen">%s %s hat einen Kontostand von %s€. Soll der Betrag ausgezahlt oder auf das Teamkonto überwiesen werden?</string>
 
 </resources>

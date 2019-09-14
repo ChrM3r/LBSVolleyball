@@ -9,28 +9,13 @@
     tools:context=".controller.SpielerVerwaltungActivity">
 
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/activity_spielerverwaltung_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_gravity="top"
-        app:layout_collapseMode="pin"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:titleTextColor="#888888" />
-
-
     <ListView
         android:id="@+id/listview_spieler"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:choiceMode="multipleChoiceModal"
+        android:layout_marginTop="16dp"
+        android:choiceMode="none"
         android:divider="@null"
         android:dividerHeight="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -39,6 +24,18 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_spielerverwaltung_toolbar"
         tools:layout_conversion_absoluteHeight="585dp"
         tools:layout_conversion_absoluteWidth="145dp" />
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/activity_spielerverwaltung_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#AE1732"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/training_tunier">
+
+    <activity
+        android:id="@+id/spielerverwaltung"
+        android:name="eu.merscher.lbsvolleyball.controller.SpielerVerwaltungActivity"
+        android:label="Spielerverwaltung"
+        tools:layout="@layout/activity_spielerverwaltung" />
+    <activity
+        android:id="@+id/edit_spieler"
+        android:name="eu.merscher.lbsvolleyball.controller.EditSpielerFragment"
+        android:label="Add Spieler"
+        tools:layout="@layout/activity_add_edit_spieler" />
+    <fragment
+        android:id="@+id/add_spieler"
+        android:name="eu.merscher.lbsvolleyball.controller.AddSpielerFragment"
+        android:label="Add Spieler"
+        tools:layout="@layout/fragment_spielerverwaltung_add_edit_spieler" />
+    <fragment
+        android:id="@+id/training_tunier"
+        android:name="eu.merscher.lbsvolleyball.controller.TrainingFragment"
+        android:label="Training Tunier"
+        tools:layout="@layout/activity_training_tunier" />
+    <fragment
+        android:id="@+id/einstellungen"
+        android:name="eu.merscher.lbsvolleyball.controller.TrainingTunierActivity"
+        android:label="Second Fragment"
+        tools:layout="@layout/activity_einstellungen" />
+
+
+</navigation>

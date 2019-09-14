@@ -1,6 +1,7 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -37,13 +38,13 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
-import eu.merscher.lbsvolleyball.utilities.Utils;
+import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
 public class AddSpielerActivity extends AppCompatActivity {
 
     private static String userFotoAlsString = null;
-    private ImageView spielerFoto;
+    private ImageView spielerBild;
 
     protected static String getUserFotoAlsString() {
         return userFotoAlsString;
@@ -70,9 +71,8 @@ public class AddSpielerActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit);
         FloatingActionButton fotoAddButton = findViewById(R.id.activity_add_edit_spieler_foto_button);
         FloatingActionButton fotoLoeschenButton = findViewById(R.id.activity_add_edit_spieler_foto_loeschen_button);
-        fotoLoeschenButton.hide();
         ViewPager viewPager = findViewById(R.id.add_edit_viewpager);
-        spielerFoto = findViewById(R.id.spielerbild_groß_add_edit);
+        spielerBild = findViewById(R.id.spielerbild_groß_add_edit);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
 
@@ -80,8 +80,7 @@ public class AddSpielerActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
-        spielerFoto.setOnClickListener(new View.OnClickListener() {
+        spielerBild.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 bildAusGalerieAuswaehlen();
@@ -92,6 +91,15 @@ public class AddSpielerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 bildAusGalerieAuswaehlen();
+            }
+        });
+
+        fotoLoeschenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                spielerBild.setImageResource(R.drawable.avatar_m);
+                setUserFotoAlsString("geloescht");
+
             }
         });
 
@@ -115,6 +123,11 @@ public class AddSpielerActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+
+        ProgressDialog progressDialog = ProgressDialog.show(this,
+                "Einen kleinen Augenblick",
+                "");
+
         if (resultCode == Activity.RESULT_OK)
             switch (requestCode) {
                 case 1:
@@ -131,7 +144,7 @@ public class AddSpielerActivity extends AppCompatActivity {
                 Bitmap spielerBild = BitmapFactory.decodeFile(userFotoAlsString);
 
                 try {
-                    spielerBild = Utils.handleSamplingAndRotationBitmap(getApplicationContext(), selectedImage);
+                    spielerBild = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), selectedImage);
                     new UserFotoUmspeichernAsyncTask(this, spielerBild).execute();
 
                     ContextWrapper cw = new ContextWrapper(getApplicationContext());
@@ -142,9 +155,10 @@ public class AddSpielerActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                spielerFoto.setImageBitmap(spielerBild);
+                    this.spielerBild.setImageBitmap(spielerBild);
                 cursor.close();
             }
+        progressDialog.dismiss();
 
     }
 
@@ -177,7 +191,7 @@ public class AddSpielerActivity extends AppCompatActivity {
         @Override
         public Void doInBackground(Void... args) {
 
-            userFotoAlsString = Utils.bildSpeichern(activityReference.get().getApplicationContext(), spielerBild);
+            userFotoAlsString = Utilities.bildSpeichern(activityReference.get().getApplicationContext(), spielerBild);
             Log.d("ASyncBild", "Bild gespeichert");
             return null;
         }

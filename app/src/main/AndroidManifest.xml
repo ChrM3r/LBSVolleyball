@@ -11,12 +11,14 @@
         android:icon="@mipmap/lbs_volleyball_appicon_white_round"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+
+
         <activity
-            android:name=".controller.SpieltagActivity"
-            android:label="@string/app_name" >
+            android:name=".controller.TrainingTunierActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -24,24 +26,44 @@
         <activity
             android:name=".controller.SpielerVerwaltungActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop"></activity>
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"></activity>
 
         <activity
             android:name=".controller.SpielerseiteActivity"
             android:label="@string/app_name"
-            android:launchMode="standard"></activity>
-
+            android:launchMode="standard"
+            android:screenOrientation="portrait"></activity>
 
         <activity
             android:name=".controller.AddSpielerActivity"
             android:label="@string/app_name"
-            android:launchMode="standard"></activity>
+            android:launchMode="standard"
+            android:screenOrientation="portrait"></activity>
 
 
         <activity
             android:name=".controller.EditSpielerActivity"
             android:label="@string/app_name"
-            android:launchMode="standard"></activity>
+            android:launchMode="standard"
+            android:screenOrientation="portrait"></activity>
+
+
+        <activity
+            android:name=".controller.TrainingUebersichtActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name=".controller.EinstellungenActivity"
+            android:label="@string/app_name"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"></activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBZNYEUwq0cg9s6jxKtKWwENI1wyvF977k" />
 
         <meta-data
             android:name="preloaded_fonts"

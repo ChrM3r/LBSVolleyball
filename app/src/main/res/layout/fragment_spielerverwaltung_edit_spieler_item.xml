@@ -46,7 +46,7 @@
                     android:layout_marginStart="10dp"
                     android:layout_marginRight="8dp"
                     android:layout_weight="3"
-                    android:inputType="text"
+                    android:inputType="textCapSentences"
                     android:imeOptions="actionNext"
                     android:nextFocusDown="@id/editText_name_edit"
                     android:textSize="16sp" />
@@ -82,7 +82,7 @@
                     android:layout_marginStart="10dp"
                     android:layout_marginRight="8dp"
                     android:layout_weight="3"
-                    android:inputType="text"
+                    android:inputType="textCapSentences"
                     android:imeOptions="actionNext"
                     android:textSize="16sp" />
             </LinearLayout>

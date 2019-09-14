@@ -46,9 +46,10 @@
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="3"
-                    android:inputType="text"
                     android:imeOptions="actionNext"
+                    android:inputType="textCapSentences"
                     android:nextFocusDown="@id/editText_name_add"
+                    android:textColor="#AE1732"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -80,10 +81,11 @@
                     android:layout_marginStart="10dp"
                     android:layout_marginRight="8dp"
                     android:layout_weight="3"
-                    android:inputType="text"
                     android:imeOptions="actionNext"
+                    android:inputType="textCapSentences"
                     android:nextFocusUp="@id/editText_vname_add"
                     android:nextFocusDown="@id/editText_bdate_add"
+                    android:textColor="#AE1732"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -115,11 +117,12 @@
                     android:layout_marginRight="8dp"
                     android:layout_weight="3"
                     android:digits="0123456789."
+                    android:imeOptions="actionNext"
                     android:inputType="date"
                     android:maxLength="10"
-                    android:imeOptions="actionNext"
                     android:nextFocusUp="@id/editText_name_add"
                     android:nextFocusDown="@id/editText_mail_add"
+                    android:textColor="#AE1732"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -160,10 +163,11 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="3"
-                android:inputType="text"
                 android:imeOptions="actionNext"
+                android:inputType="text"
                 android:nextFocusUp="@id/editText_bdate_add"
                 android:nextFocusDown="@id/fragment_add_editText_AddBuchung"
+                android:textColor="#AE1732"
                 android:textSize="16sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -203,10 +207,11 @@
                 android:digits="01234567890,"
                 android:ems="10"
                 android:hint="0,00"
-                android:inputType="number"
-                android:textAlignment="textEnd"
                 android:imeOptions="actionDone"
+                android:inputType="number"
                 android:nextFocusUp="@id/editText_mail_add"
+                android:textAlignment="textEnd"
+                android:textColor="#AE1732"
                 android:textSize="40sp" />
 
             <TextView
