@@ -1,14 +1,11 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.appcompat.app.ActionBar;
@@ -19,6 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.DataSource;
@@ -27,44 +25,26 @@ import eu.merscher.lbsvolleyball.model.Spieler;
 
 public class SpielerVerwaltungActivity extends AppCompatActivity {
 
-    private static boolean shouldExecuteOnResume;
-
-    public static final String LOG_TAG = SpielerVerwaltungActivity.class.getSimpleName();
-    private static ArrayList<Bitmap> spielerFotos = new ArrayList<>();
-    private static ArrayList<String> spielerNamen = new ArrayList<>();
-    private static ArrayList<String> spielerGeburtstage = new ArrayList<>();
-    private static ArrayList<Spieler> spielerList = new ArrayList<>();
-    private static Resources resources;
-    private static ListView spielerListView;
+    private ArrayList<Bitmap> spielerFotos = new ArrayList<>();
+    private ArrayList<String> spielerNamen = new ArrayList<>();
+    private ArrayList<String> spielerGeburtstage = new ArrayList<>();
+    private ArrayList<Spieler> spielerList = new ArrayList<>();
 
 
-    public static void setSpielerFotos(Bitmap b) {
+    public void setSpielerFotos(Bitmap b) {
         spielerFotos.add(b);
     }
 
-    public static void setSpielerNamen(String s) {
+    public void setSpielerNamen(String s) {
         spielerNamen.add(s);
     }
 
-    public static void setSpielerGeburtstage(String s) {
+    public void setSpielerGeburtstage(String s) {
         spielerGeburtstage.add(s);
     }
 
-    public static void setSpielerList(ArrayList<Spieler> list) {
+    public void setSpielerList(ArrayList<Spieler> list) {
         spielerList = list;
-    }
-
-    public static SpielerVerwaltungAdapter getAdapter() {
-        return (SpielerVerwaltungAdapter) spielerListView.getAdapter();
-    }
-
-    public static void setAdapter(SpielerVerwaltungAdapter adapter) {
-        spielerListView.setAdapter(adapter);
-    }
-
-
-    public static ArrayList<Spieler> getSpielerList() {
-        return spielerList;
     }
 
     @Override
@@ -72,35 +52,25 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spielerverwaltung);
 
-        resources = getResources();
-        shouldExecuteOnResume = false;
-
-        spielerListView = findViewById(R.id.listview_spieler);
-
-        //new GetSpielerAndSetAdapterAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-        getSpielerUndSetAdapter();
-
-
+        //Add-Spieler-Button
         FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(view -> {
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent intent = new Intent(SpielerVerwaltungActivity.this, AddSpielerActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                SpielerVerwaltungActivity.this.startActivity(intent);
-            }
+            Intent intent = new Intent(SpielerVerwaltungActivity.this, AddSpielerActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            SpielerVerwaltungActivity.this.startActivity(intent);
         });
 
+        //Toolbar
         Toolbar toolbar = findViewById(R.id.activity_spielerverwaltung_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getString(R.string.spielerverwaltung));
 
-        initializeContextualActionBar();
+        //Spielerlistview
+        ListView spielerListView = findViewById(R.id.listview_spieler);
+        spielerListView.setOnItemClickListener((parent, view, position, id) -> new GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity.this, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
     }
 
     @Override
@@ -112,6 +82,13 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onResume() {
+
+        super.onResume();
+        getSpielerUndSetAdapter();
+
+    }
 
     private void getSpielerUndSetAdapter() {
         DataSource dataSource = DataSource.getInstance();
@@ -122,28 +99,25 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         spielerFotos.clear();
         spielerGeburtstage.clear();
 
-
-        SpielerVerwaltungActivity.setSpielerList(dataSource.getAllSpielerAlphabetischName());
-
-        System.out.println(spielerList + "in AsyncTask");
+        setSpielerList(dataSource.getAllSpielerAlphabetischName());
 
         for (Spieler s : spielerList) {
 
             Bitmap spielerBildOriginal;
 
             if (s.getFoto().equals("avatar_m"))
-                spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+                spielerBildOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.avatar_m);
             else {
                 spielerBildOriginal = BitmapFactory.decodeFile(s.getFoto().replace(".png", "_klein.png"));
             }
 
             if (spielerBildOriginal == null)
-                spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+                spielerBildOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.avatar_m);
 
 
-            SpielerVerwaltungActivity.setSpielerFotos(spielerBildOriginal);
-            SpielerVerwaltungActivity.setSpielerNamen(s.getVname() + " " + s.getName());
-            SpielerVerwaltungActivity.setSpielerGeburtstage(s.getBdate());
+            setSpielerFotos(spielerBildOriginal);
+            setSpielerNamen(s.getVname() + " " + s.getName());
+            setSpielerGeburtstage(s.getBdate());
 
         }
 
@@ -151,39 +125,14 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
         spielerListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
         SpielerVerwaltungAdapter adapter = new SpielerVerwaltungAdapter(spielerList, spielerNamen, spielerFotos, spielerGeburtstage, getApplicationContext());
         spielerListView.setAdapter(adapter);
-        SpielerVerwaltungActivity.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-    }
-
-    private void initializeContextualActionBar() {
-
-        final ListView spielerListView = findViewById(R.id.listview_spieler);
-        spielerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                new GetSpielerAndStartSpielerseiteAsyncTask(SpielerVerwaltungActivity.this, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-            }
-        });
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (shouldExecuteOnResume) {
-            getSpielerUndSetAdapter();
-        } else
-            shouldExecuteOnResume = true;
-
     }
 
 
     static class GetSpielerAndStartSpielerseiteAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
 
 
-        public final WeakReference<SpielerVerwaltungActivity> activityReference;
+        private final WeakReference<SpielerVerwaltungActivity> activityReference;
         private final int position;
         private ArrayList<Spieler> spielerList = new ArrayList<>();
 

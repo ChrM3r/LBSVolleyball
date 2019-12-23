@@ -14,12 +14,12 @@
         android:id="@+id/edit_spieler"
         android:name="eu.merscher.lbsvolleyball.controller.EditSpielerFragment"
         android:label="Add Spieler"
-        tools:layout="@layout/activity_add_edit_spieler" />
+        tools:layout="@layout/activity_add_spieler" />
     <fragment
         android:id="@+id/add_spieler"
         android:name="eu.merscher.lbsvolleyball.controller.AddSpielerFragment"
         android:label="Add Spieler"
-        tools:layout="@layout/fragment_spielerverwaltung_add_edit_spieler" />
+        tools:layout="@layout/fragment_add_edit_spieler" />
     <fragment
         android:id="@+id/training_tunier"
         android:name="eu.merscher.lbsvolleyball.controller.TrainingFragment"

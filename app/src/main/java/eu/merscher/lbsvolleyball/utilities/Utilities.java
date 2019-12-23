@@ -1,26 +1,34 @@
 package eu.merscher.lbsvolleyball.utilities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
-import android.view.inputmethod.InputMethodManager;
+import android.view.Gravity;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.exifinterface.media.ExifInterface;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import de.siegmar.fastcsv.reader.CsvParser;
 import de.siegmar.fastcsv.reader.CsvReader;
@@ -28,17 +36,11 @@ import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import eu.merscher.lbsvolleyball.model.Spieler;
+import eu.merscher.lbsvolleyball.model.Trainingsort;
 
 public class Utilities {
 
 
-    public static void hideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager =
-                (InputMethodManager) activity.getSystemService(
-                        Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(
-                activity.getCurrentFocus().getWindowToken(), 0);
-    }
 
     public static void formatNumericEditText(EditText editText) {
         String s = null;
@@ -73,7 +75,6 @@ public class Utilities {
      * @param context       The current context
      * @param selectedImage The Image URI
      * @return Bitmap image results
-     * @throws IOException
      */
     public static Bitmap handleSamplingAndRotationBitmap(Context context, Uri selectedImage)
             throws IOException {
@@ -85,6 +86,7 @@ public class Utilities {
         options.inJustDecodeBounds = true;
         InputStream imageStream = context.getContentResolver().openInputStream(selectedImage);
         BitmapFactory.decodeStream(imageStream, null, options);
+        assert imageStream != null;
         imageStream.close();
 
         // Calculate inSampleSize
@@ -160,9 +162,9 @@ public class Utilities {
         InputStream input = context.getContentResolver().openInputStream(selectedImage);
         ExifInterface ei;
         if (Build.VERSION.SDK_INT > 23)
-            ei = new ExifInterface(input);
+            ei = new ExifInterface(Objects.requireNonNull(input));
         else
-            ei = new ExifInterface(selectedImage.getPath());
+            ei = new ExifInterface(Objects.requireNonNull(selectedImage.getPath()));
 
         int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
@@ -196,14 +198,39 @@ public class Utilities {
         File pfad = new File(ordner, "temp.png");
         File pfad_klein = new File(ordner, "temp_klein.png");
 
-        FileOutputStream fos = null;
-        FileOutputStream fos_klein = null;
+        FileOutputStream fos;
+        FileOutputStream fos_klein;
         try {
             fos = new FileOutputStream(pfad);
             fos_klein = new FileOutputStream(pfad_klein);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.close();
-            bitmap = BitmapScaler.scaleToFitWidth(bitmap, 200);
+            bitmap = scaleToFitWidth(bitmap, 200);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos_klein);
+            fos_klein.close();
+
+        } catch (Exception e) {
+            Log.d("BILD_SPEICHERN", e.getMessage(), e);
+        }
+        return pfad.getAbsolutePath();
+    }
+
+    public static String bildTrainingsortSpeichern(Context context, Bitmap bitmap) {
+
+        ContextWrapper cw = new ContextWrapper(context);
+        File ordner = cw.getDir("trainingsortbilder", Context.MODE_PRIVATE);
+
+        File pfad = new File(ordner, "temp.png");
+        File pfad_klein = new File(ordner, "temp_klein.png");
+
+        FileOutputStream fos;
+        FileOutputStream fos_klein;
+        try {
+            fos = new FileOutputStream(pfad);
+            fos_klein = new FileOutputStream(pfad_klein);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+            bitmap = scaleToFitWidth(bitmap, 200);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos_klein);
             fos_klein.close();
 
@@ -220,14 +247,35 @@ public class Utilities {
         File bildAlt = new File(spieler.getFoto());
         File bildAlt_klein = new File(spieler.getFoto().replace(".png", "_klein.png"));
 
-        File bildNeu = new File(directory, spieler.getU_id() + "_" + spieler.getName() + ".png");
-        File bildNeu_klein = new File(directory, spieler.getU_id() + "_" + spieler.getName() + "_klein.png");
+        File bildNeu = new File(directory, spieler.getS_id() + "_" + spieler.getName() + ".png");
+        File bildNeu_klein = new File(directory, spieler.getS_id() + "_" + spieler.getName() + "_klein.png");
 
 
-        boolean umbenannt = bildAlt.renameTo(bildNeu);
-        boolean umbenannt_klein = bildAlt_klein.renameTo(bildNeu_klein);
-        System.out.println(umbenannt);
-        System.out.println(umbenannt_klein);
+        boolean umbenannt;
+        umbenannt = bildAlt.renameTo(bildNeu);
+        Log.d("S Bild gr umbennant:", Boolean.toString(umbenannt));
+        umbenannt = bildAlt_klein.renameTo(bildNeu_klein);
+        Log.d("S Bild kl umbennant:", Boolean.toString(umbenannt));
+
+        return bildNeu.getAbsolutePath();
+    }
+
+    public static String bildNachTrainingsortBenennen(Context context, Trainingsort trainingsort) {
+        ContextWrapper cw = new ContextWrapper(context);
+        File directory = cw.getDir("trainingsortbilder", Context.MODE_PRIVATE);
+
+        File bildAlt = new File(trainingsort.getFoto());
+        File bildAlt_klein = new File(trainingsort.getFoto().replace(".png", "_klein.png"));
+
+        File bildNeu = new File(directory, trainingsort.getTo_id() + "_" + trainingsort.getName().replace(" ", "_") + ".png");
+        File bildNeu_klein = new File(directory, trainingsort.getTo_id() + "_" + trainingsort.getName().replace(" ", "_") + "_klein.png");
+
+
+        boolean umbenannt;
+        umbenannt = bildAlt.renameTo(bildNeu);
+        Log.d("TO Bild gr umbennant:", Boolean.toString(umbenannt));
+        umbenannt = bildAlt_klein.renameTo(bildNeu_klein);
+        Log.d("TO Bild kl umbennant:", Boolean.toString(umbenannt));
 
         return bildNeu.getAbsolutePath();
     }
@@ -239,20 +287,41 @@ public class Utilities {
         File bildAlt = new File(spielerAlt.getFoto());
         File bildAlt_klein = new File(spielerAlt.getFoto().replace(".png", "_klein.png"));
 
-        File bildNeu = new File(directory, spielerNeu.getU_id() + "_" + spielerNeu.getName() + ".png");
-        File bildNeu_klein = new File(directory, spielerNeu.getU_id() + "_" + spielerNeu.getName() + "_klein.png");
+        File bildNeu = new File(directory, spielerNeu.getS_id() + "_" + spielerNeu.getName() + ".png");
+        File bildNeu_klein = new File(directory, spielerNeu.getS_id() + "_" + spielerNeu.getName() + "_klein.png");
 
 
-        boolean umbenannt = bildAlt.renameTo(bildNeu);
-        boolean umbenannt_klein = bildAlt_klein.renameTo(bildNeu_klein);
+        boolean umbenannt;
+        umbenannt = bildAlt.renameTo(bildNeu);
+        Log.d("S Bild gr umbennant:", Boolean.toString(umbenannt));
+        umbenannt = bildAlt_klein.renameTo(bildNeu_klein);
+        Log.d("S Bild kl umbennant:", Boolean.toString(umbenannt));
 
         return bildNeu.getAbsolutePath();
     }
 
-    public static void csvExport(ArrayList<String> list, Context context) {
-
+    public static String bildNachTrainingsortaenderungBenennen(Context context, Trainingsort trainingsortAlt, Trainingsort trainingsortNeu) {
         ContextWrapper cw = new ContextWrapper(context);
-        File directory = cw.getDir("export", Context.MODE_PRIVATE);
+        File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+
+        File bildAlt = new File(trainingsortAlt.getFoto());
+        File bildAlt_klein = new File(trainingsortAlt.getFoto().replace(".png", "_klein.png"));
+
+        File bildNeu = new File(directory, trainingsortNeu.getTo_id() + "_" + trainingsortNeu.getName().replace(" ", "_") + ".png");
+        File bildNeu_klein = new File(directory, trainingsortNeu.getTo_id() + "_" + trainingsortNeu.getName().replace(" ", "_") + "_klein.png");
+
+
+        boolean umbenannt;
+        umbenannt = bildAlt.renameTo(bildNeu);
+        Log.d("TO Bild gr umbennant:", Boolean.toString(umbenannt));
+        umbenannt = bildAlt_klein.renameTo(bildNeu_klein);
+        Log.d("TO Bild kl umbennant:", Boolean.toString(umbenannt));
+
+        return bildNeu.getAbsolutePath();
+    }
+
+    public static void csvExport(ArrayList<String> list) {
+
         String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 
         File file = new File(baseDir, "spieler_export.csv");
@@ -268,10 +337,8 @@ public class Utilities {
         }
     }
 
-    public static ArrayList<String> csvImport(Context context) {
+    public static ArrayList<String> csvImport() {
 
-        ContextWrapper cw = new ContextWrapper(context);
-        File directory = cw.getDir("export", Context.MODE_PRIVATE);
         String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 
         File file = new File(baseDir, "spieler_export.csv");
@@ -284,9 +351,7 @@ public class Utilities {
             while ((row = csvParser.nextRow()) != null) {
 
                 List<String> list = row.getFields();
-                for (String s : list) {
-                    spielerListString.add(s);
-                }
+                spielerListString.addAll(list);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -314,4 +379,74 @@ public class Utilities {
         }
     }
 
+
+    //https://stackoverflow.com/questions/3574644/how-can-i-find-the-latitude-and-longitude-from-address/27834110#27834110
+    public static LatLng getLocationFromAddress(Context context, String strAddress) {
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1;
+
+        try {
+            // May throw an IOException
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address.size() < 1) {
+                Toast toast = Toast.makeText(context, "Es wurden keine passenden Orte gefunden.", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 0);
+                toast.show();
+                return null;
+            } else {
+
+                Address location = address.get(0);
+                p1 = new LatLng(location.getLatitude(), location.getLongitude());
+            }
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+            p1 = new LatLng(-999, -999);
+        }
+
+        return p1;
+    }
+
+    public static Bitmap getMapBildAusURL(double lat, double lon, int width, int height) {
+
+        Bitmap img;
+
+        try {
+            String urlString = "http://maps.google.com/maps/api/staticmap";
+            urlString += "?zoom=15&size=" + width + "x" + height;
+            urlString += "&maptype=roadmap";
+            urlString += "&markers=color:red|label:A|" + lat + "," + lon;
+            urlString += "&sensor=true";
+            urlString += "&key=AIzaSyBZNYEUwq0cg9s6jxKtKWwENI1wyvF977k";
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            InputStream is = connection.getInputStream();
+            img = BitmapFactory.decodeStream(is);
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            img = null;
+        }
+        return img;
+    }
+
+    // Scale and maintain aspect ratio given a desired width
+    public static Bitmap scaleToFitWidth(Bitmap b, int width) {
+        float factor = width / (float) b.getWidth();
+        return Bitmap.createScaledBitmap(b, width, (int) (b.getHeight() * factor), true);
+    }
+
+
+    // Scale and maintain aspect ratio given a desired height
+    public static Bitmap scaleToFitHeight(Bitmap b, int height) {
+        float factor = height / (float) b.getHeight();
+        return Bitmap.createScaledBitmap(b, (int) (b.getWidth() * factor), height, true);
+    }
 }
+
+
+

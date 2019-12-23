@@ -37,4 +37,16 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Backup">
+
+        <ListPreference
+            android:defaultValue="true"
+            android:entries="@array/backup"
+            android:entryValues="@array/backup_values"
+            android:key="einstellungen_backup"
+            android:summary="Wählen Sie die Daten zum Sichern oder Wiederherstellen aus."
+            android:title="Datenbank auswählen" />
+    </PreferenceCategory>
+
+
 </androidx.preference.PreferenceScreen>

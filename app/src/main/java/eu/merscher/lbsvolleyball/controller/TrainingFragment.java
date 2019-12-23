@@ -8,10 +8,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,9 +28,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.MapStyleOptions;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
@@ -36,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -50,69 +54,40 @@ import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.DataSource;
 import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
+import eu.merscher.lbsvolleyball.model.Trainingsort;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
-public class TrainingFragment extends Fragment implements EinstellungenFragment.OnEinstellungChange {
+public class TrainingFragment extends Fragment {
+
 
     private static final DecimalFormat df = new DecimalFormat("0.00");
-    /**
-     * A list of locations to show in this ListView.
-     */
-    private static final NamedLocation[] LIST_LOCATIONS = new NamedLocation[]{
-            new NamedLocation("BUGA Potsdam", new LatLng(52.4124881, 13.0491085)),
-            new NamedLocation("Werder/Havel", new LatLng(52.384314, 12.9088907))
-    };
-    public static ArrayList<Spieler> selectedSpieler = new ArrayList<>();
-    public static ArrayList<Spieler> spielerList = new ArrayList<>();
+    private DataSource dataSource;
+    private static ArrayList<Spieler> selectedSpieler = new ArrayList<>();
     public static Resources resources;
-    private static EinstellungenFragment.OnEinstellungChange onEinstellungChange;
-    //private static TrainingFragment.OnResume onResume;
-    private static boolean shouldExecuteOnResume;
+
     private TrainingFragmentAdapter adapter;
 
     public TrainingFragment() {
     }
 
     //Statische Methoden
-    public static void addSelectedSpieler(Spieler spieler) {
+    static void addSelectedSpieler(Spieler spieler) {
         selectedSpieler.add(spieler);
     }
 
-    public static boolean spielerIstSelected(Spieler spieler) {
+    static boolean spielerIstSelected(Spieler spieler) {
         if (selectedSpieler.isEmpty())
             return false;
         else
             return selectedSpieler.contains(spieler);
     }
 
-    public static void uncheckSelectedSpieler(Spieler spieler) {
+    static void uncheckSelectedSpieler(Spieler spieler) {
         selectedSpieler.remove(spieler);
     }
 
-    public static ArrayList<Spieler> getSpielerList() {
-        return spielerList;
-    }
-
-    public static void setSpielerList(ArrayList<Spieler> spielerList) {
-        TrainingFragment.spielerList = spielerList;
-    }
-
-    public static EinstellungenFragment.OnEinstellungChange getOnEinstellungChange() {
-        return onEinstellungChange;
-    }
-
-    @Override
-    public void onEinstellungChange(String value) {
-
-        if (value != null) {
-            adapter.holder.editTextPlatzkosten.setText(df.format(Float.valueOf(value.replace(",", "."))).replace('.', ','));
-            adapter.setBetragJeSpieler();
-        }
-
-    }
-
-    public void onSpielerClick() {
+    void onSpielerClick() {
 
         adapter.setBetragJeSpieler();
         adapter.holder.editTextPlatzkosten.clearFocus();
@@ -122,13 +97,10 @@ public class TrainingFragment extends Fragment implements EinstellungenFragment.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        onEinstellungChange = this;
-
         View view = inflater.inflate(R.layout.fragment_spielerseite_grunddaten_kontodaten, container, false);
 
-        adapter = new TrainingFragmentAdapter((TrainingTunierActivity) getContext(), this, (TrainingTunierActivity) getActivity());
         RecyclerView recyclerView = view.findViewById(R.id.fragment_spielerseite_recyclerView);
-
+        adapter = new TrainingFragmentAdapter((TrainingTunierActivity) getContext(), (TrainingTunierActivity) getActivity());
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
@@ -136,88 +108,370 @@ public class TrainingFragment extends Fragment implements EinstellungenFragment.
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (shouldExecuteOnResume) {
-            adapter.holder.kostenlosSwitch.setChecked(false);
-            //holder.editTextPlatzkosten.setText("");
-            //holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
-            new SpielerauswahlBefuellenAsyncTask((TrainingTunierActivity) this.getContext(), (TrainingTunierActivity) getActivity(), adapter.holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            selectedSpieler.clear();
-            adapter.setBetragJeSpieler();
 
-        } else
-            shouldExecuteOnResume = true;
-    }
-
-    public interface OnResume {
-        void onResumeInterface();
-    }
-
-    static class SpielerauswahlBefuellenAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
+    public class TrainingFragmentAdapter extends RecyclerView.Adapter<TrainingFragmentAdapter.TrainingFragmentViewHolder> {
 
 
-        public final WeakReference<TrainingTunierActivity> activityReference;
-        private ArrayList<Spieler> list = new ArrayList<>();
+        private final LayoutInflater inflate;
+        public TrainingTunierActivity context;
+        private TrainingFragmentViewHolder holder = null;
+        private Boolean kostenlos = false;
+        private Trainingsort trainingsort;
         private TrainingTunierSpielerauswahlFragment.OnSpielerClickListener onSpielerClickListener;
-        private TrainingFragmentAdapter.ViewHolder holder;
 
-        SpielerauswahlBefuellenAsyncTask(TrainingTunierActivity context, TrainingTunierSpielerauswahlFragment.OnSpielerClickListener onSpielerClickListener, TrainingFragmentAdapter.ViewHolder holder) {
-            activityReference = new WeakReference<>(context);
+
+        private TrainingFragmentAdapter(TrainingTunierActivity context, TrainingTunierSpielerauswahlFragment.OnSpielerClickListener onSpielerClickListener) {
+            this.inflate = LayoutInflater.from(context);
+            this.context = context;
             this.onSpielerClickListener = onSpielerClickListener;
-            this.holder = holder;
+        }
+
+
+        private class TrainingFragmentViewHolder extends RecyclerView.ViewHolder {
+
+            private Button buttonAddSpieltag;
+            private EditText editTextPlatzkosten;
+            private TextView betragJeSpieler;
+            private Switch kostenlosSwitch;
+            private CardView cardView;
+            private MapView mapView;
+            private GoogleMap map;
+            private Spinner spinner;
+
+            TrainingFragmentViewHolder(View view) {
+                super(view);
+                buttonAddSpieltag = view.findViewById(R.id.fragment_training_button_add_spieltag);
+                editTextPlatzkosten = view.findViewById(R.id.fragment_training_editText_platzkosten);
+                betragJeSpieler = view.findViewById(R.id.fragment_training_textview_betrag_je_spieler);
+                kostenlosSwitch = view.findViewById(R.id.fragment_training_kostenlosSwitch);
+                cardView = view.findViewById(R.id.training_kosten_card);
+                mapView = view.findViewById(R.id.fragment_training_mapView);
+                spinner = view.findViewById(R.id.fragment_training_spinner);
+            }
+
+        }
+
+        @NotNull
+        @Override
+        public TrainingFragmentViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
+
+            View view = inflate.inflate(R.layout.fragment_training, parent, false);
+            holder = new TrainingFragmentViewHolder(view);
+            return holder;
 
         }
 
         @Override
-        protected ArrayList<Spieler> doInBackground(Void... args) {
+        public void onBindViewHolder(TrainingFragmentViewHolder holder, int position) {
+
+            resources = context.getResources();
+            selectedSpieler.clear();
+
 
             DataSource dataSource = DataSource.getInstance();
             dataSource.open();
 
-            list = dataSource.getAllSpielerAbsteigendTeilnahme();
-            TrainingFragment.setSpielerList(list);
-            return list;
+            //Spielerauswahl
+            spielerAuswahlBefuellen();
+
+            //Platzkosten aus Einstellungen auslesen
+            platzKostenErmittelnUndSetzen();
+
+            //Kostenlos-Switch
+            holder.kostenlosSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+
+                if (isChecked) {
+                    kostenlos = true;
+                    holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
+                    holder.editTextPlatzkosten.setText("");
+                    holder.editTextPlatzkosten.setEnabled(false);
+                    holder.editTextPlatzkosten.setFocusable(false);
+
+                    holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView.getLayoutParams().width, 88));
+                    holder.cardView.setMinimumHeight(88);
+
+                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
+                    layoutParams.setMargins(32, 32, 32, 0);
+
+                    holder.cardView.requestLayout();
+
+                } else {
+                    kostenlos = false;
+                    holder.editTextPlatzkosten.setEnabled(true);
+                    holder.editTextPlatzkosten.setFocusableInTouchMode(true);
+                    holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView.getLayoutParams().width, 256));
+                    holder.cardView.setMinimumHeight(256);
+
+                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
+                    layoutParams.setMargins(32, 32, 32, 0);
+                    holder.cardView.requestLayout();
+
+                    platzKostenErmittelnUndSetzen();
+                    setBetragJeSpieler();
+
+                }
+            });
+
+            //Spieltag-Button
+            holder.buttonAddSpieltag.setOnClickListener(v -> onSpieltagButtonClick());
+
+            //Textformat Platzkosten
+            holder.editTextPlatzkosten.setOnFocusChangeListener((v, hasFocus) -> {
+                Utilities.formatNumericEditText(holder.editTextPlatzkosten);
+                setBetragJeSpieler();
+
+            });
+            holder.editTextPlatzkosten.setGravity(Gravity.END);
+
+            //Trainingsort
+            trainigsorteSpinnerUndMapBefuellen();
+        }
+
+
+        private void mapTrainingsortSetzen(double lat, double lng) {
+            if (holder.map == null) return;
+
+            holder.map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15.0f));
+            holder.map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        }
+
+        private void spielerAuswahlBefuellen() {
+
+            //Sortierung Einstellungen
+
+            SharedPreferences einstellungen = PreferenceManager.getDefaultSharedPreferences(context);
+            String einstellungen_sortierung_platzkosten = "einstellungen_sortierung_spielerauswahl";
+            String sortierungUser = einstellungen.getString(einstellungen_sortierung_platzkosten, "teilnahmen");
+
+            ArrayList<Spieler> list;
+
+            dataSource = DataSource.getInstance();
+
+            switch (Objects.requireNonNull(sortierungUser)) {
+                case "vname": {
+                    list = dataSource.getAllSpielerAlphabetischVname();
+                    break;
+                }
+                case "name": {
+                    list = dataSource.getAllSpielerAlphabetischName();
+                    break;
+                }
+                default: {
+                    list = dataSource.getAllSpielerAbsteigendTeilnahme();
+                    break;
+                }
+            }
+
+
+            //SpielerauswahlFragment laden
+            context.fm = context.getSupportFragmentManager();
+            context.fragment = new TrainingTunierSpielerauswahlFragment(context, list, onSpielerClickListener, sortierungUser);
+            context.fm.beginTransaction().add(R.id.fragment_training_spielerauswahl_fragmentContainer, context.fragment).commitAllowingStateLoss();
+
+        }
+
+        private void platzKostenErmittelnUndSetzen() {
+            //Einstellungen
+            SharedPreferences einstellungen = PreferenceManager.getDefaultSharedPreferences(context);
+            String einstellungen_platzkosten = "einstellungen_platzkosten";
+
+            //Platzkosten
+            String platzkostenUser = einstellungen.getString(einstellungen_platzkosten, "");
+            if (platzkostenUser != null) {
+                if (!platzkostenUser.isEmpty()) {
+                    if (Double.parseDouble(platzkostenUser.replace(",", ".")) > 0) {
+                        holder.editTextPlatzkosten.setText(df.format(Float.valueOf(platzkostenUser.replace(",", "."))).replace('.', ','));
+                        setBetragJeSpieler();
+                    }
+                }
+            } else holder.editTextPlatzkosten.setText("");
+        }
+
+        private void trainigsorteSpinnerUndMapBefuellen() {
+
+            DataSource.initializeInstance(context);
+            dataSource = DataSource.getInstance();
+
+            ArrayList<Trainingsort> trainingsortList = dataSource.getAllTrainingsort();
+            ArrayList<String> spinnerList = new ArrayList<>();
+
+            for (Trainingsort t : trainingsortList) {
+                spinnerList.add(t.getName());
+            }
+
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, spinnerList);
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            holder.spinner.setAdapter(dataAdapter);
+
+            holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                    if (holder.mapView != null) {
+                        holder.mapView.onCreate(null);
+                        holder.mapView.getMapAsync(googleMap -> {
+
+                            holder.map = googleMap;
+                            holder.map.setMapStyle(MapStyleOptions.loadRawResourceStyle(Objects.requireNonNull(getContext()), R.raw.style_json));
+
+
+                            if (trainingsortList.size() > 0) {
+                                trainingsort = trainingsortList.get(position);
+                                MapsInitializer.initialize(context);
+                                mapTrainingsortSetzen(trainingsort.getLatitude(), trainingsort.getLongitude());
+                                holder.map.getUiSettings().setMapToolbarEnabled(false);
+
+                            } else {
+                                MapsInitializer.initialize(context);
+                                mapTrainingsortSetzen(52.396149, 13.058540);
+                                holder.map.getUiSettings().setMapToolbarEnabled(false);
+                            }
+                        });
+                    }
+
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+        }
+
+        private void setBetragJeSpieler() {
+
+            if (!holder.editTextPlatzkosten.getText().toString().isEmpty()) {
+                double platzkosten = Double.valueOf(holder.editTextPlatzkosten.getText().toString().replace(',', '.'));
+                int anzahl = selectedSpieler.size();
+
+                if (anzahl > 0) {
+
+                    double betragDouble = platzkosten / anzahl;
+                    holder.betragJeSpieler.setText(df.format(betragDouble).replace('.', ','));
+                } else
+                    holder.betragJeSpieler.setText(df.format(platzkosten).replace('.', ','));
+            } else
+                holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
+
+        }
+
+        private void onSpieltagButtonClick() {
+
+
+            float platzkosten;
+            if (!holder.editTextPlatzkosten.getText().toString().isEmpty())
+                platzkosten = Float.parseFloat(holder.editTextPlatzkosten.getText().toString().replace(',', '.'));
+            else
+                platzkosten = 0;
+
+            //Trainings-ID ermitteln
+
+            long trainings_id_alt = dataSource.getNeusteTrainingsID();
+            long trainings_id;
+
+            dataSource.open();
+
+            if (trainings_id_alt > 0) {
+                trainings_id = trainings_id_alt + 1;
+            } else
+                trainings_id = 1;
+
+
+            if (selectedSpieler.size() > 0 && platzkosten > 0 && !kostenlos) {
+
+                double bu_btr = platzkosten / selectedSpieler.size();
+
+                //Datenbank-Einträge erzeugen
+
+                trainingsort = dataSource.updateBesucheTrainingsort(trainingsort);
+
+                for (int i = 0; i < selectedSpieler.size(); i++) {
+                    if (i == selectedSpieler.size() - 1) {
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), bu_btr, platzkosten, trainings_id, trainingsort, true).execute();
+                    } else
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), bu_btr, platzkosten, trainings_id, trainingsort, true).execute();
+
+                }
+
+                //Alles zurücksetzen
+
+                holder.editTextPlatzkosten.setText("");
+                platzKostenErmittelnUndSetzen();
+                selectedSpieler.clear();
+                holder.kostenlosSwitch.setChecked(false);
+                setBetragJeSpieler();
+
+            } else if (selectedSpieler.size() <= 0) {
+
+                Toast toast = Toast.makeText(context, "Es wurde kein Spieler ausgewählt.", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 20);
+                toast.show();
+
+            } else if (platzkosten <= 0 && !kostenlos) {
+
+                Toast toast = Toast.makeText(context, "Die Platzkosten wurden nicht erfasst", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 20);
+                toast.show();
+
+            } else if (platzkosten > 0 && kostenlos) {
+
+                Toast toast = Toast.makeText(context, "Es wurden Platzkosten erfasst, obwohl >Kostenlos< gewählt wurde.", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 20);
+                toast.show();
+
+            } else if (platzkosten <= 0 && kostenlos) {
+
+                trainingsort = dataSource.updateBesucheTrainingsort(trainingsort);
+
+                for (int i = 0; i < selectedSpieler.size(); i++) {
+
+                    if (i == selectedSpieler.size() - 1) {
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), 0, platzkosten, trainings_id, trainingsort, true).execute();
+                    } else
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), 0, platzkosten, trainings_id, trainingsort, true).execute();
+
+                }
+                spielerAuswahlBefuellen();
+
+                Toast toast = Toast.makeText(this.context, "Der kostenlose Spieltag wurde gebucht. Trainigsteilnahmen aktualisiert", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 20);
+                toast.show();
+
+                holder.kostenlosSwitch.setChecked(false);
+            }
         }
 
         @Override
-        public void onPostExecute(ArrayList<Spieler> list) {
-
-            TrainingTunierActivity activity = activityReference.get();
-
-            if (activity == null) return;
-
-            //Spielerauswahl
-            if (activity.fragment == null) {
-                activity.fm = activity.getSupportFragmentManager();
-                activity.fragment = new TrainingTunierSpielerauswahlFragment(activity, list, onSpielerClickListener);
-                activity.fm.beginTransaction().add(R.id.fragment_training_spielerauswahl_fragmentContainer, activity.fragment).commitAllowingStateLoss();
-            } else {
-                activity.fm.beginTransaction().replace(R.id.fragment_training_spielerauswahl_fragmentContainer, new TrainingTunierSpielerauswahlFragment(activity, list, onSpielerClickListener)).commitAllowingStateLoss();
-            }
-
+        public int getItemCount() {
+            return 1;
         }
     }
 
-    static class SpieltagBuchenAsyncTask extends AsyncTask<Void, Void, Buchung> {
+    private static class SpieltagBuchenAsyncTask extends AsyncTask<Void, Void, Buchung> {
 
-
-        public final WeakReference<TrainingFragmentAdapter> activityReference;
+        private final WeakReference<TrainingFragmentAdapter> activityReference;
         private Spieler spieler;
         private Buchung buchung;
+        private double bu_btr;
+        private double platzkosten;
+        private long trainings_id;
+        private Trainingsort trainingsort;
+        private boolean letzterSpieler;
 
-        SpieltagBuchenAsyncTask(TrainingFragmentAdapter context, Spieler spieler) {
-            activityReference = new WeakReference<>(context);
+        SpieltagBuchenAsyncTask(TrainingFragmentAdapter context, Spieler spieler, double bu_btr, double platzkosten, long trainings_id, Trainingsort trainingsort, boolean letzterSpieler) {
+            this.activityReference = new WeakReference<>(context);
             this.spieler = spieler;
+            this.bu_btr = bu_btr;
+            this.platzkosten = platzkosten;
+            this.trainings_id = trainings_id;
+            this.trainingsort = trainingsort;
+            this.letzterSpieler = letzterSpieler;
         }
 
 
         @Override
         protected Buchung doInBackground(Void... args) {
-
-            TrainingFragmentAdapter activity = activityReference.get();
-
 
             Calendar kalender = Calendar.getInstance();
             SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
@@ -225,30 +479,34 @@ public class TrainingFragment extends Fragment implements EinstellungenFragment.
             DataSource dataSource = DataSource.getInstance();
             dataSource.open();
 
+            //Trainingsort-ID
+            long trainings_ort_id = trainingsort.getTo_id();
 
-            if (selectedSpieler.size() > 0 && activity.platzkosten > 0) {
 
-                activity.bu_btr = activity.platzkosten / selectedSpieler.size();
+            if (bu_btr != 0) {
 
                 if (spieler.getHat_buchung_mm() != null) {
 
                     double kto_saldo_alt = dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
-                    double kto_saldo_neu = kto_saldo_alt - activity.bu_btr;
+                    double kto_saldo_neu = kto_saldo_alt - bu_btr;
 
-                    buchung = dataSource.createBuchung(spieler.getU_id(), -activity.bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", null, null);
+                    buchung = dataSource.createBuchung(spieler.getS_id(), -bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", trainings_id, null, null, -999);
                     spieler = dataSource.updateTeilnahmenSpieler(spieler);
+                    dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), trainings_ort_id, spieler.getS_id(), platzkosten, null);
 
                 } else {
 
-                    double kto_saldo_neu = -activity.bu_btr;
-                    buchung = dataSource.createBuchung(spieler.getU_id(), -activity.bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", null, null);
+                    double kto_saldo_neu = -bu_btr;
+
+                    buchung = dataSource.createBuchung(spieler.getS_id(), -bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", trainings_id, null, null, -999);
                     spieler = dataSource.updateHatBuchungenMM(dataSource.updateTeilnahmenSpieler(spieler));
+                    dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), trainings_ort_id, spieler.getS_id(), platzkosten, null);
                 }
 
 
             } else {
                 spieler = dataSource.updateTeilnahmenSpieler(spieler);
-
+                dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), trainings_ort_id, spieler.getS_id(), 0, "X");
             }
 
             return buchung;
@@ -257,16 +515,26 @@ public class TrainingFragment extends Fragment implements EinstellungenFragment.
         @Override
         public void onPostExecute(Buchung neusteBuchung) {
 
+            TrainingFragmentAdapter activity = activityReference.get();
+
+            if (letzterSpieler) {
+                activity.spielerAuswahlBefuellen();
+
+                Toast toast = Toast.makeText(activity.context, "Der Spieltag wurde gebucht.", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 20);
+                toast.show();
+            }
+
             if (neusteBuchung != null) {
                 if (neusteBuchung.getKto_saldo_neu() < 5)
                     new EMailSendenAsyncTask(spieler, df.format(neusteBuchung.getKto_saldo_neu())).execute();
             }
+
+
         }
-
-
     }
 
-    static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {
+    private static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {
 
 
         private final Spieler spieler;
@@ -324,327 +592,4 @@ public class TrainingFragment extends Fragment implements EinstellungenFragment.
             return null;
         }
     }
-
-    /**
-     * Location represented by a position ({@link com.google.android.gms.maps.model.LatLng} and a
-     * name ({@link java.lang.String}).
-     */
-    private static class NamedLocation {
-
-        public final String name;
-        public final LatLng location;
-
-        NamedLocation(String name, LatLng location) {
-            this.name = name;
-            this.location = location;
-        }
-    }
-
-    public class TrainingFragmentAdapter extends RecyclerView.Adapter<TrainingFragmentAdapter.ViewHolder> implements OnMapReadyCallback {
-
-
-        private final LayoutInflater inflate;
-        private final SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
-        public TrainingTunierActivity context;
-        private ViewHolder holder;
-        private Boolean kostenlos = false;
-        private float platzkosten;
-        private double bu_btr;
-        private Calendar kalender = Calendar.getInstance();
-        private EinstellungenFragment.OnEinstellungChange onEinstellungChange;
-        private TrainingTunierSpielerauswahlFragment.OnSpielerClickListener onSpielerClickListener;
-
-
-        public TrainingFragmentAdapter(TrainingTunierActivity context, EinstellungenFragment.OnEinstellungChange onEinstellungChange, TrainingTunierSpielerauswahlFragment.OnSpielerClickListener onSpielerClickListener) {
-            this.inflate = LayoutInflater.from(context);
-            this.context = context;
-            this.onEinstellungChange = onEinstellungChange;
-            this.onSpielerClickListener = onSpielerClickListener;
-            //onResume = this;
-
-        }
-
-
-//    public static TrainingFragment.OnResume getOnResume() {
-//        return onResume;
-//    }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            View view = inflate.inflate(R.layout.fragment_training, parent, false);
-            return new ViewHolder(view);
-
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-
-            this.holder = holder;
-            resources = context.getResources();
-            selectedSpieler.clear();
-
-            holder.editTextPlatzkosten.setGravity(Gravity.END);
-
-            DataSource.initializeInstance(this.context);
-
-            DataSource dataSource = DataSource.getInstance();
-            dataSource.open();
-
-            ArrayList<Spieler> list = new ArrayList<>();
-
-            list = dataSource.getAllSpielerAbsteigendTeilnahme();
-            TrainingFragment.setSpielerList(list);
-
-
-            //Spielerauswahl
-            if (context.fragment == null) {
-                context.fm = context.getSupportFragmentManager();
-                context.fragment = new TrainingTunierSpielerauswahlFragment(context, list, onSpielerClickListener);
-                context.fm.beginTransaction().add(R.id.fragment_training_spielerauswahl_fragmentContainer, context.fragment).commitAllowingStateLoss();
-            } else {
-                context.fm.beginTransaction().replace(R.id.fragment_training_spielerauswahl_fragmentContainer, new TrainingTunierSpielerauswahlFragment(context, list, onSpielerClickListener)).commitAllowingStateLoss();
-            }
-
-
-            //Kostenlos-Switch
-
-            holder.kostenlosSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-
-                    if (isChecked) {
-                        kostenlos = isChecked;
-                        holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
-                        holder.editTextPlatzkosten.setText("");
-                        holder.editTextPlatzkosten.setEnabled(false);
-                        holder.editTextPlatzkosten.setFocusable(false);
-
-                        holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView.getLayoutParams().width, 72));
-                        holder.cardView.setMinimumHeight(72);
-
-                        LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
-                        layoutParams.setMargins(16, 32, 16, 0);
-
-                        holder.cardView.requestLayout();
-
-                    } else {
-                        kostenlos = false;
-                        holder.editTextPlatzkosten.setEnabled(true);
-                        holder.editTextPlatzkosten.setFocusableInTouchMode(true);
-
-                        holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView.getLayoutParams().width, 256));
-                        holder.cardView.setMinimumHeight(256);
-
-                        LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
-                        layoutParams.setMargins(16, 32, 16, 0);
-
-                        holder.cardView.requestLayout();
-                        setBetragJeSpieler();
-                    }
-                }
-            });
-
-            //Spieltag-Button
-            holder.buttonAddSpieltag.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onSpieltagButtonClick(v);
-                }
-            });
-
-
-            //Textformat Platzkosten
-            holder.editTextPlatzkosten.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    Utilities.formatNumericEditText(holder.editTextPlatzkosten);
-                    setBetragJeSpieler();
-
-                }
-            });
-
-            //Platzkosten aus Einstellungen
-
-            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.context);
-            String einstellungen_platzkosten = "einstellungen_platzkosten";
-            String platzkostenEinstellungen = sharedPrefs.getString(einstellungen_platzkosten, "");
-            if (platzkostenEinstellungen != null) {
-                if (!platzkostenEinstellungen.isEmpty()) {
-                    if (Double.parseDouble(platzkostenEinstellungen) > 0) {
-                        holder.editTextPlatzkosten.setText(df.format(Float.valueOf(platzkostenEinstellungen.replace(",", "."))).replace('.', ','));
-                        setBetragJeSpieler();
-                    }
-                }
-            }
-            //Map
-
-            if (holder.mapView != null) {
-                // Initialise the MapView
-                holder.mapView.onCreate(null);
-                // Set the map ready callback to receive the GoogleMap object
-                holder.mapView.getMapAsync(this);
-            }
-
-            setMapLocation();
-        }
-
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            MapsInitializer.initialize(context);
-            holder.map = googleMap;
-            setMapLocation();
-            holder.map.getUiSettings().setMapToolbarEnabled(false);
-
-        }
-
-
-        private void setMapLocation() {
-            if (holder.map == null) return;
-
-            NamedLocation data = new NamedLocation("BUGAPotsdam", new LatLng(52.4124881, 13.0491085));
-
-            if (data == null) return;
-
-            // Add a marker for this item and set the camera
-            holder.map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.location, 13f));
-            holder.map.addMarker(new MarkerOptions().position(data.location));
-
-            // Set the map type back to normal.
-            holder.map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        }
-
-
-        @Override
-        public int getItemCount() {
-            return 1;
-        }
-
-
-        public void onSpieltagButtonClick(View v) {
-
-            if (!holder.editTextPlatzkosten.getText().toString().isEmpty())
-                platzkosten = Float.parseFloat(holder.editTextPlatzkosten.getText().toString().replace(',', '.'));
-            else
-                platzkosten = 0;
-
-            long trainings_id;
-            DataSource dataSource = DataSource.getInstance();
-            dataSource.open();
-
-            if (dataSource.getNeustesTrainingsID() != -999) {
-                trainings_id = dataSource.getNeustesTrainingsID() + 1;
-            } else
-                trainings_id = 1;
-
-
-//
-//        InputMethodManager inputMethodManager;
-//        inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-//
-//        if (getCurrentFocus() != null) {
-//            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-//        }
-
-            if (selectedSpieler.size() > 0 && platzkosten > 0 && !kostenlos) {
-
-                bu_btr = platzkosten / selectedSpieler.size();
-
-                //Datenbank-Einträge erzeugen
-
-                for (Spieler s : selectedSpieler) {
-
-                    new SpieltagBuchenAsyncTask(this, s).execute();
-                    dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), s.getU_id(), null);
-                }
-
-                new SpielerauswahlBefuellenAsyncTask(context, (TrainingTunierActivity) getActivity(), holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-                Toast toast = Toast.makeText(context, "Der Spieltag wurde gebucht.", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.show();
-                holder.editTextPlatzkosten.setText("");
-                holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
-                holder.kostenlosSwitch.setChecked(false);
-
-            } else if (selectedSpieler.size() <= 0) {
-
-                Toast toast = Toast.makeText(context, "Es wurde kein Spieler ausgewählt.", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.show();
-
-            } else if (platzkosten <= 0 && !kostenlos) {
-
-                Toast toast = Toast.makeText(context, "Die Platzkosten wurden nicht erfasst", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.show();
-
-            } else if (platzkosten > 0 && kostenlos) {
-
-                Toast toast = Toast.makeText(context, "Es wurden Platzkosten erfasst, obwohl >Kostenlos< gewählt wurde.", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.show();
-
-            } else if (platzkosten <= 0 && kostenlos) {
-
-                for (Spieler s : selectedSpieler) {
-
-                    new SpieltagBuchenAsyncTask(this, s).execute();
-                    dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), s.getU_id(), "X");
-
-                }
-
-                new SpielerauswahlBefuellenAsyncTask(context, (TrainingTunierActivity) getActivity(), holder).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-                Toast toast = Toast.makeText(this.context, "Der kostenlose Spieltag wurde gebucht. Trainigsteilnahmen aktualisiert", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.show();
-
-                holder.kostenlosSwitch.setChecked(false);
-            }
-        }
-
-        public void setBetragJeSpieler() {
-
-            System.out.println("setBetragJeSpieler");
-            if (!holder.editTextPlatzkosten.getText().toString().isEmpty()) {
-                double platzkosten = Double.valueOf(holder.editTextPlatzkosten.getText().toString().replace(',', '.'));
-                int anzahl = selectedSpieler.size();
-
-                if (anzahl > 0) {
-
-                    double betragDouble = platzkosten / anzahl;
-                    holder.betragJeSpieler.setText(df.format(betragDouble).replace('.', ','));
-                } else
-                    holder.betragJeSpieler.setText(df.format(platzkosten).replace('.', ','));
-            } else
-                holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
-        }
-
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-
-            private Button buttonAddSpieltag;
-            private EditText editTextPlatzkosten;
-            private TextView betragJeSpieler;
-            private Switch kostenlosSwitch;
-            private CardView cardView;
-            private MapView mapView;
-            private GoogleMap map;
-
-            ViewHolder(View view) {
-                super(view);
-                buttonAddSpieltag = view.findViewById(R.id.fragment_training_button_add_spieltag);
-                editTextPlatzkosten = view.findViewById(R.id.fragment_training_editText_platzkosten);
-                betragJeSpieler = view.findViewById(R.id.fragment_training_textview_betrag_je_spieler);
-                kostenlosSwitch = view.findViewById(R.id.fragment_training_kostenlosSwitch);
-                cardView = view.findViewById(R.id.fragment_training_cardVieW_platzkosten);
-                mapView = view.findViewById(R.id.fragment_training_mapView);
-            }
-
-        }
-
-    }
-
 }

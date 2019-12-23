@@ -15,15 +15,15 @@ public class EinstellungenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // View-Elemente aus XML-Layout Datei erzeugen lassen
         setContentView(R.layout.activity_einstellungen);
 
-        // Initialisieren der App Bar und Aktivieren des Up-Buttons
         Toolbar toolbar = findViewById(R.id.toolbar_settings_activity);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getString(R.string.einstellungen));
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getString(R.string.einstellungen));
+        }
 
     }
 

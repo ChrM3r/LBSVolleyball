@@ -1,8 +1,17 @@
 <resources>
+
+    <string name="API_KEY">AIzaSyBZNYEUwq0cg9s6jxKtKWwENI1wyvF977k</string>
+    <string name="APP_VERSION">Version 0.19.12 Build 23122019</string>
     <string name="app_name">LBS Volleyball</string>
 
     <string name="spieltag">Spieltag</string>
+    <string name="spieltag_anlegen">Spieltag anlegen</string>
     <string name="spielerverwaltung">Spielerverwaltung</string>
+    <string name="spieler">Spieler</string>
+    <string name="kalender">Kalender</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="trainingsortverwaltung">Trainingsortverwaltung</string>
+    <string name="trainingsort">Trainingsorte</string>
     <string name="trainingsuebersicht">Trainingsübersicht</string>
     <string name="einstellungen">Einstellungen</string>
     <string name="export">Export</string>
@@ -11,11 +20,17 @@
     <string name="editText_hint_name">Name</string>
     <string name="editText_hint_vname">Vorname</string>
     <string name="editText_hint_bdate">Geburtstag</string>
+    <string name="editText_hint_strasse">Straße</string>
+    <string name="editText_hint_plz">Postleitzahl</string>
+    <string name="editText_hint_ort">Ort</string>
     <string name="editText_mail">E-Mail</string>
     <string name="editText_hint_platzkosten">20,00</string>
-    <string name="textView_platzkosten">Platzkosten</string>
+    <string name="textView_platzkosten">Wieviel wurde bezahlt?</string>
+    <string name="textView_platzkosten_2">Platzkosten</string>
     <string name="textView_tunierkosten">Tunierkosten</string>
     <string name="textView_spieltag">Spieltag</string>
+    <string name="textView_Ort">Ort</string>
+    <string name="textView_Teilnehmer">Teilnehmer</string>
     <string name="textView_spielerverwaltung">Spielerverwaltung</string>
     <string name="textView_wer_gespielt">Wer hat gespielt?</string>
     <string name="textView_wo_gespielt">Wo wurde gespielt?</string>
@@ -26,12 +41,22 @@
     <string name="textView_kto_saldo_neu">Kontosaldo</string>
     <string name="textView_kto_saldo_aktuell">Aktueller Kontostand:</string>
     <string name="textView_teilnahmen">Trainingsteilnahmen:</string>
+    <string name="textView_besuche">Trainings an diesem Ort:</string>
     <string name="textView_keine_spieler">Es sind noch keine Spieler eingerichtet.</string>
+    <string name="textView_auswahl">Auswahl:</string>
+
 
     <string name="sort_vorname">Vorname</string>
     <string name="sort_nachmane">Nachname</string>
     <string name="sort_teilnahmen">Teilnahmen</string>
-
+    <string name="export_spieler">Spieler exportieren</string>
+    <string name="import_spieler">Spieler importieren</string>
+    <string name="export_buchung">Buchungen exportieren</string>
+    <string name="import_buchung">Buchungen importieren</string>
+    <string name="export_training">Trainings exportieren</string>
+    <string name="import_training">Trainings importieren</string>
+    <string name="export_trainingsort">Trainingsorte exportieren</string>
+    <string name="import_trainingsort">Trainingsorte importieren</string>
 
     <string name="tab_grunddaten">Grunddaten</string>
     <string name="tab_kontodaten">Kontoübersicht</string>
@@ -54,11 +79,19 @@
     <string name="button_spieler_aendern">Spieler ändern</string>
     <string name="button_speichern">Speichern</string>
     <string name="button_spieler_loeschen">Spieler löschen</string>
+    <string name="button_trainingsort_anlegen">Trainingsort anlegen</string>
+    <string name="button_trainingsort_aendern">Trainingsort ändern</string>
+    <string name="button_trainingsort_loeschen">Trainingsort löschen</string>
+
     <string name="betrag_0">0,00</string>
 
     <string name="button_add_player">+</string>
 
-    <string name="editText_errorMessage">Das Feld darf nicht leer sein.</string>
+    <string name="editText_errorMessage_empty">Das Feld darf nicht leer sein.</string>
+    <string name="editText_errorMessage_bdate">Das Feld muss ein Datum im Format DD.MM.JJJJ enthalten.</string>
+
+    <string name="editText_errorMessageMail">Die Mail-Adresse muss ein @ sowie einen Punkt enthalten. </string>
+
 
     <string name="cab_delete">Einträge löschen</string>
 
@@ -69,10 +102,14 @@
     <string name="dialog_title_name">Name:</string>
     <string name="dialog_title_vname">Vorname:</string>
     <string name="dialog_title_bdate">Geburtstag:</string>
+    <string name="dialog_title_strasse">Straße/Nr.:</string>
+    <string name="dialog_title_plz">Postleitzahl:</string>
+    <string name="dialog_title_ort">Ort:</string>
+
     <string name="dialog_button_positive">Ändern</string>
     <string name="dialog_button_negative">Abbrechen</string>
 
-    <string name="dialog_title_add">Spieler anlegen</string>
+
     <string name="dialog_button_positive_add">Anlegen</string>
 
     <string name="pick_image_intent_text">Bild auswählen</string>
@@ -82,5 +119,20 @@
     <string name="dialogMessage_Ausgleichen">%s %s hat einen Kontostand von %s€. Bitte Konto vorher ausgleichen.</string>
     <string name="dialogMessage_wirklichLoeschen">Soll %s %s wirklich gelöscht werden? Diese Aktion kann nicht widerrufen werden.</string>
     <string name="dialogMessage_BuchenBeiLoeschen">%s %s hat einen Kontostand von %s€. Soll der Betrag ausgezahlt oder auf das Teamkonto überwiesen werden?</string>
+    <string name="hinzufuegen">hinzufügen</string>
+    <string name="_0">0</string>
+    <string name="todo">TODO</string>
+    <string name="max_mustermann">Max Mustermann</string>
+    <string name="max">Max</string>
+    <string name="mustermann">Mustermann</string>
+    <string name="funfor4_beachvolleyball">funfor4 Beachvolleyball</string>
+    <string name="georg_hermann_allee_105_14469_potsdam">Georg-Hermann-Allee 105, 14469 Potsdam</string>
+    <string name="buga_potsdam">BUGA Potsdam</string>
+    <string name="_24_99_eur">24,99 EUR</string>
+    <string name="volleyball_app">Volleyball-App</string>
+    <string name="teammitglieder">Teammitglieder</string>
+    <string name="_15">15</string>
+    <string name="teamkonto">Teamkonto</string>
+    <string name="_37_50">37,50</string>
 
 </resources>

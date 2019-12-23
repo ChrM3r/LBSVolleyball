@@ -1,5 +1,6 @@
 package eu.merscher.lbsvolleyball.controller;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
@@ -8,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -19,14 +19,13 @@ import eu.merscher.lbsvolleyball.model.Spieler;
 public class SpielerVerwaltungAdapter extends BaseAdapter implements ListAdapter {
 
     private final Context context;
-    private ArrayList<Spieler> spielerList = new ArrayList<Spieler>();
-    private ArrayList<String> spielerNamen = new ArrayList<String>();
-    private ArrayList<String> spielerGeburtstage = new ArrayList<String>();
-    private ArrayList<Bitmap> spielerFotos = new ArrayList<Bitmap>();
-    private ListView spielerListView;
+    private ArrayList<Spieler> spielerList;
+    private ArrayList<String> spielerNamen;
+    private ArrayList<String> spielerGeburtstage;
+    private ArrayList<Bitmap> spielerFotos;
 
 
-    public SpielerVerwaltungAdapter(ArrayList<Spieler> spielerList, ArrayList<String> spielerNamen, ArrayList<Bitmap> spielerFotos, ArrayList<String> spielerGeburtstage, Context context) {
+    SpielerVerwaltungAdapter(ArrayList<Spieler> spielerList, ArrayList<String> spielerNamen, ArrayList<Bitmap> spielerFotos, ArrayList<String> spielerGeburtstage, Context context) {
         this.spielerList = spielerList;
         this.spielerNamen = spielerNamen;
         this.spielerFotos = spielerFotos;
@@ -49,6 +48,7 @@ public class SpielerVerwaltungAdapter extends BaseAdapter implements ListAdapter
         return 0;
     }
 
+    @SuppressLint("InflateParams")
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;

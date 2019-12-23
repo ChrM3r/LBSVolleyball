@@ -25,7 +25,7 @@ public class SpielerseiteKontodatenFragment extends Fragment {
     }
 
 
-    public SpielerseiteKontodatenFragment(ArrayList<Buchung> buchungList, Spieler spieler) {
+    SpielerseiteKontodatenFragment(ArrayList<Buchung> buchungList, Spieler spieler) {
         this.buchungList = buchungList;
         this.spieler = spieler;
     }

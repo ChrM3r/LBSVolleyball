@@ -8,38 +8,44 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.DecimalFormat;
 
 import eu.merscher.lbsvolleyball.R;
-import eu.merscher.lbsvolleyball.model.Grunddaten;
 import eu.merscher.lbsvolleyball.model.Spieler;
 
 public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<SpielerseiteGrunddatenFragmentAdapter.ViewHolder> implements SpielerseiteKontodatenFragmentAdapter.OnBuchungListener {
 
 
     private static final DecimalFormat df = new DecimalFormat("0.00");
-    private final Grunddaten grunddaten;
+    private Spieler spieler;
+    private double kto_saldo_neu;
+    private int teilnahmen;
     private final LayoutInflater inflate;
     private ViewHolder holder;
     private static SpielerseiteKontodatenFragmentAdapter.OnBuchungListener onBuchungListener;
 
 
-    public static SpielerseiteKontodatenFragmentAdapter.OnBuchungListener getOnBuchungListener() {
+    static SpielerseiteKontodatenFragmentAdapter.OnBuchungListener getOnBuchungListener() {
         return onBuchungListener;
     }
 
-    public SpielerseiteGrunddatenFragmentAdapter(Context context, Grunddaten grunddaten) {
+    SpielerseiteGrunddatenFragmentAdapter(Context context, Spieler spieler, double kto_saldo_neu, int teilnahmen) {
         this.inflate = LayoutInflater.from(context);
-        Context context1 = context;
-        this.grunddaten = grunddaten;
+        this.spieler = spieler;
+        this.kto_saldo_neu = kto_saldo_neu;
+        this.teilnahmen = teilnahmen;
     }
 
     @Override
     public void onBuchung(String saldo) {
         holder.textViewKtoSaldo.setText(saldo.replace('.', ','));
     }
+
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
 
         View view = inflate.inflate(R.layout.fragment_spielerseite_grunddaten_item, parent, false);
         return new ViewHolder(view);
@@ -50,9 +56,8 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
 
         this.holder = holder;
         onBuchungListener = this;
-        String ktoSaldoAlsString = df.format(grunddaten.getKto_saldo_neu());
-        String teilnahmenAlsString = String.valueOf(grunddaten.getTeilnahmen());
-        Spieler spieler = grunddaten.getSpieler();
+        String ktoSaldoAlsString = df.format(kto_saldo_neu);
+        String teilnahmenAlsString = String.valueOf(teilnahmen);
 
         holder.textViewName.setText(spieler.getName());
         holder.textViewVname.setText(spieler.getVname());

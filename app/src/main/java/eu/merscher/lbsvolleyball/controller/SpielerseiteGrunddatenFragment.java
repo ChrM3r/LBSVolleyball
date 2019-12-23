@@ -9,8 +9,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Objects;
+
 import eu.merscher.lbsvolleyball.R;
-import eu.merscher.lbsvolleyball.model.Grunddaten;
 import eu.merscher.lbsvolleyball.model.Spieler;
 
 
@@ -19,7 +20,7 @@ public class SpielerseiteGrunddatenFragment extends Fragment {
     public SpielerseiteGrunddatenFragment() {
     }
 
-    public static SpielerseiteGrunddatenFragment newInstance(Spieler spieler, double kto_saldo_neu, int teilnahmen) {
+    static SpielerseiteGrunddatenFragment newInstance(Spieler spieler, double kto_saldo_neu, int teilnahmen) {
         SpielerseiteGrunddatenFragment fragment = new SpielerseiteGrunddatenFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable("spieler", spieler);
@@ -39,13 +40,12 @@ public class SpielerseiteGrunddatenFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_spielerseite_grunddaten_kontodaten, container, false);
 
-        spieler = getArguments().getParcelable("spieler");
+        spieler = Objects.requireNonNull(getArguments()).getParcelable("spieler");
         kto_saldo_neu = getArguments().getDouble("kto_saldo_neu");
         teilnahmen = getArguments().getInt("teilnahmen");
 
-        Grunddaten grunddaten = new Grunddaten(spieler, kto_saldo_neu, teilnahmen);
 
-        SpielerseiteGrunddatenFragmentAdapter adapter = new SpielerseiteGrunddatenFragmentAdapter(getActivity(), grunddaten);
+        SpielerseiteGrunddatenFragmentAdapter adapter = new SpielerseiteGrunddatenFragmentAdapter(getActivity(), spieler, kto_saldo_neu, teilnahmen);
         RecyclerView recyclerView = rootView.findViewById(R.id.fragment_spielerseite_recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));

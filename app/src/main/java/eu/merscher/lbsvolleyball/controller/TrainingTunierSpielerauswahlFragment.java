@@ -3,7 +3,6 @@ package eu.merscher.lbsvolleyball.controller;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,7 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.lang.ref.WeakReference;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 import eu.merscher.lbsvolleyball.R;
@@ -32,32 +32,18 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
     private ArrayList<Spieler> spielerList;
     private OnSpielerClickListener onSpielerClickListener;
     private TrainingTunierActivity context;
+    private String sortierungUser;
 
     public TrainingTunierSpielerauswahlFragment() {
     }
 
-    public TrainingTunierSpielerauswahlFragment(TrainingTunierActivity context, ArrayList<Spieler> spielerList, OnSpielerClickListener onSpielerClickListener) {
+    TrainingTunierSpielerauswahlFragment(TrainingTunierActivity context, ArrayList<Spieler> spielerList, OnSpielerClickListener onSpielerClickListener, String sortierungUser) {
         this.context = context;
         this.spielerList = spielerList;
         this.onSpielerClickListener = onSpielerClickListener;
+        this.sortierungUser = sortierungUser;
 
     }
-
-    public static TrainingTunierSpielerauswahlFragment newInstance(ArrayList<Spieler> spielerList) {
-        TrainingTunierSpielerauswahlFragment fragment = new TrainingTunierSpielerauswahlFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("spielerList", spielerList);
-        fragment.setArguments(bundle);
-
-        return fragment;
-    }
-
-//    public TrainingTunierSpielerauswahlFragment(TrainingTunierActivity context, ArrayList<Spieler> spielerList, OnSpielerClickListenerInFragment onSpielerClickListenerInFragment) {
-//        this.context = context;
-//        this.spielerList = spielerList;
-//        this.onSpielerClickListenerInFragment = onSpielerClickListenerInFragment;
-//
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,8 +57,7 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
         recyclerView.setAdapter(new TrainingTunierSpielerauswahlFragmentAdapter(context, spielerList, onSpielerClickListener));
-
-            recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(layoutManager);
 
         return rootView;
 
@@ -83,45 +68,36 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
         void onSpielerClick();
     }
 
-    static class GetSpielerAndStartSpielerseiteAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
+    private void getSpielerUndStartSpielerseite(String sortierungUser, int position) {
 
+        ArrayList<Spieler> spielerList;
 
-        public final WeakReference<TrainingTunierActivity> activityReference;
-        private final int position;
-        private ArrayList<Spieler> spielerList = new ArrayList<>();
+        DataSource dataSource = DataSource.getInstance();
+        dataSource.open();
 
-        GetSpielerAndStartSpielerseiteAsyncTask(TrainingTunierActivity context, int position) {
-            activityReference = new WeakReference<>(context);
-            this.position = position;
+        switch (sortierungUser) {
 
+            default: {
+                spielerList = dataSource.getAllSpielerAbsteigendTeilnahme();
+                break;
+            }
+            case "vname": {
+                spielerList = dataSource.getAllSpielerAlphabetischVname();
+                break;
+            }
+            case "name": {
+                spielerList = dataSource.getAllSpielerAlphabetischName();
+                break;
+            }
         }
 
-        @Override
-        protected ArrayList<Spieler> doInBackground(Void... args) {
+        Spieler spieler = spielerList.get(position);
 
-            DataSource dataSource = DataSource.getInstance();
-            dataSource.open();
+        Intent data = new Intent(context, SpielerseiteActivity.class);
+        data.putExtra("spieler", spieler);
 
-            spielerList = dataSource.getAllSpielerAbsteigendTeilnahme();
-            return spielerList;
-        }
+        context.startActivity(data);
 
-        @Override
-        public void onPostExecute(ArrayList<Spieler> result) {
-
-            TrainingTunierActivity activity = activityReference.get();
-
-            if (activity == null || activity.isFinishing()) return;
-
-            spielerList = result;
-
-            Spieler spieler = spielerList.get(position);
-
-            Intent data = new Intent(activity, SpielerseiteActivity.class);
-            data.putExtra("spieler", spieler);
-            activity.startActivity(data);
-
-        }
     }
 
     public class TrainingTunierSpielerauswahlFragmentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -139,23 +115,18 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
 
         }
 
+        @NotNull
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
 
 
-            switch (viewType) {
-                case 0:
-                    View view1 = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_training_tunier_spielerauswahl_item, parent, false);
-                    return new SpielerauswahlViewHolder(view1);
-
-                case 1:
-                    View view2 = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_training_tunier_spielerauswahl_item_button, parent, false);
-                    return new AddSpielerViewHolder(view2);
-
-                default:
-                    View view3 = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_training_tunier_spielerauswahl_item, parent, false);
-                    return new SpielerauswahlViewHolder(view3);
+            if (viewType == 1) {
+                View view2 = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_training_tunier_spielerauswahl_item_button, parent, false);
+                return new AddSpielerViewHolder(view2);
             }
+
+            View view1 = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_training_tunier_spielerauswahl_item, parent, false);
+            return new SpielerauswahlViewHolder(view1);
         }
 
         @Override
@@ -185,54 +156,27 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
                     }
 
 
-                    holder1.spielerBild.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            selectSpieler(holder1, position);
-
-                            onSpielerClickListener.onSpielerClick();
-
-                        }
+                    holder1.spielerBild.setOnClickListener(v -> {
+                        selectSpieler(holder1, position);
+                        onSpielerClickListener.onSpielerClick();
                     });
 
 
-                    holder1.textViewName.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            selectSpieler(holder1, position);
-                            System.out.println("Test davor");
-                            onSpielerClickListener.onSpielerClick();
-                            System.out.println("Test dannach");
-
-                        }
+                    holder1.textViewName.setOnClickListener(v -> {
+                        selectSpieler(holder1, position);
+                        onSpielerClickListener.onSpielerClick();
                     });
 
-                    holder1.textViewVname.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            selectSpieler(holder1, position);
-                            onSpielerClickListener.onSpielerClick();
-
-                        }
+                    holder1.textViewVname.setOnClickListener(v -> {
+                        selectSpieler(holder1, position);
+                        onSpielerClickListener.onSpielerClick();
                     });
 
-                    holder1.checkBox.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            selectSpieler(holder1, position);
-                            onSpielerClickListener.onSpielerClick();
-
-                        }
+                    holder1.checkBox.setOnClickListener(v -> {
+                        selectSpieler(holder1, position);
+                        onSpielerClickListener.onSpielerClick();
                     });
 
-//
-//                holder1.spielerBild.setOnLongClickListener(new View.OnLongClickListener() {
-//                    @Override
-//                    public boolean onLongClick(View v) {
-//                        new GetSpielerAndStartSpielerseiteAsyncTask(context, position).execute();
-//                        return true;
-//                    }
-//                });
 
                     holder1.spielerBild.setOnTouchListener(new View.OnTouchListener() {
 
@@ -244,7 +188,7 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
                                 then = System.currentTimeMillis();
                             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if ((System.currentTimeMillis() - then) > 1200) {
-                                    new GetSpielerAndStartSpielerseiteAsyncTask(context, position).execute();
+                                    getSpielerUndStartSpielerseite(sortierungUser, position);
                                     onSpielerClickListener.onSpielerClick();
                                     return true;
                                 }
@@ -256,14 +200,11 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
 
                 case 1:
                     AddSpielerViewHolder holder2 = (AddSpielerViewHolder) holder;
-                    holder2.button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            onSpielerClickListener.onSpielerClick();
-                            Intent intent = new Intent(context, AddSpielerActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            context.startActivity(intent);
-                        }
+                    holder2.button.setOnClickListener(v -> {
+                        onSpielerClickListener.onSpielerClick();
+                        Intent intent = new Intent(context, AddSpielerActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        context.startActivity(intent);
                     });
                     break;
             }
@@ -275,6 +216,7 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
         }
 
         private void selectSpieler(final SpielerauswahlViewHolder holder, final int position) {
+
             if (TrainingFragment.spielerIstSelected(spielerList.get(position))) {
                 holder.checkBox.setChecked(false);
                 TrainingFragment.uncheckSelectedSpieler(spielerList.get(position));
@@ -285,15 +227,15 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
         }
 
 
-        public class SpielerauswahlViewHolder extends RecyclerView.ViewHolder {
+        class SpielerauswahlViewHolder extends RecyclerView.ViewHolder {
 
-            public final TextView textViewName;
-            public final TextView textViewVname;
-            public final ImageView spielerBild;
-            public final CheckBox checkBox;
+            final TextView textViewName;
+            final TextView textViewVname;
+            final ImageView spielerBild;
+            final CheckBox checkBox;
 
 
-            public SpielerauswahlViewHolder(View v) {
+            SpielerauswahlViewHolder(View v) {
                 super(v);
                 textViewName = v.findViewById(R.id.activity_spieltag_spielerauswahl_item_name);
                 textViewVname = v.findViewById(R.id.activity_spieltag_spielerauswahl_item_vname);
@@ -306,14 +248,10 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
 
             public final FloatingActionButton button;
 
-            public AddSpielerViewHolder(View v) {
+            AddSpielerViewHolder(View v) {
                 super(v);
                 button = v.findViewById(R.id.training_tunier_spielerauswahl_item_button);
             }
         }
-
-
     }
-
-
 }

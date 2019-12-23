@@ -18,12 +18,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -31,6 +32,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +48,8 @@ public class AddSpielerActivity extends AppCompatActivity {
 
     private static String userFotoAlsString = null;
     private ImageView spielerBild;
+    private boolean boolZurueck;
+    private AddSpieler addSpieler;
 
     protected static String getUserFotoAlsString() {
         return userFotoAlsString;
@@ -62,10 +67,12 @@ public class AddSpielerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_edit_spieler);
+        setContentView(R.layout.activity_add_spieler);
 
         setTitle(R.string.button_spieler_anlegen);
 
+        //Zurück-Zähler wieder default setzen
+        boolZurueck = false;
         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit);
         Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit);
         TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit);
@@ -73,6 +80,7 @@ public class AddSpielerActivity extends AppCompatActivity {
         FloatingActionButton fotoLoeschenButton = findViewById(R.id.activity_add_edit_spieler_foto_loeschen_button);
         ViewPager viewPager = findViewById(R.id.add_edit_viewpager);
         spielerBild = findViewById(R.id.spielerbild_groß_add_edit);
+        Button spieler_add_button = findViewById(R.id.fragement_add_spieler_button);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
 
@@ -80,62 +88,69 @@ public class AddSpielerActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        spielerBild.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bildAusGalerieAuswaehlen();
-            }
+        spielerBild.setOnClickListener(v -> bildAusGalerieAuswaehlen());
+
+        fotoAddButton.setOnClickListener(v -> bildAusGalerieAuswaehlen());
+
+        fotoLoeschenButton.setOnClickListener(v -> {
+            spielerBild.setImageResource(R.drawable.avatar_m);
+            setUserFotoAlsString("geloescht");
+
         });
 
-        fotoAddButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bildAusGalerieAuswaehlen();
-            }
-        });
-
-        fotoLoeschenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                spielerBild.setImageResource(R.drawable.avatar_m);
-                setUserFotoAlsString("geloescht");
-
-            }
-        });
 
         AddSpielerActivityPagerAdapter adapter = new AddSpielerActivityPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
+
+
+        spieler_add_button.setOnClickListener(v -> {
+
+            addSpieler = adapter.getAddSpielerFragment().getAddSpielerFragmentAdapter().getViewHolder();
+            addSpieler.onAddSpieler();
+        });
     }
 
     //Zurück-Button
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        boolZurueck = false;
+
+        if (item.getItemId() == android.R.id.home) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(AddSpielerActivity.this);
+
+            dialog.setTitle("Achtung")
+                    .setMessage(("Alle ungespeicherten Eingaben gehen verloren"))
+                    .setNegativeButton("Abbrechen", (dialog1, which) -> {
+                        dialog1.cancel();
+                        boolZurueck = false;
+                    })
+                    .setPositiveButton("Ok", (dialog2, i) -> {
+                        onBackPressed();
+                        boolZurueck = true;
+                    }).show();
+            return boolZurueck;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 
+        super.onActivityResult(requestCode, resultCode, data);
+
         ProgressDialog progressDialog = ProgressDialog.show(this,
                 "Einen kleinen Augenblick",
                 "");
 
         if (resultCode == Activity.RESULT_OK)
-            switch (requestCode) {
-                case 1:
+            if (requestCode == 1) {
                 Uri selectedImage = data.getData();
 
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
-                Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                cursor.moveToFirst();
+                Cursor cursor = getContentResolver().query(Objects.requireNonNull(selectedImage), filePathColumn, null, null, null);
+                Objects.requireNonNull(cursor).moveToFirst();
 
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 
@@ -155,7 +170,7 @@ public class AddSpielerActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                    this.spielerBild.setImageBitmap(spielerBild);
+                this.spielerBild.setImageBitmap(spielerBild);
                 cursor.close();
             }
         progressDialog.dismiss();
@@ -182,7 +197,7 @@ public class AddSpielerActivity extends AppCompatActivity {
         private final WeakReference<AddSpielerActivity> activityReference;
         private Bitmap spielerBild;
 
-        public UserFotoUmspeichernAsyncTask(AddSpielerActivity context, Bitmap spielerBild) {
+        private UserFotoUmspeichernAsyncTask(AddSpielerActivity context, Bitmap spielerBild) {
             activityReference = new WeakReference<>(context);
             this.spielerBild = spielerBild;
 
@@ -223,16 +238,23 @@ public class AddSpielerActivity extends AppCompatActivity {
     public class AddSpielerActivityPagerAdapter extends FragmentPagerAdapter {
 
         private final Context context;
+        private FragmentManager fm;
 
-        public AddSpielerActivityPagerAdapter(Context context, FragmentManager fm) {
-            super(fm);
+        AddSpielerFragment getAddSpielerFragment() {
+            return (AddSpielerFragment) fm.findFragmentById(0);
+        }
+
+        AddSpielerActivityPagerAdapter(Context context, FragmentManager fm) {
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+            this.fm = fm;
             this.context = context;
         }
 
+        @NotNull
         @Override
-        public Fragment getItem(int position) {
-            AddSpielerFragment fragment = new AddSpielerFragment();
-            return fragment;
+
+        public AddSpielerFragment getItem(int position) {
+            return new AddSpielerFragment();
         }
 
         @Override
@@ -245,7 +267,9 @@ public class AddSpielerActivity extends AppCompatActivity {
             return context.getString(R.string.tab_grunddaten);
 
         }
+    }
 
-
+    public interface AddSpieler {
+        void onAddSpieler();
     }
 }

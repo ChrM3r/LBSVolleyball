@@ -1,5 +1,6 @@
 package eu.merscher.lbsvolleyball.controller;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
@@ -10,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -23,6 +23,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -56,157 +58,143 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        ViewHolder holder1 = holder;
         dataSource = DataSource.getInstance();
 
         holder.ueberschrift1.setGravity(Gravity.CENTER);
         holder.ueberschrift2.setGravity(Gravity.CENTER);
         holder.ueberschrift3.setGravity(Gravity.CENTER);
 
-        holder.auszahlungSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    auszahlung = isChecked;
-                    setAuszahlungInText(holder);
-                } else {
-                    auszahlung = false;
-                    setAuszahlungInText(holder);
-                }
-            }
-        });
-
-        holder.editTextAddBuchung.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-
-                Utilities.formatNumericEditText(holder.editTextAddBuchung);
+        holder.auszahlungSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                auszahlung = true;
+                setAuszahlungInText(holder);
+            } else {
+                auszahlung = false;
                 setAuszahlungInText(holder);
             }
         });
 
-        holder.buttonAddBuchung.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        holder.editTextAddBuchung.setOnFocusChangeListener((v, hasFocus) -> {
 
-                Toast toastError;
-                if (holder.editTextAddBuchung.getText().toString().isEmpty()) {
-                    toastError = Toast.makeText(context, "Es wurde kein Betrag zum Buchen erfasst!", Toast.LENGTH_SHORT);
-                    toastError.setGravity(Gravity.BOTTOM, 0, 0);
-                    toastError.show();
-                } else {
+            Utilities.formatNumericEditText(holder.editTextAddBuchung);
+            setAuszahlungInText(holder);
+        });
 
-                    DecimalFormat df = new DecimalFormat("0.00");
+        holder.buttonAddBuchung.setOnClickListener(view -> {
 
-                    String bu_btr_String = df.format(Double.parseDouble(holder.editTextAddBuchung.getText().toString().replace(',', '.')));
-                    double bu_btr = Double.parseDouble(bu_btr_String.replace(',', '.'));
-                    double kto_saldo_alt;
-                    double kto_saldo_neu;
+            Toast toastError;
+            if (holder.editTextAddBuchung.getText().toString().isEmpty()) {
+                toastError = Toast.makeText(context, "Es wurde kein Betrag zum Buchen erfasst!", Toast.LENGTH_SHORT);
+                toastError.setGravity(Gravity.BOTTOM, 0, 0);
+                toastError.show();
+            } else {
 
+                DecimalFormat df = new DecimalFormat("0.00");
 
-                    Calendar kalender = Calendar.getInstance();
-                    SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy");
-
-
-                    System.out.println(spieler.getName() + " " + spieler.getHat_buchung_mm() + " " + spieler.getTeilnahmen());
-                    dataSource.open();
-
-                    if (spieler.getHat_buchung_mm() != null) { //Wenn Buchungen für den Spieler vorhanden sind...
-
-                        System.out.println("1");
-                        Buchung buchung = dataSource.getNeusteBuchungZuSpieler(spieler);
-
-                        kto_saldo_alt = buchung.getKto_saldo_neu(); //der vorherige Kto_Saldo_neu ist der neue Kto_Saldo_alt
-                        kto_saldo_neu = kto_saldo_alt + bu_btr;
-                        dataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
-
-                    } else { //Wenn keine Buchung vorhaden ist, ist der Startsaldo 0
-
-                        System.out.println("2");
-
-                        kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
-                        kto_saldo_neu = kto_saldo_alt + bu_btr;
-                        dataSource.createBuchung(spieler.getU_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, "X", null);
-
-                    }
-                    spieler = dataSource.updateHatBuchungenMM(spieler);
-
-                    if (kto_saldo_neu < 5)
-                        new EMailSendenAsyncTask(spieler, df.format(kto_saldo_neu)).execute();
-
-                    Toast toast = Toast.makeText(context, "Buchung angelegt", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.BOTTOM, 0, 0);
-                    toast.show();
-
-                    ArrayList<Buchung> buchungListNeu = dataSource.getAllBuchungZuSpieler(spieler);
-                    SpielerseiteActivity.setBuchungList(buchungListNeu);
-
-                    if (buchungListNeu.size() > 5) {
-
-                        holder.mehrBuchungen.setVisibility(View.VISIBLE);
-                        holder.mehrBuchungenText.setVisibility(View.VISIBLE);
-                        holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
-                        holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 5));
-
-                        ArrayList<Buchung> buchungListKlein = new ArrayList<>();
-
-                        for (int i = 0; i < 5; i++) {
-                            buchungListKlein.add(buchungListNeu.get(i));
-                        }
-                        spielerKontoListViewAdapter.updateBuchungen(buchungListKlein);
-
-                        holder.mehrBuchungen.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                ArrayList<Buchung> buchungListGross = new ArrayList<>();
-
-                                if (!istAusgeklappt) {
-
-                                    istAusgeklappt = true;
-                                    holder.mehrBuchungen.setImageResource(R.drawable.icon_up_arrow);
-
-                                    if (buchungListNeu.size() > 10) {
-                                        for (int i = 0; i < 10; i++) {
-                                            buchungListGross.add(buchungListNeu.get(i));
-                                        }
-                                        spielerKontoListViewAdapter.updateBuchungen(buchungListGross);
-                                        holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 10));
-
-                                    } else {
-                                        spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
-                                        holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen)));
-                                    }
-
-                                } else {
-                                    ArrayList<Buchung> buchungListKleinNeu = new ArrayList<>();
-
-                                    istAusgeklappt = false;
-                                    holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
+                String bu_btr_String = df.format(Double.parseDouble(holder.editTextAddBuchung.getText().toString().replace(',', '.')));
+                double bu_btr = Double.parseDouble(bu_btr_String.replace(',', '.'));
+                double kto_saldo_alt;
+                double kto_saldo_neu;
 
 
-                                    for (int i = 0; i < 5; i++) {
-                                        buchungListKleinNeu.add(buchungListNeu.get(i));
-                                    }
-                                    spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
-                                    holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 5));
-                                }
-                            }
-                        });
-                    } else
-                        spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
+                Calendar kalender = Calendar.getInstance();
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy");
 
 
-                    //Kto_Saldo_Neu auf Grundseitenfragment aktualisieren
-                    onBuchungListener = SpielerseiteGrunddatenFragmentAdapter.getOnBuchungListener();
-                    onBuchungListener.onBuchung(df.format(dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu()));
+                System.out.println(spieler.getName() + " " + spieler.getHat_buchung_mm() + " " + spieler.getTeilnahmen());
+                dataSource.open();
 
-                    holder.editTextAddBuchung.setText("");
-                    holder.editTextAddBuchung.clearFocus();
-                    holder.buttonAddBuchung.requestFocus();
-                    holder.auszahlungSwitch.setChecked(false);
+                if (spieler.getHat_buchung_mm() != null) { //Wenn Buchungen für den Spieler vorhanden sind...
+
+                    System.out.println("1");
+                    Buchung buchung = dataSource.getNeusteBuchungZuSpieler(spieler);
+
+                    kto_saldo_alt = buchung.getKto_saldo_neu(); //der vorherige Kto_Saldo_neu ist der neue Kto_Saldo_alt
+                    kto_saldo_neu = kto_saldo_alt + bu_btr;
+                    dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999);
+
+                } else { //Wenn keine Buchung vorhaden ist, ist der Startsaldo 0
+
+                    System.out.println("2");
+
+                    kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
+                    kto_saldo_neu = kto_saldo_alt + bu_btr;
+                    dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999);
+
                 }
-            }
+                spieler = dataSource.updateHatBuchungenMM(spieler);
 
+                if (kto_saldo_neu < 5)
+                    new EMailSendenAsyncTask(spieler, df.format(kto_saldo_neu)).execute();
+
+                Toast toast = Toast.makeText(context, "Buchung angelegt", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 0);
+                toast.show();
+
+                ArrayList<Buchung> buchungListNeu = dataSource.getAllBuchungZuSpieler(spieler);
+                SpielerseiteActivity.setBuchungList(buchungListNeu);
+
+                if (buchungListNeu.size() > 5) {
+
+                    holder.mehrBuchungen.setVisibility(View.VISIBLE);
+                    holder.mehrBuchungenText.setVisibility(View.VISIBLE);
+                    holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
+                    holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 5));
+
+                    ArrayList<Buchung> buchungListKlein = new ArrayList<>();
+
+                    for (int i = 0; i < 5; i++) {
+                        buchungListKlein.add(buchungListNeu.get(i));
+                    }
+                    spielerKontoListViewAdapter.updateBuchungen(buchungListKlein);
+
+                    holder.mehrBuchungen.setOnClickListener(v -> {
+                        ArrayList<Buchung> buchungListGross = new ArrayList<>();
+
+                        if (!istAusgeklappt) {
+
+                            istAusgeklappt = true;
+                            holder.mehrBuchungen.setImageResource(R.drawable.icon_up_arrow);
+
+                            if (buchungListNeu.size() > 10) {
+                                for (int i = 0; i < 10; i++) {
+                                    buchungListGross.add(buchungListNeu.get(i));
+                                }
+                                spielerKontoListViewAdapter.updateBuchungen(buchungListGross);
+                                holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 10));
+
+                            } else {
+                                spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
+                                holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
+                            }
+
+                        } else {
+                            ArrayList<Buchung> buchungListKleinNeu = new ArrayList<>();
+
+                            istAusgeklappt = false;
+                            holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
+
+
+                            for (int i = 0; i < 5; i++) {
+                                buchungListKleinNeu.add(buchungListNeu.get(i));
+                            }
+                            spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
+                            holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 5));
+                        }
+                    });
+                } else
+                    spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
+
+
+                //Kto_Saldo_Neu auf Grundseitenfragment aktualisieren
+                onBuchungListener = SpielerseiteGrunddatenFragmentAdapter.getOnBuchungListener();
+                onBuchungListener.onBuchung(df.format(dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu()));
+
+                holder.editTextAddBuchung.setText("");
+                holder.editTextAddBuchung.clearFocus();
+                holder.buttonAddBuchung.requestFocus();
+                holder.auszahlungSwitch.setChecked(false);
+            }
         });
 
         if (buchungList.size() > 5) {
@@ -223,50 +211,44 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             spielerKontoListViewAdapter = new SpielerKontoListViewAdapter(context, buchungListKlein);
             holder.buchungListView.setAdapter(spielerKontoListViewAdapter);
 
-            holder.mehrBuchungen.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ArrayList<Buchung> buchungListGross = new ArrayList<>();
+            holder.mehrBuchungen.setOnClickListener(v -> {
+                ArrayList<Buchung> buchungListGross = new ArrayList<>();
 
-                    if (!istAusgeklappt) {
+                if (!istAusgeklappt) {
 
-                        istAusgeklappt = true;
-                        holder.mehrBuchungen.setImageResource(R.drawable.icon_up_arrow);
+                    istAusgeklappt = true;
+                    holder.mehrBuchungen.setImageResource(R.drawable.icon_up_arrow);
 
 
-                        if (buchungList.size() > 10) {
-                            for (int i = 0; i < 10; i++) {
-                                buchungListGross.add(buchungList.get(i));
-                            }
-                            spielerKontoListViewAdapter.updateBuchungen(buchungListGross);
-                            holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungList.size() - 10));
-
-                        } else {
-                            spielerKontoListViewAdapter.updateBuchungen(buchungList);
-                            holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen)));
+                    if (buchungList.size() > 10) {
+                        for (int i = 0; i < 10; i++) {
+                            buchungListGross.add(buchungList.get(i));
                         }
+                        spielerKontoListViewAdapter.updateBuchungen(buchungListGross);
+                        holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungList.size() - 10));
 
                     } else {
-                        ArrayList<Buchung> buchungListKleinNeu = new ArrayList<>();
-
-                        istAusgeklappt = false;
-                        holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
-                        holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungList.size() - 5));
-
-
-                        for (int i = 0; i < 5; i++) {
-                            buchungListKleinNeu.add(buchungList.get(i));
-                        }
-                        spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
-
+                        spielerKontoListViewAdapter.updateBuchungen(buchungList);
+                        holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
                     }
+
+                } else {
+                    ArrayList<Buchung> buchungListKleinNeu = new ArrayList<>();
+
+                    istAusgeklappt = false;
+                    holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
+                    holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungList.size() - 5));
+
+
+                    for (int i = 0; i < 5; i++) {
+                        buchungListKleinNeu.add(buchungList.get(i));
+                    }
+                    spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
+
                 }
             });
-            holder.mehrBuchungenText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            holder.mehrBuchungenText.setOnClickListener(v -> {
 
-                }
             });
         } else {
             spielerKontoListViewAdapter = new SpielerKontoListViewAdapter(context, buchungList);
@@ -288,8 +270,9 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         this.spieler = spieler;
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
 
         View view = inflate.inflate(R.layout.fragment_spielerseite_kontodaten_item, parent, false);
         return new ViewHolder(view);
@@ -420,23 +403,12 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
         private final DecimalFormat df = new DecimalFormat("0.00");
         private ArrayList<Buchung> buchungList;
-        private Activity activity;
-        private Fragment fragment;
+        private Activity activity = null;
+        private Fragment fragment = null;
         private Context context;
 
-        public SpielerKontoListViewAdapter(Activity activity, ArrayList<Buchung> buchungList) {
-            super();
-            this.activity = activity;
-            this.buchungList = buchungList;
-        }
 
-        public SpielerKontoListViewAdapter(Fragment fragment, ArrayList<Buchung> buchungList) {
-            super();
-            this.fragment = fragment;
-            this.buchungList = buchungList;
-        }
-
-        public SpielerKontoListViewAdapter(Context context, ArrayList<Buchung> buchungList) {
+        SpielerKontoListViewAdapter(Context context, ArrayList<Buchung> buchungList) {
             super();
             this.context = context;
             this.buchungList = buchungList;
@@ -457,6 +429,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             return position;
         }
 
+        @SuppressLint("InflateParams")
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -517,7 +490,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             return convertView;
         }
 
-        public void updateBuchungen(ArrayList<Buchung> list) {
+        void updateBuchungen(ArrayList<Buchung> list) {
             this.buchungList = list;
             notifyDataSetChanged();
         }

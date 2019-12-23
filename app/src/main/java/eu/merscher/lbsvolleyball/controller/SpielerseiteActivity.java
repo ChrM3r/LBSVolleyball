@@ -1,14 +1,12 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,7 +32,10 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -49,7 +50,7 @@ import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.DataSource;
 import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
-import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
+import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
 public class SpielerseiteActivity extends AppCompatActivity implements EditSpielerFragment.OnEditFinish {
@@ -66,9 +67,6 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
     private static EditSpielerFragment.OnEditFinish onEditFinish;
     private FloatingActionButton exportKontoButton;
 
-    public static ArrayList<Buchung> getBuchungList() {
-        return buchungList;
-    }
 
     public static void setBuchungList(ArrayList<Buchung> buchungList) {
         SpielerseiteActivity.buchungList = buchungList;
@@ -81,14 +79,12 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
     @Override
     public void onEditFinish() {
         this.finish();
-        System.out.println("JO HIER ISSER");
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spielerseite);
-
-        Context context = getApplicationContext();
 
         onEditFinish = this;
         resources = getResources();
@@ -114,7 +110,7 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
 
         final Toolbar toolbar = findViewById(R.id.htab_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         //Displaygröße ermittlen
@@ -126,7 +122,6 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
         //Spielerbild skalieren und setzen
         Bitmap spielerBildOriginal;
         Bitmap spielerBildScaled;
-        Uri uri;
 
 
         if (spieler.getFoto().equals("avatar_m"))
@@ -139,10 +134,10 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
         }
 
         if (spielerBildOriginal != null)
-            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+            spielerBildScaled = Utilities.scaleToFitWidth(spielerBildOriginal, width);
         else {
             spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
-            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+            spielerBildScaled = Utilities.scaleToFitWidth(spielerBildOriginal, width);
         }
         spielerBild.setImageBitmap(spielerBildScaled);
 
@@ -158,19 +153,16 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
             }
         });
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
 
             @Override
@@ -180,49 +172,33 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
             }
         });
 
 
+        editSpielerButton.setOnClickListener(v -> {
 
-        editSpielerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent = new Intent(SpielerseiteActivity.this, EditSpielerActivity.class);
-                intent.putExtra("spieler", spieler);
-                SpielerseiteActivity.this.startActivity(intent);
-            }
+            Intent intent = new Intent(SpielerseiteActivity.this, EditSpielerActivity.class);
+            intent.putExtra("spieler", spieler);
+            SpielerseiteActivity.this.startActivity(intent);
         });
 
-        exportKontoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        exportKontoButton.setOnClickListener(v -> {
 
-                AlertDialog.Builder dialog = new AlertDialog.Builder(SpielerseiteActivity.this);
+            AlertDialog.Builder dialog = new AlertDialog.Builder(SpielerseiteActivity.this);
 
-                dialog.setTitle("Kontoverlauf-Export")
-                        .setMessage("Kontoverlauf von "
-                                + spieler.getVname() + " " + spieler.getName()
-                                + " wird an " + spieler.getMail() + " gesendet.")
-                        .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        })
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int i) {
-                                new SpielerseiteActivity.EMailSendenAsyncTask(spieler, buchungList).execute();
-                                Toast toast = Toast.makeText(getApplicationContext(), "Der Kontoverlauf wurde per Mail zugestellt", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                                toast.show();
-                            }
-                        }).show();
+            dialog.setTitle("Kontoverlauf-Export")
+                    .setMessage("Kontoverlauf von "
+                            + spieler.getVname() + " " + spieler.getName()
+                            + " wird an " + spieler.getMail() + " gesendet.")
+                    .setNegativeButton("Abbrechen", (dialog1, which) -> dialog1.cancel())
+                    .setPositiveButton("Ok", (dialog12, i) -> {
+                        new EMailSendenAsyncTask(spieler, buchungList).execute();
+                        Toast toast = Toast.makeText(getApplicationContext(), "Der Kontoverlauf wurde per Mail zugestellt", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.BOTTOM, 0, 0);
+                        toast.show();
+                    }).show();
 
-            }
         });
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
@@ -241,19 +217,12 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
     }
 
     private void animateFab(int position) {
-        switch (position) {
-            case 0:
-                editSpielerButton.show();
-                exportKontoButton.hide();
-                break;
-            case 1:
-                editSpielerButton.hide();
-                exportKontoButton.show();
-                break;
-            default:
-                editSpielerButton.show();
-                exportKontoButton.hide();
-                break;
+        if (position == 1) {
+            editSpielerButton.hide();
+            exportKontoButton.show();
+        } else {
+            editSpielerButton.show();
+            exportKontoButton.hide();
         }
 
     }
@@ -298,8 +267,8 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
         private final int teilnahmen;
         private final Context context;
 
-        public SpielerseiteActivityPagerAdapter(Context context, Spieler spieler, ArrayList<Buchung> buchungList, double kto_saldo_neu, int teilnahmen, FragmentManager fm) {
-            super(fm);
+        SpielerseiteActivityPagerAdapter(Context context, Spieler spieler, ArrayList<Buchung> buchungList, double kto_saldo_neu, int teilnahmen, FragmentManager fm) {
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             this.spieler = spieler;
             this.buchungList = buchungList;
             this.kto_saldo_neu = kto_saldo_neu;
@@ -307,20 +276,19 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
             this.context = context;
         }
 
+        @NotNull
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                SpielerseiteGrunddatenFragment spielerseiteGrunddatenFragment = new SpielerseiteGrunddatenFragment().newInstance(spieler, kto_saldo_neu, teilnahmen);
-                return spielerseiteGrunddatenFragment;
+                return SpielerseiteGrunddatenFragment.newInstance(spieler, kto_saldo_neu, teilnahmen);
             } else {
-                SpielerseiteKontodatenFragment spielerseiteKontodatenFragment = new SpielerseiteKontodatenFragment(buchungList, spieler);
-                return spielerseiteKontodatenFragment;
+                return new SpielerseiteKontodatenFragment(buchungList, spieler);
             }
 
         }
 
         @Override
-        public int getItemPosition(Object o) {
+        public int getItemPosition(@NotNull Object o) {
             return POSITION_NONE;
         }
 
@@ -393,7 +361,7 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
                     StringBuilder stringBuilder = new StringBuilder();
 
                     for (Buchung b : buchungList) {
-                        stringBuilder.append(b + "\n");
+                        stringBuilder.append(b).append("\n");
                     }
 
                     msg.setText("Hi " + spieler.getVname()

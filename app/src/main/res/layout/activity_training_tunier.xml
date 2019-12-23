@@ -11,12 +11,6 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/viewpager_training_tunier"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/htab_appbar_training_tunier"
@@ -34,20 +28,6 @@
                 app:contentScrim="?attr/colorPrimary"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 app:titleEnabled="false">
-
-                <ImageView
-                    android:id="@+id/bild_groß_training_tunier"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fitsSystemWindows="true"
-                    android:scaleType="centerCrop"
-                    app:layout_collapseMode="parallax"
-                    app:layout_collapseParallaxMultiplier="0.75" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fitsSystemWindows="true" />
 
                 <androidx.appcompat.widget.Toolbar
                     android:id="@+id/htab_toolbar_training_tunier"
@@ -70,6 +50,12 @@
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
         </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewpager_training_tunier"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

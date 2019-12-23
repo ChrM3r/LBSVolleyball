@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,15 +27,15 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Spieler;
-import eu.merscher.lbsvolleyball.utilities.BitmapScaler;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
-
-import static eu.merscher.lbsvolleyball.controller.TrainingTunierActivity.resources;
 
 
 public class EditSpielerActivity extends AppCompatActivity implements View.OnClickListener, EditSpielerFragment.OnEditFinish {
@@ -58,46 +59,37 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_edit_spieler);
+        setContentView(R.layout.activity_edit_spieler);
 
         setTitle(R.string.button_spieler_aendern);
 
-        Spieler spieler = getIntent().getExtras().getParcelable("spieler");
+        Spieler spieler = Objects.requireNonNull(getIntent().getExtras()).getParcelable("spieler");
 
-        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit);
-        Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit);
-        TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit);
-        FloatingActionButton fotoAddButton = findViewById(R.id.activity_add_edit_spieler_foto_button);
-        FloatingActionButton fotoLoeschenButton = findViewById(R.id.activity_add_edit_spieler_foto_loeschen_button);
+        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_edit);
+        Toolbar toolbar = findViewById(R.id.htab_toolbar_edit);
+        TabLayout tabLayout = findViewById(R.id.htab_tabs_edit);
+        FloatingActionButton fotoAddButton = findViewById(R.id.activity_edit_spieler_foto_button);
+        FloatingActionButton fotoLoeschenButton = findViewById(R.id.activity_edit_spieler_foto_loeschen_button);
         ViewPager viewPager = findViewById(R.id.add_edit_viewpager);
-        spielerBild = findViewById(R.id.spielerbild_groß_add_edit);
+        spielerBild = findViewById(R.id.spielerbild_groß_edit);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        spielerBild.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bildAusGalerieAuswaehlen();
-            }
-        });
+        Button buttonSpielerAendern = findViewById(R.id.fragment_edit_spieler_button);
 
-        fotoAddButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bildAusGalerieAuswaehlen();
-            }
-        });
+        buttonSpielerAendern.setOnClickListener((View v) -> ((EditSpielerFragment) getSupportFragmentManager().getFragments().get(0)).getAdapter().getHolder().onSpielerSpeichernClick());
 
-        fotoLoeschenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                spielerBild.setImageResource(R.drawable.avatar_m);
-                setUserFotoAlsString("geloescht");
+        spielerBild.setOnClickListener(v -> bildAusGalerieAuswaehlen());
 
-            }
+        fotoAddButton.setOnClickListener(v -> bildAusGalerieAuswaehlen());
+
+        fotoLoeschenButton.setOnClickListener(v -> {
+            spielerBild.setImageResource(R.drawable.avatar_m);
+            setUserFotoAlsString("geloescht");
+
         });
 
         EditSpielerActivityPagerAdapter adapter = new EditSpielerActivityPagerAdapter(this, spieler, getSupportFragmentManager());
@@ -116,19 +108,18 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
 
         Bitmap spielerBildOriginal;
         Bitmap spielerBildScaled;
-        Uri uri;
 
-        if (spieler.getFoto().equals("avatar_m"))
-            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
+        if (Objects.requireNonNull(spieler).getFoto().equals("avatar_m"))
+            spielerBildOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.avatar_m);
         else {
             spielerBildOriginal = BitmapFactory.decodeFile(spieler.getFoto());
         }
 
         if (spielerBildOriginal != null)
-            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+            spielerBildScaled = Utilities.scaleToFitWidth(spielerBildOriginal, width);
         else {
-            spielerBildOriginal = BitmapFactory.decodeResource(resources, R.drawable.avatar_m);
-            spielerBildScaled = BitmapScaler.scaleToFitWidth(spielerBildOriginal, width);
+            spielerBildOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.avatar_m);
+            spielerBildScaled = Utilities.scaleToFitWidth(spielerBildOriginal, width);
         }
         spielerBild.setImageBitmap(spielerBildScaled);
     }
@@ -168,31 +159,32 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (resultCode == Activity.RESULT_OK)
-            switch (requestCode) {
-                case 1:
-                    Uri selectedImage = data.getData();
+            if (requestCode == 1) {
+                Uri selectedImage = data.getData();
 
-                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
-                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                    cursor.moveToFirst();
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                Cursor cursor = getContentResolver().query(Objects.requireNonNull(selectedImage), filePathColumn, null, null, null);
+                Objects.requireNonNull(cursor).moveToFirst();
 
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 
-                    userFotoAlsString = cursor.getString(columnIndex);
+                userFotoAlsString = cursor.getString(columnIndex);
 
-                    Uri uri;
-                    Bitmap spielerBildNeu = BitmapFactory.decodeFile(userFotoAlsString);
+                Uri uri;
+                Bitmap spielerBildNeu = BitmapFactory.decodeFile(userFotoAlsString);
 
-                    try {
-                        uri = Uri.fromFile(new File(userFotoAlsString));
-                        spielerBildNeu = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
-                        userFotoAlsString = Utilities.bildSpeichern(getApplicationContext(), spielerBildNeu);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    spielerBild.setImageBitmap(spielerBildNeu);
-                    cursor.close();
+                try {
+                    uri = Uri.fromFile(new File(userFotoAlsString));
+                    spielerBildNeu = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
+                    userFotoAlsString = Utilities.bildSpeichern(getApplicationContext(), spielerBildNeu);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                spielerBild.setImageBitmap(spielerBildNeu);
+                cursor.close();
             }
 
     }
@@ -203,17 +195,17 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
         private final Spieler spieler;
 
 
-        public EditSpielerActivityPagerAdapter(Context context, Spieler spieler, FragmentManager fm) {
-            super(fm);
+        EditSpielerActivityPagerAdapter(Context context, Spieler spieler, FragmentManager fm) {
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             this.spieler = spieler;
             this.context = context;
         }
 
 
+        @NotNull
         @Override
         public Fragment getItem(int position) {
-            EditSpielerFragment fragment = new EditSpielerFragment(spieler);
-            return fragment;
+            return new EditSpielerFragment(spieler);
         }
 
         // This determines the number of tabs
@@ -234,4 +226,5 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
 
 
     }
+
 }

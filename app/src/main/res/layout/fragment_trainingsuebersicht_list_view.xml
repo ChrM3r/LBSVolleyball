@@ -21,19 +21,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:text="Max Mustermann"
+            android:text="@string/max_mustermann"
             android:textColor="#1B1B1B"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/fragment_trainingsuebersicht_list_view_bdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="50dp"
-            android:text="01.01.0001"
-            android:textColor="#888888"
-            android:textSize="12sp" />
     </LinearLayout>
 
     <de.hdodenhof.circleimageview.CircleImageView

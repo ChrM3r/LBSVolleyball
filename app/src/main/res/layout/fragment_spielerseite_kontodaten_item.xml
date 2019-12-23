@@ -9,15 +9,16 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="128dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="10dp"
-        android:layout_marginEnd="8dp">
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="6dp">
 
         <TextView
             android:id="@+id/betrag_je_spieler2"
             android:layout_width="wrap_content"
             android:layout_height="20dp"
-            android:layout_gravity="start|top|left"
+            android:layout_gravity="start|top"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:fontFamily="sans-serif"
@@ -48,11 +49,11 @@
                 android:layout_marginTop="28dp"
                 android:layout_marginBottom="16dp"
                 android:layout_weight="3"
-                android:autoText="false"
                 android:digits="01234567890,"
                 android:ems="10"
                 android:fontFamily="sans-serif-light"
-                android:hint="0,00"
+                android:hint="@string/betrag_0"
+                android:importantForAutofill="no"
                 android:inputType="number"
                 android:singleLine="true"
                 android:textAlignment="textEnd"
@@ -80,6 +81,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/icon_plus_white"
             app:fabSize="mini" />
     </androidx.cardview.widget.CardView>
@@ -87,15 +89,17 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="150dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#AE1732">
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="#AE1732"
+        app:cardCornerRadius="6dp">
 
         <LinearLayout
             android:id="@+id/relativeLayout1"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:baselineAligned="false">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -152,7 +156,7 @@
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
                     android:background="@android:color/transparent"
-                    android:gravity="left"
+                    android:gravity="start"
                     android:padding="5dp"
                     android:text="@string/textView_kto_saldo_neu"
                     android:textAlignment="center"
@@ -177,7 +181,7 @@
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="8dp"
                     android:background="@android:color/transparent"
-                    android:gravity="left"
+                    android:gravity="start"
                     android:padding="5dp"
                     android:text="@string/textView_buchung_typ"
                     android:textAlignment="center"
@@ -195,9 +199,10 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="192dp"
-        android:layout_marginEnd="8dp">
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="6dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -222,6 +227,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="24dp"
                 android:background="@android:color/white"
+                android:contentDescription="@string/todo"
                 android:scaleType="centerInside"
                 android:src="@drawable/icon_down_arrow" />
 
@@ -230,7 +236,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="TextView"
                 android:textColor="#888888" />
         </LinearLayout>
 

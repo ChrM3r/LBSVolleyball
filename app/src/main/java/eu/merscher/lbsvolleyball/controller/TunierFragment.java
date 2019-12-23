@@ -35,10 +35,6 @@ public class TunierFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        TunierFragmentAdapter.getOnResume().onResumeInterface();
     }
 
-    public interface OnResume {
-        void onResumeInterface();
-    }
 }

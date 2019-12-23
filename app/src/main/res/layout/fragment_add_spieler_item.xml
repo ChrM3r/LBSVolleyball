@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".controller.AddSpielerFragment">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardview_add_spieler_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp">
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="6dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,10 +50,12 @@
                     android:layout_marginEnd="8dp"
                     android:layout_weight="3"
                     android:imeOptions="actionNext"
+                    android:importantForAutofill="no"
                     android:inputType="textCapSentences"
                     android:nextFocusDown="@id/editText_name_add"
                     android:textColor="#AE1732"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    tools:ignore="LabelFor" />
             </LinearLayout>
 
             <LinearLayout
@@ -69,7 +74,6 @@
                     android:layout_weight="1"
                     android:fontFamily="sans-serif"
                     android:gravity="end"
-                    android:inputType="text"
                     android:text="@string/dialog_title_name"
                     android:textColor="#888888"
                     android:textSize="14sp" />
@@ -79,14 +83,16 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="3"
                     android:imeOptions="actionNext"
+                    android:importantForAutofill="no"
                     android:inputType="textCapSentences"
                     android:nextFocusUp="@id/editText_vname_add"
                     android:nextFocusDown="@id/editText_bdate_add"
                     android:textColor="#AE1732"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    tools:ignore="LabelFor" />
             </LinearLayout>
 
             <LinearLayout
@@ -114,16 +120,17 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="3"
                     android:digits="0123456789."
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
                     android:inputType="date"
                     android:maxLength="10"
-                    android:nextFocusUp="@id/editText_name_add"
                     android:nextFocusDown="@id/editText_mail_add"
                     android:textColor="#AE1732"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    tools:ignore="LabelFor" />
             </LinearLayout>
 
         </LinearLayout>
@@ -131,11 +138,16 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardview_add_spieler_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="165dp"
-        android:layout_marginEnd="8dp">
+        android:layout_below="@+id/cardview_add_spieler_1"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="6dp">
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -163,27 +175,63 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="3"
-                android:imeOptions="actionNext"
-                android:inputType="text"
+                android:imeOptions="actionDone"
+                android:importantForAutofill="no"
+                android:inputType="textWebEmailAddress"
                 android:nextFocusUp="@id/editText_bdate_add"
-                android:nextFocusDown="@id/fragment_add_editText_AddBuchung"
                 android:textColor="#AE1732"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                tools:ignore="LabelFor" />
+
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="48dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10sp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/fragment_add_spieler_button_lbsmail"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="3"
+                android:background="#AE1732"
+                android:contentDescription="@string/todo"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/logo_lbs_trans_micro"
+                android:tint="@android:color/white" />
+        </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardview_add_spieler_3"
         android:layout_width="match_parent"
         android:layout_height="126dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="235dp"
-        android:layout_marginEnd="8dp">
+        android:layout_below="@+id/cardview_add_spieler_2"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="6dp">
 
         <TextView
             android:id="@+id/betrag_je_spieler2"
             android:layout_width="wrap_content"
             android:layout_height="20dp"
-            android:layout_gravity="start|top|left"
+            android:layout_gravity="start|top"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:fontFamily="sans-serif"
@@ -206,8 +254,9 @@
                 android:layout_weight="3"
                 android:digits="01234567890,"
                 android:ems="10"
-                android:hint="0,00"
+                android:hint="@string/betrag_0"
                 android:imeOptions="actionDone"
+                android:importantForAutofill="no"
                 android:inputType="number"
                 android:nextFocusUp="@id/editText_mail_add"
                 android:textAlignment="textEnd"
@@ -229,16 +278,4 @@
 
     </androidx.cardview.widget.CardView>
 
-    <Button
-        android:id="@+id/fragement_add_spieler_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="375dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#AE1732"
-        android:shadowRadius="2"
-        android:text="@string/button_spieler_anlegen"
-        android:textColor="@android:color/white" />
-
-</FrameLayout>
+</RelativeLayout>

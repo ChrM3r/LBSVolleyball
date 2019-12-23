@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Objects;
+
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Spieler;
 
@@ -16,16 +18,25 @@ import eu.merscher.lbsvolleyball.model.Spieler;
 public class EditSpielerFragment extends Fragment implements EditSpielerFragmentAdapter.SpielerUpdateAsyncTask.OnSpeichernClick, EditSpielerFragmentAdapter.SpielerLoeschenAsyncTask.OnLoeschenClick {
 
     private final Spieler spieler;
-    public static EditSpielerFragmentAdapter.SpielerUpdateAsyncTask.OnSpeichernClick onSpeichernClick;
-    public static EditSpielerFragmentAdapter.SpielerLoeschenAsyncTask.OnLoeschenClick onLoeschenClick;
+    private static EditSpielerFragmentAdapter.SpielerUpdateAsyncTask.OnSpeichernClick onSpeichernClick;
+    static EditSpielerFragmentAdapter.SpielerLoeschenAsyncTask.OnLoeschenClick onLoeschenClick;
     private OnEditFinish onEditFinish;
+    EditSpielerFragmentAdapter adapter;
 
-    public static EditSpielerFragmentAdapter.SpielerLoeschenAsyncTask.OnLoeschenClick getOnLoeschenClick() {
+    static EditSpielerFragmentAdapter.SpielerLoeschenAsyncTask.OnLoeschenClick getOnLoeschenClick() {
         return onLoeschenClick;
     }
 
-    public static EditSpielerFragmentAdapter.SpielerUpdateAsyncTask.OnSpeichernClick getOnSpeichernClick() {
+    static EditSpielerFragmentAdapter.SpielerUpdateAsyncTask.OnSpeichernClick getOnSpeichernClick() {
         return onSpeichernClick;
+    }
+
+    public EditSpielerFragmentAdapter getAdapter() {
+        return adapter;
+    }
+
+    public void setAdapter(EditSpielerFragmentAdapter adapter) {
+        this.adapter = adapter;
     }
 
     public EditSpielerFragment(Spieler spieler) {
@@ -35,14 +46,14 @@ public class EditSpielerFragment extends Fragment implements EditSpielerFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_spielerverwaltung_add_edit_spieler, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_add_edit_spieler, container, false);
 
         onSpeichernClick = this;
         onLoeschenClick = this;
 
         onEditFinish = SpielerseiteActivity.getOnEditFinish();
 
-        EditSpielerFragmentAdapter adapter = new EditSpielerFragmentAdapter(getActivity(), spieler);
+        adapter = new EditSpielerFragmentAdapter(getActivity(), spieler);
         RecyclerView recyclerView = rootView.findViewById(R.id.fragment_add_edit_spieler_recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -56,12 +67,12 @@ public class EditSpielerFragment extends Fragment implements EditSpielerFragment
     public void onSpeichernClick() {
 
         System.out.println("onSpeicherClick");
-        getActivity().finish();
+        Objects.requireNonNull(getActivity()).finish();
     }
 
     @Override
     public void onLoeschenClick() {
-        getActivity().finish();
+        Objects.requireNonNull(getActivity()).finish();
         onEditFinish.onEditFinish();
 
     }
@@ -69,4 +80,6 @@ public class EditSpielerFragment extends Fragment implements EditSpielerFragment
     public interface OnEditFinish {
         void onEditFinish();
     }
+
+
 }

@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -25,6 +24,8 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
@@ -49,104 +50,34 @@ import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
-public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAdapter.ViewHolder> implements TrainingTunierSpielerauswahlFragment.OnSpielerClickListener, TrainingFragment.OnResume, OnMapReadyCallback {
+public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAdapter.ViewHolder> implements TrainingTunierSpielerauswahlFragment.OnSpielerClickListener, OnMapReadyCallback {
 
 
     private static final DecimalFormat df = new DecimalFormat("0.00");
     /**
      * A list of locations to show in this ListView.
      */
-    private static final NamedLocation[] LIST_LOCATIONS = new NamedLocation[]{
-            new NamedLocation("Cape Town", new LatLng(-33.920455, 18.466941)),
-            new NamedLocation("Beijing", new LatLng(39.937795, 116.387224)),
-            new NamedLocation("Bern", new LatLng(46.948020, 7.448206)),
-            new NamedLocation("Breda", new LatLng(51.589256, 4.774396)),
-            new NamedLocation("Brussels", new LatLng(50.854509, 4.376678)),
-            new NamedLocation("Copenhagen", new LatLng(55.679423, 12.577114)),
-            new NamedLocation("Hannover", new LatLng(52.372026, 9.735672)),
-            new NamedLocation("Helsinki", new LatLng(60.169653, 24.939480)),
-            new NamedLocation("Hong Kong", new LatLng(22.325862, 114.165532)),
-            new NamedLocation("Istanbul", new LatLng(41.034435, 28.977556)),
-            new NamedLocation("Johannesburg", new LatLng(-26.202886, 28.039753)),
-            new NamedLocation("Lisbon", new LatLng(38.707163, -9.135517)),
-            new NamedLocation("London", new LatLng(51.500208, -0.126729)),
-            new NamedLocation("Madrid", new LatLng(40.420006, -3.709924)),
-            new NamedLocation("Mexico City", new LatLng(19.427050, -99.127571)),
-            new NamedLocation("Moscow", new LatLng(55.750449, 37.621136)),
-            new NamedLocation("New York", new LatLng(40.750580, -73.993584)),
-            new NamedLocation("Oslo", new LatLng(59.910761, 10.749092)),
-            new NamedLocation("Paris", new LatLng(48.859972, 2.340260)),
-            new NamedLocation("Prague", new LatLng(50.087811, 14.420460)),
-            new NamedLocation("Rio de Janeiro", new LatLng(-22.90187, -43.232437)),
-            new NamedLocation("Rome", new LatLng(41.889998, 12.500162)),
-            new NamedLocation("Sao Paolo", new LatLng(-22.863878, -43.244097)),
-            new NamedLocation("Seoul", new LatLng(37.560908, 126.987705)),
-            new NamedLocation("Stockholm", new LatLng(59.330650, 18.067360)),
-            new NamedLocation("Sydney", new LatLng(-33.873651, 151.2068896)),
-            new NamedLocation("Taipei", new LatLng(25.022112, 121.478019)),
-            new NamedLocation("Tokyo", new LatLng(35.670267, 139.769955)),
-            new NamedLocation("Tulsa Oklahoma", new LatLng(36.149777, -95.993398)),
-            new NamedLocation("Vaduz", new LatLng(47.141076, 9.521482)),
-            new NamedLocation("Vienna", new LatLng(48.209206, 16.372778)),
-            new NamedLocation("Warsaw", new LatLng(52.235474, 21.004057)),
-            new NamedLocation("Wellington", new LatLng(-41.286480, 174.776217)),
-            new NamedLocation("Winnipeg", new LatLng(49.875832, -97.150726))
-    };
-    public static ArrayList<Spieler> selectedSpieler = new ArrayList<>();
+
+    private static ArrayList<Spieler> selectedSpieler = new ArrayList<>();
     public static Resources resources;
-    private static TrainingFragment.OnResume onResume;
-    private static boolean shouldExecuteOnResume;
     private final LayoutInflater inflate;
     private final SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
     public Context context;
-    public TrainingTunierActivity trainingTunierActivity;
     private ViewHolder holder;
     private Boolean kostenlos = false;
     private float platzkosten;
     private double bu_btr;
     private Calendar kalender = Calendar.getInstance();
 
-    public TunierFragmentAdapter(Context context) {
+    TunierFragmentAdapter(Context context) {
         this.inflate = LayoutInflater.from(context);
         this.context = context;
-        onResume = this;
-
     }
 
-    //Statische Methoden
-    public static void addSelectedSpieler(Spieler spieler) {
-        selectedSpieler.add(spieler);
-    }
 
-    public static boolean spielerIstSelected(Spieler spieler) {
-        if (selectedSpieler.isEmpty())
-            return false;
-        else
-            return selectedSpieler.contains(spieler);
-    }
-
-    public static void uncheckSelectedSpieler(Spieler spieler) {
-        selectedSpieler.remove(spieler);
-    }
-
-    public static TrainingFragment.OnResume getOnResume() {
-        return onResume;
-    }
-
+    @NotNull
     @Override
-    public void onResumeInterface() {
-        if (shouldExecuteOnResume) {
-            holder.kostenlosSwitch.setChecked(false);
-            holder.editTextPlatzkosten.setText("");
-            holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
-            new TunierFragmentAdapter.SpielerauswahlBefuellenAsyncTask((TrainingTunierActivity) context).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            selectedSpieler.clear();
-        } else
-            shouldExecuteOnResume = true;
-    }
-
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
 
         View view = inflate.inflate(R.layout.fragment_tunier, parent, false);
         return new ViewHolder(view);
@@ -158,7 +89,6 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
 
         this.holder = holder;
 
-        trainingTunierActivity = (TrainingTunierActivity) context;
         resources = context.getResources();
 
         selectedSpieler.clear();
@@ -173,58 +103,47 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
 
         //Kostenlos-Switch
 
-        holder.kostenlosSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        holder.kostenlosSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
 
 
-                if (isChecked) {
-                    kostenlos = isChecked;
-                    holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
-                    holder.editTextPlatzkosten.setText("");
-                    holder.editTextPlatzkosten.setEnabled(false);
-                    holder.editTextPlatzkosten.setFocusable(false);
-                    holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(
-                            holder.cardView.getLayoutParams().width, 72));
-                    holder.cardView.setMinimumHeight(72);
-                    LinearLayout.MarginLayoutParams layoutParams =
-                            (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
-                    layoutParams.setMargins(16, 16, 16, 0);
-                    holder.cardView.requestLayout();
+            if (isChecked) {
+                kostenlos = true;
+                holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
+                holder.editTextPlatzkosten.setText("");
+                holder.editTextPlatzkosten.setEnabled(false);
+                holder.editTextPlatzkosten.setFocusable(false);
+                holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(
+                        holder.cardView.getLayoutParams().width, 72));
+                holder.cardView.setMinimumHeight(72);
+                LinearLayout.MarginLayoutParams layoutParams =
+                        (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
+                layoutParams.setMargins(16, 16, 16, 0);
+                holder.cardView.requestLayout();
 
-                } else {
-                    kostenlos = false;
-                    holder.editTextPlatzkosten.setEnabled(true);
-                    holder.editTextPlatzkosten.setFocusableInTouchMode(true);
-                    setBetragJeSpieler();
-                    holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(
-                            holder.cardView.getLayoutParams().width, 256));
-                    holder.cardView.setMinimumHeight(256);
-                    LinearLayout.MarginLayoutParams layoutParams =
-                            (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
-                    layoutParams.setMargins(16, 16, 16, 0);
-                    holder.cardView.requestLayout();
-                }
+            } else {
+                kostenlos = false;
+                holder.editTextPlatzkosten.setEnabled(true);
+                holder.editTextPlatzkosten.setFocusableInTouchMode(true);
+                setBetragJeSpieler();
+                holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(
+                        holder.cardView.getLayoutParams().width, 256));
+                holder.cardView.setMinimumHeight(256);
+                LinearLayout.MarginLayoutParams layoutParams =
+                        (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
+                layoutParams.setMargins(16, 16, 16, 0);
+                holder.cardView.requestLayout();
             }
         });
 
         //Spieltag-Button
-        holder.buttonAddSpieltag.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSpieltagButtonClick(v);
-            }
-        });
+        holder.buttonAddSpieltag.setOnClickListener(v -> onSpieltagButtonClick());
 
 
         //Textformat Platzkosten
-        holder.editTextPlatzkosten.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                Utilities.formatNumericEditText(holder.editTextPlatzkosten);
-                setBetragJeSpieler();
+        holder.editTextPlatzkosten.setOnFocusChangeListener((v, hasFocus) -> {
+            Utilities.formatNumericEditText(holder.editTextPlatzkosten);
+            setBetragJeSpieler();
 
-            }
         });
 
         //Map
@@ -251,8 +170,6 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
 
         NamedLocation data = new NamedLocation("Hannover", new LatLng(52.372026, 9.735672));
 
-        if (data == null) return;
-
         // Add a marker for this item and set the camera
         holder.map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.location, 13f));
         holder.map.addMarker(new MarkerOptions().position(data.location));
@@ -274,21 +191,16 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
         holder.buttonAddSpieltag.requestFocus();
     }
 
-    public void onSpieltagButtonClick(View v) {
+    private void onSpieltagButtonClick() {
 
         if (!holder.editTextPlatzkosten.getText().toString().isEmpty())
             platzkosten = Float.parseFloat(holder.editTextPlatzkosten.getText().toString().replace(',', '.'));
         else
             platzkosten = 0;
 
-        long trainings_id;
         DataSource dataSource = DataSource.getInstance();
         dataSource.open();
 
-        if (dataSource.getNeustesTrainingsID() != -999) {
-            trainings_id = dataSource.getNeustesTrainingsID() + 1;
-        } else
-            trainings_id = 1;
 
 
 //
@@ -309,7 +221,7 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
             for (Spieler s : selectedSpieler) {
 
                 new TunierFragmentAdapter.SpieltagBuchenAsyncTask(this, s).execute();
-                dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), s.getU_id(), null);
+                dataSource.createTraining(1, datumsformat.format(kalender.getTime()), 0, s.getS_id(), platzkosten, null);
 
             }
 
@@ -345,7 +257,7 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
             for (Spieler s : selectedSpieler) {
 
                 new TunierFragmentAdapter.SpieltagBuchenAsyncTask(this, s).execute();
-                dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), s.getU_id(), "X");
+                dataSource.createTraining(1, datumsformat.format(kalender.getTime()), 0, s.getS_id(), 0, "X");
 
             }
 
@@ -360,7 +272,7 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
     }
 
 
-    public void setBetragJeSpieler() {
+    private void setBetragJeSpieler() {
 
         if (!holder.editTextPlatzkosten.getText().toString().isEmpty()) {
             double platzkosten = Double.valueOf(holder.editTextPlatzkosten.getText().toString().replace(',', '.'));
@@ -380,7 +292,7 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
     static class SpielerauswahlBefuellenAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
 
 
-        public final WeakReference<TrainingTunierActivity> activityReference;
+        final WeakReference<TrainingTunierActivity> activityReference;
         private ArrayList<Spieler> spielerList = new ArrayList<>();
 
         SpielerauswahlBefuellenAsyncTask(TrainingTunierActivity context) {
@@ -408,10 +320,10 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
             //Spielerauswahl
             if (activity.fragment == null) {
                 activity.fm = activity.getSupportFragmentManager();
-                activity.fragment = new TrainingTunierSpielerauswahlFragment(activity, spielerList, activity);
-                activity.fm.beginTransaction().add(R.id.fragment_training_spielerauswahl_fragmentContainer, activity.fragment).commitAllowingStateLoss();
+                activity.fragment = new TrainingTunierSpielerauswahlFragment(activity, spielerList, activity, "NOCH ERSETZEN");
+                activity.fm.beginTransaction().add(R.id.fragment_tunier_spielerauswahl_fragmentContainer, activity.fragment).commitAllowingStateLoss();
             } else {
-                activity.fm.beginTransaction().replace(R.id.fragment_training_spielerauswahl_fragmentContainer, new TrainingTunierSpielerauswahlFragment(activity, spielerList, activity)).commitAllowingStateLoss();
+                activity.fm.beginTransaction().replace(R.id.fragment_tunier_spielerauswahl_fragmentContainer, new TrainingTunierSpielerauswahlFragment(activity, spielerList, activity, "NOCH ERSETZEN")).commitAllowingStateLoss();
 
             }
 
@@ -421,7 +333,7 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
     static class SpieltagBuchenAsyncTask extends AsyncTask<Void, Void, Buchung> {
 
 
-        public final WeakReference<TunierFragmentAdapter> activityReference;
+        final WeakReference<TunierFragmentAdapter> activityReference;
         private Spieler spieler;
         private Buchung buchung;
 
@@ -453,13 +365,13 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
                     double kto_saldo_alt = dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
                     double kto_saldo_neu = kto_saldo_alt - activity.bu_btr;
 
-                    buchung = dataSource.createBuchung(spieler.getU_id(), -activity.bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", null, null);
+                    buchung = dataSource.createBuchung(spieler.getS_id(), -activity.bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", -999, null, null, -999);
                     spieler = dataSource.updateTeilnahmenSpieler(spieler);
 
                 } else {
 
                     double kto_saldo_neu = -activity.bu_btr;
-                    buchung = dataSource.createBuchung(spieler.getU_id(), -activity.bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", null, null);
+                    buchung = dataSource.createBuchung(spieler.getS_id(), -activity.bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", -999, null, null, -999);
                     spieler = dataSource.updateHatBuchungenMM(dataSource.updateTeilnahmenSpieler(spieler));
                 }
 
@@ -551,7 +463,7 @@ public class TunierFragmentAdapter extends RecyclerView.Adapter<TunierFragmentAd
     private static class NamedLocation {
 
         public final String name;
-        public final LatLng location;
+        final LatLng location;
 
         NamedLocation(String name, LatLng location) {
             this.name = name;

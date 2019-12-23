@@ -3,12 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="25dp"
     android:background="#FFFFFF"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:orientation="vertical">
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/training_tunier_spielerauswahl_item_button"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:tint="@color/colorPrimary"
+        app:backgroundTint="@android:color/white"
+        app:fabCustomSize="60dp"
+        app:srcCompat="@drawable/icon_plus_white"
+        android:focusable="true" />
 
     <TextView
         android:id="@+id/activity_spieltag_spielerauswahl_item_name"
@@ -17,7 +28,7 @@
         android:layout_marginEnd="5sp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="Spieler"
+        android:text="@string/spieler"
         android:textColor="#1B1B1B"
         app:autoSizeMaxTextSize="100sp"
         app:autoSizeMinTextSize="12sp"
@@ -31,20 +42,11 @@
         android:layout_marginEnd="5sp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="hinzufügen"
+        android:text="@string/hinzufuegen"
         android:textColor="#1B1B1B"
         app:autoSizeMaxTextSize="100sp"
         app:autoSizeMinTextSize="12sp"
         app:autoSizeStepGranularity="2sp"
         app:autoSizeTextType="uniform" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/training_tunier_spielerauswahl_item_button"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="center"
-        android:clickable="true"
-        app:fabCustomSize="60dp"
-        app:srcCompat="@drawable/icon_plus_white" />
 
 </LinearLayout>
