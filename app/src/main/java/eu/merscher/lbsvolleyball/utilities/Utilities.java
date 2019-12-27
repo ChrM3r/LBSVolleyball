@@ -1,7 +1,10 @@
 package eu.merscher.lbsvolleyball.utilities;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -10,10 +13,10 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
-import android.view.Gravity;
 import android.widget.EditText;
-import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -22,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -302,7 +306,7 @@ public class Utilities {
 
     public static String bildNachTrainingsortaenderungBenennen(Context context, Trainingsort trainingsortAlt, Trainingsort trainingsortNeu) {
         ContextWrapper cw = new ContextWrapper(context);
-        File directory = cw.getDir("profilbilder", Context.MODE_PRIVATE);
+        File directory = cw.getDir("trainingsortbilder", Context.MODE_PRIVATE);
 
         File bildAlt = new File(trainingsortAlt.getFoto());
         File bildAlt_klein = new File(trainingsortAlt.getFoto().replace(".png", "_klein.png"));
@@ -391,10 +395,8 @@ public class Utilities {
             // May throw an IOException
             address = coder.getFromLocationName(strAddress, 5);
             if (address.size() < 1) {
-                Toast toast = Toast.makeText(context, "Es wurden keine passenden Orte gefunden.", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.BOTTOM, 0, 0);
-                toast.show();
-                return null;
+                p1 = new LatLng(-999, -999);
+                return p1;
             } else {
 
                 Address location = address.get(0);
@@ -405,6 +407,7 @@ public class Utilities {
 
             ex.printStackTrace();
             p1 = new LatLng(-999, -999);
+            return p1;
         }
 
         return p1;
@@ -445,6 +448,74 @@ public class Utilities {
     public static Bitmap scaleToFitHeight(Bitmap b, int height) {
         float factor = height / (float) b.getHeight();
         return Bitmap.createScaledBitmap(b, (int) (b.getWidth() * factor), height, true);
+    }
+
+    public static void berechtigungenPruefen(Activity context) {
+
+        final WeakReference<Activity> activityReference;
+        activityReference = new WeakReference<>(context);
+        Activity activity = activityReference.get();
+
+
+        if (ContextCompat.checkSelfPermission(activity,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(activity,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        0);
+            }
+
+            if (ContextCompat.checkSelfPermission(activity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Permission is not granted
+                // Should we show an explanation?
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(activity,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            0);
+                }
+            }
+            if (ContextCompat.checkSelfPermission(activity,
+                    Manifest.permission.ACCESS_NETWORK_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Permission is not granted
+                // Should we show an explanation?
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        Manifest.permission.ACCESS_NETWORK_STATE)) {
+
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(activity,
+                            new String[]{Manifest.permission.ACCESS_NETWORK_STATE},
+                            0);
+                }
+            }
+            if (ContextCompat.checkSelfPermission(activity,
+                    Manifest.permission.INTERNET)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Permission is not granted
+                // Should we show an explanation?
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        Manifest.permission.INTERNET)) {
+
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(activity,
+                            new String[]{Manifest.permission.INTERNET},
+                            0);
+                }
+            }
+        }
     }
 }
 

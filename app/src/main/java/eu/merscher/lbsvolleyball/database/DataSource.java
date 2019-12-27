@@ -749,6 +749,32 @@ public class DataSource {
         return trainingIDList;
     }
 
+    public ArrayList<Long> getAllTrainingsID() {
+
+        Cursor cursor = database.query(DbHelper.TABLE_TRAINING_DATA,
+                training_data_columns, null,
+                null, null, null, DbHelper.TRAINING_DATA_COLUMN_TRAINING_ID + " DESC");
+
+        Training training;
+        ArrayList<Long> trainingIDList = new ArrayList<>();
+
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+
+            training = cursorToTraining(cursor);
+
+            if (!trainingIDList.contains(training.getTraining_id()))
+                trainingIDList.add(training.getTraining_id());
+
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return trainingIDList;
+    }
+
     //ArrayList mit allen Trainings
     public ArrayList<Training> getAllTraining() {
 
@@ -804,10 +830,12 @@ public class DataSource {
                     spieler_data_columns, DbHelper.SPIELER_DATA_COLUMN_S_ID + "=" + t.getTrainings_tn(),
                     null, null, null, null);
 
-            cursor_spieler.moveToFirst();
-            Spieler spieler = cursorToSpieler(cursor_spieler);
-
-            trainings_teilnehmer.add(spieler);
+            if (!cursor_spieler.isAfterLast()) {
+                cursor_spieler.moveToFirst();
+                Spieler spieler = cursorToSpieler(cursor_spieler);
+                trainings_teilnehmer.add(spieler);
+            } else
+                trainings_teilnehmer.add(new Spieler(-999, "gelöscht", "Bereits", null, 0, "avatar_m", null, null));
         }
 
         return trainings_teilnehmer;
@@ -850,11 +878,34 @@ public class DataSource {
                 null, null, null, null);
 
         cursor1.moveToFirst();
-        trainingsort = cursorToTrainingsort(cursor1);
+
+        if (!cursor1.isAfterLast())
+            trainingsort = cursorToTrainingsort(cursor1);
+        else
+            trainingsort = new Trainingsort(-999, "Bereits gelöscht", null, null, null, null, -999, -999, 0);
         cursor1.close();
 
         return trainingsort;
     }
+
+    //Platzkosten zu TrainingsID
+    public String getDatumZuTrainingsId(long trainings_Id) {
+
+        Training training;
+        String datum;
+
+        Cursor cursor = database.query(DbHelper.TABLE_TRAINING_DATA,
+                training_data_columns, DbHelper.TRAINING_DATA_COLUMN_TRAINING_ID + "=" + trainings_Id,
+                null, null, null, null);
+
+
+        cursor.moveToFirst();
+        training = cursorToTraining(cursor);
+        datum = training.getTraining_dtm();
+
+        return datum;
+    }
+
 
     //Trainingobjekt zu TrainingsID
     public Training getTrainingZuTrainingsId(long trainings_Id) {

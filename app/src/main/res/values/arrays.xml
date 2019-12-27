@@ -34,4 +34,19 @@
         <item>imp_trainingsort</item>
     </string-array>
 
+    <string-array name="auswertungen">
+        <item>@string/platzhalter1</item>
+        <item>@string/platzhalter2</item>
+        <item>@string/platzhalter3</item>
+    </string-array>
+
+    <string-array name="auswertungen_values">
+        <item>platzhalter1</item>
+        <item>platzhalter2</item>
+        <item>platzhalter3</item>
+    </string-array>
+
+    <string name="platzhalter1">platzhalter1</string>
+    <string name="platzhalter2">platzhalter2</string>
+    <string name="platzhalter3">platzhalter3</string>
 </resources>

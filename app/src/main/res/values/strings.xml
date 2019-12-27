@@ -1,7 +1,7 @@
 <resources>
 
     <string name="API_KEY">AIzaSyBZNYEUwq0cg9s6jxKtKWwENI1wyvF977k</string>
-    <string name="APP_VERSION">Version 0.19.12 Build 23122019</string>
+    <string name="APP_VERSION">Version 0.19.12 Build 27122019</string>
     <string name="app_name">LBS Volleyball</string>
 
     <string name="spieltag">Spieltag</string>
@@ -11,6 +11,7 @@
     <string name="kalender">Kalender</string>
     <string name="dashboard">Dashboard</string>
     <string name="trainingsortverwaltung">Trainingsortverwaltung</string>
+    <string name="trainingsverwaltung">Trainingsverwaltung</string>
     <string name="trainingsort">Trainingsorte</string>
     <string name="trainingsuebersicht">Trainingsübersicht</string>
     <string name="einstellungen">Einstellungen</string>
@@ -103,7 +104,7 @@
     <string name="dialog_title_vname">Vorname:</string>
     <string name="dialog_title_bdate">Geburtstag:</string>
     <string name="dialog_title_strasse">Straße/Nr.:</string>
-    <string name="dialog_title_plz">Postleitzahl:</string>
+    <string name="dialog_title_plz">PLZ:</string>
     <string name="dialog_title_ort">Ort:</string>
 
     <string name="dialog_button_positive">Ändern</string>
@@ -118,6 +119,7 @@
     <string name="keine_weiteren_Buchungen">Es sind keine weiteren Buchungen vorhanden"</string>
     <string name="dialogMessage_Ausgleichen">%s %s hat einen Kontostand von %s€. Bitte Konto vorher ausgleichen.</string>
     <string name="dialogMessage_wirklichLoeschen">Soll %s %s wirklich gelöscht werden? Diese Aktion kann nicht widerrufen werden.</string>
+    <string name="dialogMessage_to_wirklichLoeschen">Soll %s wirklich gelöscht werden? Diese Aktion kann nicht widerrufen werden.</string>
     <string name="dialogMessage_BuchenBeiLoeschen">%s %s hat einen Kontostand von %s€. Soll der Betrag ausgezahlt oder auf das Teamkonto überwiesen werden?</string>
     <string name="hinzufuegen">hinzufügen</string>
     <string name="_0">0</string>
@@ -134,5 +136,10 @@
     <string name="_15">15</string>
     <string name="teamkonto">Teamkonto</string>
     <string name="_37_50">37,50</string>
+    <string name="_01_01_2001">01.01.2001</string>
+    <string name="anzahl">Anzahl:</string>
+    <string name="trainingsort_list_view">Trainingsort:</string>
+    <string name="teilnehmer">Teilnehmer:</string>
+    <string name="schlie_en">Schließen</string>
 
 </resources>

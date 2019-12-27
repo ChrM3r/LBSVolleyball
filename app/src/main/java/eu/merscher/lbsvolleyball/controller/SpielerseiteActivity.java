@@ -202,6 +202,9 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
         });
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
+
+        //Berechtigungen
+        Utilities.berechtigungenPruefen(this);
     }
 
     private void findViewsById() {

@@ -8,7 +8,7 @@ android {
         minSdkVersion 22
         targetSdkVersion 28
         versionCode 1
-        versionName "0.19.12 beta (Build 20191218)"
+        versionName "0.19.12 beta (Build 27122019)"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

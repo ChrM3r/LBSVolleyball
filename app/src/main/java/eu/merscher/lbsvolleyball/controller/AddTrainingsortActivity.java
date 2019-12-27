@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -28,6 +29,8 @@ import eu.merscher.lbsvolleyball.R;
 
 
 public class AddTrainingsortActivity extends AppCompatActivity {
+
+    private boolean boolZurueck;
 
     private static String trainingsortFotoAlsString = null;
 
@@ -71,11 +74,46 @@ public class AddTrainingsortActivity extends AppCompatActivity {
     //Zurück-Button
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolZurueck = false;
+
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+            dialog.setTitle("Achtung")
+                    .setMessage(("Alle ungespeicherten Eingaben gehen verloren"))
+                    .setNegativeButton("Abbrechen", (dialog1, which) -> {
+                        dialog1.cancel();
+                        boolZurueck = false;
+                    })
+                    .setPositiveButton("Ok", (dialog2, i) -> {
+                        this.finish();
+                        boolZurueck = true;
+                    }).show();
+            return boolZurueck;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        boolZurueck = false;
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("Achtung")
+                .setMessage(("Alle ungespeicherten Eingaben gehen verloren"))
+                .setNegativeButton("Abbrechen", (dialog1, which) -> {
+                    dialog1.cancel();
+                    boolZurueck = false;
+                })
+                .setPositiveButton("Ok", (dialog2, i) -> {
+                    this.finish();
+                    boolZurueck = true;
+                    super.onBackPressed();
+
+                }).show();
+
     }
 
 

@@ -440,8 +440,8 @@ public class TrainingUebersichtActivity extends AppCompatActivity implements Rob
             final TextView platzkosten;
             final ListView teilnehmerListView;
 
-            private MapView mapView;
-            private GoogleMap map;
+            MapView mapView;
+            GoogleMap map;
 
             ViewHolder(View view) {
                 super(view);

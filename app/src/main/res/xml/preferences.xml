@@ -19,22 +19,6 @@
             app:allowDividerBelow="true"
             app:summary="Hier legst du die Sortierreihenfolge der Spielerauswahl für Trainings und Tuniere fest." />
 
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="key_switch_preference"
-            android:summary="Wechsel zwischen dem normalen und dem dunklen App-Theme."
-            android:title="Darkmode benutzen" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="Auswertungen">
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="key_checkbox_preference"
-            android:summary="Eine kurze Erklärung für die Benutzer."
-            android:title="Titel der Checkbox-Einstellung" />
-
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Backup">
@@ -46,6 +30,18 @@
             android:key="einstellungen_backup"
             android:summary="Wählen Sie die Daten zum Sichern oder Wiederherstellen aus."
             android:title="Datenbank auswählen" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Auswertungen">
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/auswertungen"
+            android:entryValues="@array/auswertungen_values"
+            android:key="list_preference_1"
+            android:summary="Dies ist aktuell nur ein Platzhalter für weitere Appfunktionen."
+            android:title="Spielerauswertungen" />
+
     </PreferenceCategory>
 
 

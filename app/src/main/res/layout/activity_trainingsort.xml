@@ -27,6 +27,7 @@
                 android:id="@+id/activity_trainingsort_bild"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:alpha="0.6"
                 android:contentDescription="@string/todo"
                 android:scaleType="centerCrop"
                 app:srcCompat="@drawable/avatar_map" />
@@ -34,7 +35,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:alpha="0.3"
+                android:alpha="0"
                 android:background="@android:color/black"
                 android:fitsSystemWindows="true" />
 
@@ -53,8 +54,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:background="#00FFFFFF"
-                app:tabIndicatorColor="@android:color/white"
-                app:tabSelectedTextColor="@android:color/white"
                 app:tabTextColor="@android:color/white" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>

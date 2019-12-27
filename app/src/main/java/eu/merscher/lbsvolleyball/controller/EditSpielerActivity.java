@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -38,12 +39,12 @@ import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
-public class EditSpielerActivity extends AppCompatActivity implements View.OnClickListener, EditSpielerFragment.OnEditFinish {
+public class EditSpielerActivity extends AppCompatActivity implements EditSpielerFragment.OnEditFinish {
 
 
     private static String userFotoAlsString = null;
     private ImageView spielerBild;
-
+    private boolean boolZurueck;
     public static String getUserFotoAlsString() {
         return userFotoAlsString;
     }
@@ -122,24 +123,55 @@ public class EditSpielerActivity extends AppCompatActivity implements View.OnCli
             spielerBildScaled = Utilities.scaleToFitWidth(spielerBildOriginal, width);
         }
         spielerBild.setImageBitmap(spielerBildScaled);
+
+        //Berechtigungen
+        Utilities.berechtigungenPruefen(this);
     }
 
 
-
-    public void onClick(View v) {
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
+    //Zurück-Button
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolZurueck = false;
+
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+            dialog.setTitle("Achtung")
+                    .setMessage(("Alle ungespeicherten Eingaben gehen verloren"))
+                    .setNegativeButton("Abbrechen", (dialog1, which) -> {
+                        dialog1.cancel();
+                        boolZurueck = false;
+                    })
+                    .setPositiveButton("Ok", (dialog2, i) -> {
+                        this.finish();
+                        boolZurueck = true;
+                    }).show();
+            return boolZurueck;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        boolZurueck = false;
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("Achtung")
+                .setMessage(("Alle ungespeicherten Eingaben gehen verloren"))
+                .setNegativeButton("Abbrechen", (dialog1, which) -> {
+                    dialog1.cancel();
+                    boolZurueck = false;
+                })
+                .setPositiveButton("Ok", (dialog2, i) -> {
+                    this.finish();
+                    boolZurueck = true;
+                    super.onBackPressed();
+
+                }).show();
+
     }
 
 

@@ -292,7 +292,7 @@ public class AddSpielerFragment extends Fragment {
                     editTextBdate.setError(context.getString(R.string.editText_errorMessage_empty));
                     return;
 
-                } else if (bdate.split(".").length != 3) {
+                } else if (bdate.split("\\.").length != 3) {
                     editTextBdate.setError(context.getString(R.string.editText_errorMessage_bdate));
                     return;
                 }

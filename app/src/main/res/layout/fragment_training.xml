@@ -175,7 +175,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/training_map_card"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="155dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
@@ -188,21 +188,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <com.google.android.gms.maps.MapView
+                <ImageView
                     android:id="@+id/fragment_training_mapView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical|end"
                     android:clickable="false"
                     android:longClickable="false"
-                    map:liteMode="true"
-                    map:uiRotateGestures="false"
-                    map:uiScrollGestures="false"
-                    map:uiZoomGestures="false" />
+                    android:scaleType="centerCrop" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -242,7 +239,6 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="56dp"
                         android:background="@android:color/white"
                         android:orientation="horizontal"
                         android:padding="8dp">
@@ -271,6 +267,17 @@
                             android:foregroundTint="@android:color/white"
                             android:spinnerMode="dropdown" />
                     </LinearLayout>
+
+                    <Button
+                        android:id="@+id/fragment_training_trainingsort_anlegen"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:backgroundTint="@android:color/white"
+                        android:text="Spielort anlegen"
+                        android:textColor="@color/colorPrimary"
+                        android:visibility="gone" />
 
 
                 </LinearLayout>

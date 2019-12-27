@@ -48,6 +48,15 @@ public class AddSpielerActivity extends AppCompatActivity {
 
     private static String userFotoAlsString = null;
     private ImageView spielerBild;
+
+    private CollapsingToolbarLayout collapsingToolbar;
+    private Toolbar toolbar;
+    private TabLayout tabLayout;
+    private FloatingActionButton fotoAddButton;
+    private FloatingActionButton fotoLoeschenButton;
+    private ViewPager viewPager;
+    private Button spieler_add_button;
+
     private boolean boolZurueck;
     private AddSpieler addSpieler;
 
@@ -71,16 +80,11 @@ public class AddSpielerActivity extends AppCompatActivity {
 
         setTitle(R.string.button_spieler_anlegen);
 
+        findViewsById();
+
         //Zurück-Zähler wieder default setzen
         boolZurueck = false;
-        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit);
-        Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit);
-        TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit);
-        FloatingActionButton fotoAddButton = findViewById(R.id.activity_add_edit_spieler_foto_button);
-        FloatingActionButton fotoLoeschenButton = findViewById(R.id.activity_add_edit_spieler_foto_loeschen_button);
-        ViewPager viewPager = findViewById(R.id.add_edit_viewpager);
-        spielerBild = findViewById(R.id.spielerbild_groß_add_edit);
-        Button spieler_add_button = findViewById(R.id.fragement_add_spieler_button);
+
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
 
@@ -88,36 +92,57 @@ public class AddSpielerActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        //Foto hinzufügen und löschen
         spielerBild.setOnClickListener(v -> bildAusGalerieAuswaehlen());
-
         fotoAddButton.setOnClickListener(v -> bildAusGalerieAuswaehlen());
-
         fotoLoeschenButton.setOnClickListener(v -> {
             spielerBild.setImageResource(R.drawable.avatar_m);
             setUserFotoAlsString("geloescht");
 
         });
 
-
+        //Spielerdaten-Pager laden
         AddSpielerActivityPagerAdapter adapter = new AddSpielerActivityPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
-
 
         spieler_add_button.setOnClickListener(v -> {
 
             addSpieler = adapter.getAddSpielerFragment().getAddSpielerFragmentAdapter().getViewHolder();
             addSpieler.onAddSpieler();
         });
+
+        //Berechtigungen
+        Utilities.berechtigungenPruefen(this);
     }
 
+    private void findViewsById() {
+
+        collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit);
+        toolbar = findViewById(R.id.htab_toolbar_add_edit);
+        tabLayout = findViewById(R.id.htab_tabs_add_edit);
+        fotoAddButton = findViewById(R.id.activity_add_edit_spieler_foto_button);
+        fotoLoeschenButton = findViewById(R.id.activity_add_edit_spieler_foto_loeschen_button);
+        viewPager = findViewById(R.id.add_edit_viewpager);
+        spielerBild = findViewById(R.id.spielerbild_groß_add_edit);
+        spieler_add_button = findViewById(R.id.fragement_add_spieler_button);
+
+
+    }
     //Zurück-Button
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         boolZurueck = false;
 
         if (item.getItemId() == android.R.id.home) {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(AddSpielerActivity.this);
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
             dialog.setTitle("Achtung")
                     .setMessage(("Alle ungespeicherten Eingaben gehen verloren"))
@@ -126,13 +151,36 @@ public class AddSpielerActivity extends AppCompatActivity {
                         boolZurueck = false;
                     })
                     .setPositiveButton("Ok", (dialog2, i) -> {
-                        onBackPressed();
+                        this.finish();
                         boolZurueck = true;
                     }).show();
             return boolZurueck;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed() {
+
+        boolZurueck = false;
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("Achtung")
+                .setMessage(("Alle ungespeicherten Eingaben gehen verloren"))
+                .setNegativeButton("Abbrechen", (dialog1, which) -> {
+                    dialog1.cancel();
+                    boolZurueck = false;
+                })
+                .setPositiveButton("Ok", (dialog2, i) -> {
+                    this.finish();
+                    boolZurueck = true;
+                    super.onBackPressed();
+
+                }).show();
+
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -241,7 +289,7 @@ public class AddSpielerActivity extends AppCompatActivity {
         private FragmentManager fm;
 
         AddSpielerFragment getAddSpielerFragment() {
-            return (AddSpielerFragment) fm.findFragmentById(0);
+            return (AddSpielerFragment) fm.getFragments().get(0);
         }
 
         AddSpielerActivityPagerAdapter(Context context, FragmentManager fm) {

@@ -43,9 +43,9 @@
                 android:layout_weight="3"
                 android:imeOptions="actionNext"
                 android:importantForAutofill="no"
-                android:inputType="text"
                 android:nextFocusDown="@id/editText_strasse_add"
-                android:textColor="#AE1732"
+                android:singleLine="false"
+                android:textColor="@color/colorPrimary"
                 android:textSize="16sp"
                 tools:ignore="LabelFor" />
 
@@ -174,7 +174,7 @@
                     android:layout_weight="3"
                     android:imeOptions="actionDone"
                     android:importantForAutofill="no"
-                    android:inputType="text"
+                    android:inputType="textCapWords"
                     android:nextFocusUp="@id/editText_plz_add"
                     android:textColor="#AE1732"
                     android:textSize="16sp"

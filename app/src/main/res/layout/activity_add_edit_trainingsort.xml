@@ -27,6 +27,7 @@
                 android:id="@+id/trainingsortbild_groß_add_edit"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:alpha="0.6"
                 android:contentDescription="@string/todo"
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
@@ -37,7 +38,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:alpha="0.3"
+                android:alpha="0"
                 android:background="@android:color/black"
                 android:fitsSystemWindows="true">
 

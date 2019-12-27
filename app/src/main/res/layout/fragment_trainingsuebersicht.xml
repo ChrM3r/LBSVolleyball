@@ -9,121 +9,138 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.cardview.widget.CardView
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="248dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:layout_toStartOf="@+id/cardView2"
-            android:isScrollContainer="false"
-            android:nestedScrollingEnabled="false"
-            map:cardCornerRadius="6dp">
+            android:layout_height="match_parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView_teilnehmer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:isScrollContainer="false"
+                android:nestedScrollingEnabled="false"
+                map:cardCornerRadius="6dp"
+                map:layout_constraintBottom_toBottomOf="parent"
+                map:layout_constraintEnd_toStartOf="@+id/cardView2"
+                map:layout_constraintStart_toStartOf="parent"
+                map:layout_constraintTop_toTopOf="parent">
 
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="start|top"
-                android:gravity="start"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/textView_Teilnehmer"
-                    android:textSize="14sp" />
-
-                <ListView
-                    android:id="@+id/fragment_trainingsuebersicht_listView"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:divider="@null"
-                    android:dividerHeight="15dp"
-                    android:isScrollContainer="true"
-                    android:nestedScrollingEnabled="true">
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start|top"
+                    android:gravity="start"
+                    android:orientation="vertical">
 
-                </ListView>
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/textView_Teilnehmer"
+                        android:textSize="14sp" />
+
+                    <ListView
+                        android:id="@+id/fragment_trainingsuebersicht_listView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:divider="@null"
+                        android:dividerHeight="15dp"
+                        android:isScrollContainer="true"
+                        android:nestedScrollingEnabled="true">
+
+                    </ListView>
+                </LinearLayout>
 
 
-        </androidx.cardview.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView2"
-            android:layout_width="116dp"
-            android:layout_height="116dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="16dp"
-            map:cardCornerRadius="6dp">
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView2"
+                android:layout_width="116dp"
+                android:layout_height="116dp"
+                android:layout_marginEnd="16dp"
+                map:cardCornerRadius="6dp"
+                map:layout_constraintEnd_toEndOf="parent"
+                map:layout_constraintTop_toTopOf="parent">
 
-            <com.google.android.gms.maps.MapView
-                android:id="@+id/fragment_trainingsuebersicht_mapView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                map:liteMode="true" />
-        </androidx.cardview.widget.CardView>
+                <ImageView
+                    android:id="@+id/fragment_trainingsuebersicht_mapView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    map:srcCompat="@drawable/avatar_map" />
+            </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="116dp"
-            android:layout_height="116dp"
-            android:layout_below="@+id/cardView2"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            map:cardCornerRadius="6dp">
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView_daten"
+                android:layout_width="116dp"
+                android:layout_height="116dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                map:cardCornerRadius="6dp"
+                map:layout_constraintBottom_toBottomOf="parent"
+                map:layout_constraintEnd_toEndOf="parent"
+                map:layout_constraintStart_toEndOf="@+id/cardView_teilnehmer"
+                map:layout_constraintTop_toBottomOf="@+id/cardView2">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/textView_Ort"
-                    android:textSize="14sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/textView_Ort"
+                        android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/fragment_trainingsuebersicht_textView_trainingsort"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/buga_potsdam"
-                    android:textColor="#1B1B1B"
-                    android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/fragment_trainingsuebersicht_textView_trainingsort"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/buga_potsdam"
+                        android:textColor="#1B1B1B"
+                        android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/textView4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/textView_platzkosten_2"
-                    android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/textView_platzkosten_2"
+                        android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/fragment_trainingsuebersicht_textView_platzkosten"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/_24_99_eur"
-                    android:textColor="#1B1B1B"
-                    android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/fragment_trainingsuebersicht_textView_platzkosten"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/_24_99_eur"
+                        android:textColor="#1B1B1B"
+                        android:textSize="14sp" />
 
-            </LinearLayout>
+                </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+            </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </RelativeLayout>
 </ScrollView>

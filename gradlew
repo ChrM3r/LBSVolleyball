@@ -69,7 +69,7 @@ CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-        # IBM'spieler JDK on AIX uses strange locations for the executables
+        # IBM'trainingsort JDK on AIX uses strange locations for the executables
         JAVACMD="$JAVA_HOME/jre/sh/java"
     else
         JAVACMD="$JAVA_HOME/bin/java"
@@ -156,7 +156,7 @@ fi
 
 # Escape application args
 save () {
-    for i do printf %spieler\\n "$i" | sed "spieler/'/'\\\\''/g;1s/^/'/;\$spieler/\$/' \\\\/" ; done
+    for i do printf %trainingsort\\n "$i" | sed "trainingsort/'/'\\\\''/g;1s/^/'/;\$trainingsort/\$/' \\\\/" ; done
     echo " "
 }
 APP_ARGS=$(save "$@")

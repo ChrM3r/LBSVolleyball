@@ -2,9 +2,10 @@ package eu.merscher.lbsvolleyball.controller;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +18,18 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.DataSource;
@@ -32,10 +39,11 @@ import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 public class AddTrainingsortFragment extends Fragment {
 
-    //public static Activity activity = null;
+    private AddTrainingsortFragmentAdapter adapter;
 
     public AddTrainingsortFragment() {
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,7 +51,7 @@ public class AddTrainingsortFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_add_edit_spieler, container, false);
         //activity = this.getActivity();
 
-        AddTrainingsortFragmentAdapter adapter = new AddTrainingsortFragmentAdapter(this);
+        adapter = new AddTrainingsortFragmentAdapter(this);
         RecyclerView recyclerView = rootView.findViewById(R.id.fragment_add_edit_spieler_recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -58,6 +66,7 @@ public class AddTrainingsortFragment extends Fragment {
 
         private final LayoutInflater inflate;
         private final AddTrainingsortFragment context;
+        ViewHolder holder;
 
 
         AddTrainingsortFragmentAdapter(AddTrainingsortFragment context) {
@@ -70,7 +79,8 @@ public class AddTrainingsortFragment extends Fragment {
         public AddTrainingsortFragmentAdapter.ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
 
             View view = inflate.inflate(R.layout.fragment_add_trainingsort_item, parent, false);
-            return new AddTrainingsortFragmentAdapter.ViewHolder(view);
+            holder = new AddTrainingsortFragmentAdapter.ViewHolder(view);
+            return holder;
         }
 
         @Override
@@ -88,6 +98,9 @@ public class AddTrainingsortFragment extends Fragment {
             final EditText editTextPlz;
             final EditText editTextOrt;
             final Button buttonTrainingsortAnlegen;
+            MapView mapView;
+            GoogleMap map;
+
 
             ViewHolder(final View view) {
                 super(view);
@@ -97,8 +110,7 @@ public class AddTrainingsortFragment extends Fragment {
                 editTextOrt = view.findViewById(R.id.editText_ort_add);
                 buttonTrainingsortAnlegen = view.findViewById(R.id.fragement_add_trainingsort_button);
 
-
-                //Spieler anlegen
+                //Trainigsort anlegen
                 buttonTrainingsortAnlegen.setOnClickListener(v -> {
                     String name = editTextName.getText().toString();
                     String strasse = editTextStrasse.getText().toString();
@@ -124,10 +136,115 @@ public class AddTrainingsortFragment extends Fragment {
                         editTextOrt.setError(context.getString(R.string.editText_errorMessage_empty));
                         return;
                     }
+                    DataSource dataSource = DataSource.getInstance();
+                    dataSource.open();
 
-                    new TrainingsortFotoSpeichernAsyncTask(context, name, strasse, plz, ort).execute();
+                    Bitmap trainingsortBild;
+                    Trainingsort neuerTrainingsort;
+
+                    String adresse = strasse + ", " + plz + " " + ort;
+
+                    LatLng latLngTrainingsort = Utilities.getLocationFromAddress(getContext(), adresse);
+
+                    if (Objects.requireNonNull(latLngTrainingsort).equals(new LatLng(-999, -999))) {
+
+                        trainingsortBild = BitmapFactory.decodeResource(getResources(), R.drawable.avatar_map);
+                        String pfad = Utilities.bildTrainingsortSpeichern(getContext(), trainingsortBild);
+                        neuerTrainingsort = dataSource.createTrainingsort(name, strasse, plz, ort, pfad, latLngTrainingsort.latitude, latLngTrainingsort.longitude, 0);
+                        AddTrainingsortActivity.setTrainingsortFotoAlsString(Utilities.bildNachTrainingsortBenennen(getContext(), neuerTrainingsort));
+                        dataSource.updateFotoTrainingsort(neuerTrainingsort, AddTrainingsortActivity.getTrainingsortFotoAlsString());
+
+
+                        Log.d("Bild ermitteln", "LatLng falsch bzw. auf -999");
+
+                        Toast toast = Toast.makeText(getContext(), "Der Trainingsort wurde angelegt.", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.BOTTOM, 0, 0);
+                        toast.show();
+
+                        Intent intent = new Intent(getContext(), TrainingsortVerwaltungActivity.class);
+                        Objects.requireNonNull(getActivity()).finish();
+                        startActivity(intent);
+
+                    } else {
+                        try {
+                            final AtomicReference<Bitmap> reference = new AtomicReference<>();
+                            int mMapWidth = 400;
+                            int mMapHeight = 400;
+
+                            GoogleMapOptions options = new GoogleMapOptions()
+                                    .compassEnabled(false)
+                                    .mapToolbarEnabled(false)
+                                    .camera(CameraPosition.fromLatLngZoom(latLngTrainingsort, 15))
+                                    .liteMode(true);
+
+                            mapView = new MapView(getContext(), options);
+                            mapView.onCreate(null);
+
+                            mapView.getMapAsync(new OnMapReadyCallback() {
+                                @Override
+                                public void onMapReady(GoogleMap googleMap) {
+
+                                    mapView.measure(View.MeasureSpec.makeMeasureSpec(mMapWidth, View.MeasureSpec.EXACTLY),
+                                            View.MeasureSpec.makeMeasureSpec(mMapHeight, View.MeasureSpec.EXACTLY));
+                                    mapView.layout(0, 0, mMapWidth, mMapHeight);
+
+                                    googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Objects.requireNonNull(getContext()), R.raw.style_json));
+
+                                    Log.d("Bild ermitteln", "Map geladen");
+
+
+                                    googleMap.setOnMapLoadedCallback(() -> {
+                                        // Make a snapshot when map's done loading
+                                        googleMap.snapshot(newValue -> {
+                                            String pfad = Utilities.bildTrainingsortSpeichern(getContext(), newValue);
+                                            AddTrainingsortActivity.setTrainingsortFotoAlsString(pfad);
+
+                                            Log.d("Bild ermitteln", "Map Screenshot aufgenommen");
+                                            Log.d("Bild ermitteln", "Screen Pfad: " + pfad);
+
+
+                                            if (AddTrainingsortActivity.getTrainingsortFotoAlsString() != null) {
+
+                                                Trainingsort neuerTrainingsort = dataSource.createTrainingsort(name, strasse, plz, ort, AddTrainingsortActivity.getTrainingsortFotoAlsString(), latLngTrainingsort.latitude, latLngTrainingsort.longitude, 0);
+                                                AddTrainingsortActivity.setTrainingsortFotoAlsString(Utilities.bildNachTrainingsortBenennen(getContext(), neuerTrainingsort));
+                                                dataSource.updateFotoTrainingsort(neuerTrainingsort, AddTrainingsortActivity.getTrainingsortFotoAlsString());
+
+                                            } else {
+                                                Trainingsort neuerTrainingsort = dataSource.createTrainingsort(name, strasse, plz, ort, "avatar_map", latLngTrainingsort.latitude, latLngTrainingsort.longitude, 0);
+                                                AddTrainingsortActivity.setTrainingsortFotoAlsString(Utilities.bildNachTrainingsortBenennen(getContext(), neuerTrainingsort));
+                                                dataSource.updateFotoTrainingsort(neuerTrainingsort, AddTrainingsortActivity.getTrainingsortFotoAlsString());
+
+
+                                            }
+
+                                            AddTrainingsortActivity.setTrainingsortFotoAlsString(null);
+
+
+                                            Toast toast = Toast.makeText(getContext(), "Der Trainingsort wurde angelegt.", Toast.LENGTH_SHORT);
+                                            toast.setGravity(Gravity.BOTTOM, 0, 0);
+                                            toast.show();
+
+                                            Intent intent = new Intent(getContext(), TrainingsortVerwaltungActivity.class);
+                                            Objects.requireNonNull(getActivity()).finish();
+                                            startActivity(intent);
+                                        });
+
+                                    });
+
+                                }
+                            });
+
+
+                            //trainingsortBild = Utilities.getMapBildAusURL(Objects.requireNonNull(latLngTrainingsort).latitude, Objects.requireNonNull(latLngTrainingsort).longitude, 500, 500);
+
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            AddTrainingsortActivity.setTrainingsortFotoAlsString(null);
+                        }
+
+                    }
                 });
-
             }
 
         }
@@ -135,87 +252,4 @@ public class AddTrainingsortFragment extends Fragment {
 
     }
 
-    private static class TrainingsortFotoSpeichernAsyncTask extends AsyncTask<Void, Void, LatLng> {
-
-
-        private final WeakReference<AddTrainingsortFragment> activityReference;
-        private String name;
-        private String strasse;
-        private String plz;
-        private String ort;
-
-        private TrainingsortFotoSpeichernAsyncTask(AddTrainingsortFragment context, String name, String strasse, String plz, String ort) {
-            activityReference = new WeakReference<>(context);
-            this.name = name;
-            this.strasse = strasse;
-            this.plz = plz;
-            this.ort = ort;
-
-        }
-
-        @Override
-        public LatLng doInBackground(Void... args) {
-
-            AddTrainingsortFragment addTrainingsortFragment = activityReference.get();
-
-            String adresse = strasse + ", " + plz + " " + ort;
-
-            Bitmap trainingsortBild;
-
-            LatLng latLngTrainingsort = Utilities.getLocationFromAddress(addTrainingsortFragment.getContext(), adresse);
-
-            if (Objects.requireNonNull(latLngTrainingsort).longitude == -999) {
-                Toast toast = Toast.makeText(addTrainingsortFragment.getContext(), "Fehler bei der Adressermittlung. Ist die Adresse korrekt eingegeben?", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.BOTTOM, 0, 100);
-                toast.show();
-            } else {
-                try {
-                    trainingsortBild = Utilities.getMapBildAusURL(Objects.requireNonNull(latLngTrainingsort).latitude, Objects.requireNonNull(latLngTrainingsort).longitude, 500, 500);
-                    String pfad = Utilities.bildTrainingsortSpeichern(addTrainingsortFragment.getContext(), trainingsortBild);
-
-                    AddTrainingsortActivity.setTrainingsortFotoAlsString(pfad);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    AddTrainingsortActivity.setTrainingsortFotoAlsString(null);
-                }
-            }
-
-
-            return latLngTrainingsort;
-        }
-
-        @Override
-        public void onPostExecute(LatLng result) {
-
-            AddTrainingsortFragment addTrainingsortFragment = activityReference.get();
-            Trainingsort neuerTrainingsort;
-
-            DataSource dataSource = DataSource.getInstance();
-            dataSource.open();
-
-            if (AddTrainingsortActivity.getTrainingsortFotoAlsString() != null) {
-
-                neuerTrainingsort = dataSource.createTrainingsort(name, strasse, plz, ort, AddTrainingsortActivity.getTrainingsortFotoAlsString(), result.latitude, result.longitude, 0);
-                AddTrainingsortActivity.setTrainingsortFotoAlsString(Utilities.bildNachTrainingsortBenennen(addTrainingsortFragment.getContext(), neuerTrainingsort));
-                dataSource.updateFotoTrainingsort(neuerTrainingsort, AddTrainingsortActivity.getTrainingsortFotoAlsString());
-
-            } else {
-
-                dataSource.createTrainingsort(name, strasse, plz, ort, "avatar_maps", result.latitude, result.longitude, 0);
-
-            }
-
-            AddTrainingsortActivity.setTrainingsortFotoAlsString(null);
-
-
-            Toast toast = Toast.makeText(addTrainingsortFragment.getContext(), "Der Trainingsort wurde angelegt.", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.BOTTOM, 0, 0);
-            toast.show();
-
-            Intent intent = new Intent(addTrainingsortFragment.getContext(), TrainingsortVerwaltungActivity.class);
-            Objects.requireNonNull(addTrainingsortFragment.getActivity()).finish();
-            addTrainingsortFragment.startActivity(intent);
-        }
-    }
 }

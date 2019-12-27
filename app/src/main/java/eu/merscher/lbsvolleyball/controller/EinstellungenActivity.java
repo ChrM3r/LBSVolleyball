@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import eu.merscher.lbsvolleyball.R;
+import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 public class EinstellungenActivity extends AppCompatActivity {
 
@@ -24,6 +25,9 @@ public class EinstellungenActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(getString(R.string.einstellungen));
         }
+
+        //Berechtigungen
+        Utilities.berechtigungenPruefen(this);
 
     }
 

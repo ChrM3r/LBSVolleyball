@@ -21,6 +21,7 @@ import java.util.Objects;
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.DataSource;
 import eu.merscher.lbsvolleyball.model.Spieler;
+import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
 public class SpielerVerwaltungActivity extends AppCompatActivity {
@@ -29,7 +30,6 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
     private ArrayList<String> spielerNamen = new ArrayList<>();
     private ArrayList<String> spielerGeburtstage = new ArrayList<>();
     private ArrayList<Spieler> spielerList = new ArrayList<>();
-
 
     public void setSpielerFotos(Bitmap b) {
         spielerFotos.add(b);
@@ -87,6 +87,9 @@ public class SpielerVerwaltungActivity extends AppCompatActivity {
 
         super.onResume();
         getSpielerUndSetAdapter();
+
+        //Berechtigungen
+        Utilities.berechtigungenPruefen(this);
 
     }
 

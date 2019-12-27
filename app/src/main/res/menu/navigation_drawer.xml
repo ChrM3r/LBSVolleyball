@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/icon_up_arrow"
+            android:title="@string/dashboard" />
+
+        <item
+            android:id="@+id/nav_spieltag"
+            android:icon="@drawable/icon_ball"
+            android:title="@string/spieltag" />
+
+        <item
+            android:id="@+id/nav_spielerverwaltung"
+            android:icon="@drawable/icon_spieler"
+            android:title="@string/spielerverwaltung" />
+
+        <item
+            android:id="@+id/nav_trainingsortverwatung"
+            android:icon="@drawable/icon_location"
+            android:title="@string/trainingsortverwaltung" />
+
+        <item
+            android:id="@+id/nav_trainingsverwaltung"
+            android:icon="@drawable/icon_spieltag"
+            android:title="@string/trainingsuebersicht" />
+
+    </group>
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_einstellungen"
+            android:icon="@drawable/icon_einstellungen"
+            android:title="@string/einstellungen" />
+
+    </group>
+
+</menu>

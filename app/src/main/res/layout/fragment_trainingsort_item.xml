@@ -24,6 +24,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="clip_vertical"
                 android:layout_marginEnd="5sp"
                 android:layout_weight="1"
                 android:fontFamily="sans-serif"
@@ -36,11 +37,17 @@
                 android:id="@+id/fragment_trainingsort_textView_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="clip_vertical"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="3"
+                android:singleLine="true"
                 android:textColor="#1B1B1B"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                app:autoSizeMaxTextSize="16sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform" />
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
@@ -69,6 +76,7 @@
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="clip_vertical"
                     android:layout_marginEnd="5sp"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif"
@@ -81,6 +89,7 @@
                     android:id="@+id/fragment_trainingsort_textView_strasse"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="clip_vertical"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="3"
@@ -97,6 +106,7 @@
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="clip_vertical"
                     android:layout_marginEnd="5sp"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif"
@@ -109,6 +119,7 @@
                     android:id="@+id/fragment_trainingsort_textView_plz"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="clip_vertical"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="3"
@@ -124,7 +135,7 @@
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_gravity="clip_vertical"
                     android:layout_marginEnd="5sp"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif"
@@ -137,6 +148,7 @@
                     android:id="@+id/fragment_trainingsort_textView_ort"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="clip_vertical"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="3"

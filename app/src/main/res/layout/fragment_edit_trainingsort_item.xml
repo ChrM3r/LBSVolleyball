@@ -42,11 +42,11 @@
                 android:layout_marginEnd="8dp"
                 android:layout_weight="3"
                 android:autofillHints=""
-                android:imeOptions="actionNext"
+                android:imeOptions="actionDone"
                 android:importantForAutofill="no"
-                android:inputType="text"
+                android:inputType="textCapWords"
                 android:nextFocusDown="@id/editText_strasse_edit"
-                android:textColor="#AE1732"
+                android:textColor="@color/colorPrimary"
                 android:textSize="16sp"
                 tools:ignore="LabelFor"
                 tools:targetApi="o" />
@@ -98,12 +98,12 @@
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="3"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:importantForAutofill="no"
                     android:inputType="textCapSentences"
                     android:nextFocusUp="@id/editText_name_trainingsort_edit"
                     android:nextFocusDown="@id/editText_plz_add"
-                    android:textColor="#AE1732"
+                    android:textColor="@color/colorPrimary"
                     android:textSize="16sp"
                     tools:ignore="LabelFor" />
 
@@ -136,12 +136,12 @@
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="3"
-                    android:imeOptions="actionNext"
+                    android:imeOptions="actionDone"
                     android:importantForAutofill="no"
                     android:inputType="number"
                     android:nextFocusUp="@id/editText_plz_edit"
                     android:nextFocusDown="@id/editText_ort_edit"
-                    android:textColor="#AE1732"
+                    android:textColor="@color/colorPrimary"
                     android:textSize="16sp"
                     tools:ignore="LabelFor" />
 
@@ -176,9 +176,9 @@
                     android:layout_weight="3"
                     android:imeOptions="actionDone"
                     android:importantForAutofill="no"
-                    android:inputType="text"
+                    android:inputType="textCapWords"
                     android:nextFocusUp="@id/editText_plz_edit"
-                    android:textColor="#AE1732"
+                    android:textColor="@color/colorPrimary"
                     android:textSize="16sp"
                     tools:ignore="LabelFor" />
 
@@ -189,27 +189,28 @@
     </androidx.cardview.widget.CardView>
 
     <Button
+        android:id="@+id/fragment_edit_trainingsort_loeschen_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/card2_edit"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@android:color/white"
+        android:shadowRadius="2"
+        android:text="@string/button_trainingsort_loeschen"
+        android:textColor="@color/colorPrimary" />
+
+    <Button
         android:id="@+id/fragment_edit_trainingsort_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="230dp"
+        android:layout_marginTop="350dp"
         android:layout_marginEnd="8dp"
-        android:backgroundTint="#AE1732"
+        android:backgroundTint="@color/colorPrimary"
         android:shadowRadius="2"
         android:text="@string/button_speichern"
-        android:textColor="@android:color/white" />
-
-    <Button
-        android:id="@+id/fragment_edit_trainingsort_loeschen_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="290dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#AE1732"
-        android:shadowRadius="2"
-        android:text="@string/button_trainingsort_loeschen"
         android:textColor="@android:color/white" />
 
 </RelativeLayout>

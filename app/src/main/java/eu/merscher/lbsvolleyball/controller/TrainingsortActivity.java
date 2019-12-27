@@ -1,6 +1,7 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -105,9 +106,9 @@ public class TrainingsortActivity extends AppCompatActivity implements EditSpiel
 
         editTrainingsortButton.setOnClickListener(v -> {
 
-//                Intent intent = new Intent(TrainingsortActivity.this, EditTrainingsortActivity.class);
-//                intent.putExtra("trainingsort", trainingsort);
-//                TrainingsortActivity.this.startActivity(intent);
+            Intent intent = new Intent(TrainingsortActivity.this, EditTrainingsortActivity.class);
+            intent.putExtra("trainingsort", trainingsort);
+            TrainingsortActivity.this.startActivity(intent);
         });
 
 
@@ -126,6 +127,13 @@ public class TrainingsortActivity extends AppCompatActivity implements EditSpiel
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //Berechtigungen
+        Utilities.berechtigungenPruefen(this);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

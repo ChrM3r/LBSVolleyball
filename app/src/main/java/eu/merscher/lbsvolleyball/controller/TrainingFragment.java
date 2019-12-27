@@ -1,7 +1,9 @@
 package eu.merscher.lbsvolleyball.controller;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -12,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -23,13 +26,6 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -65,6 +61,7 @@ public class TrainingFragment extends Fragment {
     private DataSource dataSource;
     private static ArrayList<Spieler> selectedSpieler = new ArrayList<>();
     public static Resources resources;
+    private ArrayList<Trainingsort> trainingsortList;
 
     private TrainingFragmentAdapter adapter;
 
@@ -133,9 +130,9 @@ public class TrainingFragment extends Fragment {
             private EditText editTextPlatzkosten;
             private TextView betragJeSpieler;
             private Switch kostenlosSwitch;
-            private CardView cardView;
-            private MapView mapView;
-            private GoogleMap map;
+            private CardView cardView_platzkosten;
+            private Button trainingsort_anlegen;
+            private ImageView mapView;
             private Spinner spinner;
 
             TrainingFragmentViewHolder(View view) {
@@ -144,7 +141,8 @@ public class TrainingFragment extends Fragment {
                 editTextPlatzkosten = view.findViewById(R.id.fragment_training_editText_platzkosten);
                 betragJeSpieler = view.findViewById(R.id.fragment_training_textview_betrag_je_spieler);
                 kostenlosSwitch = view.findViewById(R.id.fragment_training_kostenlosSwitch);
-                cardView = view.findViewById(R.id.training_kosten_card);
+                cardView_platzkosten = view.findViewById(R.id.training_kosten_card);
+                trainingsort_anlegen = view.findViewById(R.id.fragment_training_trainingsort_anlegen);
                 mapView = view.findViewById(R.id.fragment_training_mapView);
                 spinner = view.findViewById(R.id.fragment_training_spinner);
             }
@@ -188,24 +186,24 @@ public class TrainingFragment extends Fragment {
                     holder.editTextPlatzkosten.setEnabled(false);
                     holder.editTextPlatzkosten.setFocusable(false);
 
-                    holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView.getLayoutParams().width, 88));
-                    holder.cardView.setMinimumHeight(88);
+                    holder.cardView_platzkosten.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView_platzkosten.getLayoutParams().width, 88));
+                    holder.cardView_platzkosten.setMinimumHeight(88);
 
-                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
+                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView_platzkosten.getLayoutParams();
                     layoutParams.setMargins(32, 32, 32, 0);
 
-                    holder.cardView.requestLayout();
+                    holder.cardView_platzkosten.requestLayout();
 
                 } else {
                     kostenlos = false;
                     holder.editTextPlatzkosten.setEnabled(true);
                     holder.editTextPlatzkosten.setFocusableInTouchMode(true);
-                    holder.cardView.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView.getLayoutParams().width, 256));
-                    holder.cardView.setMinimumHeight(256);
+                    holder.cardView_platzkosten.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView_platzkosten.getLayoutParams().width, 256));
+                    holder.cardView_platzkosten.setMinimumHeight(256);
 
-                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView.getLayoutParams();
+                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView_platzkosten.getLayoutParams();
                     layoutParams.setMargins(32, 32, 32, 0);
-                    holder.cardView.requestLayout();
+                    holder.cardView_platzkosten.requestLayout();
 
                     platzKostenErmittelnUndSetzen();
                     setBetragJeSpieler();
@@ -229,12 +227,6 @@ public class TrainingFragment extends Fragment {
         }
 
 
-        private void mapTrainingsortSetzen(double lat, double lng) {
-            if (holder.map == null) return;
-
-            holder.map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15.0f));
-            holder.map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        }
 
         private void spielerAuswahlBefuellen() {
 
@@ -293,12 +285,15 @@ public class TrainingFragment extends Fragment {
             DataSource.initializeInstance(context);
             dataSource = DataSource.getInstance();
 
-            ArrayList<Trainingsort> trainingsortList = dataSource.getAllTrainingsort();
+            trainingsortList = dataSource.getAllTrainingsort();
             ArrayList<String> spinnerList = new ArrayList<>();
 
             for (Trainingsort t : trainingsortList) {
                 spinnerList.add(t.getName());
             }
+
+            if (trainingsortList.isEmpty())
+                spinnerList.add("Kein Ort angelegt.");
 
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, spinnerList);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -308,27 +303,14 @@ public class TrainingFragment extends Fragment {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                    if (holder.mapView != null) {
-                        holder.mapView.onCreate(null);
-                        holder.mapView.getMapAsync(googleMap -> {
 
-                            holder.map = googleMap;
-                            holder.map.setMapStyle(MapStyleOptions.loadRawResourceStyle(Objects.requireNonNull(getContext()), R.raw.style_json));
-
-
-                            if (trainingsortList.size() > 0) {
-                                trainingsort = trainingsortList.get(position);
-                                MapsInitializer.initialize(context);
-                                mapTrainingsortSetzen(trainingsort.getLatitude(), trainingsort.getLongitude());
-                                holder.map.getUiSettings().setMapToolbarEnabled(false);
-
-                            } else {
-                                MapsInitializer.initialize(context);
-                                mapTrainingsortSetzen(52.396149, 13.058540);
-                                holder.map.getUiSettings().setMapToolbarEnabled(false);
-                            }
-                        });
+                    if (trainingsortList.size() > 0) {
+                        trainingsort = trainingsortList.get(position);
+                        holder.mapView.setImageBitmap(BitmapFactory.decodeFile(trainingsort.getFoto()));
+                    } else {
+                        holder.mapView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.avatar_map));
                     }
+
 
                 }
 
@@ -337,6 +319,18 @@ public class TrainingFragment extends Fragment {
 
                 }
             });
+
+            if (trainingsortList.size() <= 0)
+                holder.trainingsort_anlegen.setVisibility(View.VISIBLE);
+            else
+                holder.trainingsort_anlegen.setVisibility(View.GONE);
+
+            holder.trainingsort_anlegen.setOnClickListener(v -> {
+                Intent intent = new Intent(getContext(), AddTrainingsortActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            });
+
         }
 
         private void setBetragJeSpieler() {
@@ -378,7 +372,7 @@ public class TrainingFragment extends Fragment {
                 trainings_id = 1;
 
 
-            if (selectedSpieler.size() > 0 && platzkosten > 0 && !kostenlos) {
+            if (selectedSpieler.size() > 0 && platzkosten > 0 && !kostenlos && trainingsortList.size() > 0) {
 
                 double bu_btr = platzkosten / selectedSpieler.size();
 
@@ -420,7 +414,7 @@ public class TrainingFragment extends Fragment {
                 toast.setGravity(Gravity.BOTTOM, 0, 20);
                 toast.show();
 
-            } else if (platzkosten <= 0 && kostenlos) {
+            } else if (platzkosten <= 0 && kostenlos && trainingsortList.size() > 0) {
 
                 trainingsort = dataSource.updateBesucheTrainingsort(trainingsort);
 
@@ -439,6 +433,11 @@ public class TrainingFragment extends Fragment {
                 toast.show();
 
                 holder.kostenlosSwitch.setChecked(false);
+            } else if (trainingsortList.size() <= 0) {
+
+                Toast toast = Toast.makeText(context, "Es wurde kein Trainingsort ausgewählt", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.BOTTOM, 0, 20);
+                toast.show();
             }
         }
 
