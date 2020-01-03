@@ -119,7 +119,6 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
 
-
             if (viewType == 1) {
                 View view2 = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_training_tunier_spielerauswahl_item_button, parent, false);
                 return new AddSpielerViewHolder(view2);
@@ -142,43 +141,44 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
 
             switch (holder.getItemViewType()) {
                 case 0:
-                    SpielerauswahlViewHolder holder1 = (SpielerauswahlViewHolder) holder;
+                    SpielerauswahlViewHolder spielerauswahlViewHolder = (SpielerauswahlViewHolder) holder;
                     Spieler spieler = spielerList.get(position);
 
-                    holder1.textViewName.setText(spieler.getName());
-                    holder1.textViewVname.setText(spieler.getVname());
+                    spielerauswahlViewHolder.textViewName.setText(spieler.getName());
+                    spielerauswahlViewHolder.textViewVname.setText(spieler.getVname());
 
                     if (spieler.getFoto().equals("avatar_m"))
-                        holder1.spielerBild.setImageResource(R.drawable.avatar_m);
+                        spielerauswahlViewHolder.spielerBild.setImageResource(R.drawable.avatar_m);
 
                     else {
-                        holder1.spielerBild.setImageBitmap(BitmapFactory.decodeFile(spieler.getFoto().replace(".png", "_klein.png")));
+                        spielerauswahlViewHolder.spielerBild.setImageBitmap(BitmapFactory.decodeFile(spieler.getFoto().replace(".png", "_klein.png")));
                     }
 
 
-                    holder1.spielerBild.setOnClickListener(v -> {
-                        selectSpieler(holder1, position);
+                    spielerauswahlViewHolder.spielerBild.setOnClickListener(v -> selectSpieler(spielerauswahlViewHolder));
+
+                    spielerauswahlViewHolder.textViewName.setOnClickListener(v -> selectSpieler(spielerauswahlViewHolder));
+
+                    spielerauswahlViewHolder.textViewVname.setOnClickListener(v -> selectSpieler(spielerauswahlViewHolder));
+
+
+                    //Spieler-Select
+                    spielerauswahlViewHolder.checkBox.setOnCheckedChangeListener(null);
+                    spielerauswahlViewHolder.checkBox.setChecked(TrainingFragment.spielerIstSelected(spielerList.get(position)));
+                    spielerauswahlViewHolder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+
+                        if (isChecked)
+                            TrainingFragment.addSelectedSpieler(spielerList.get(position));
+                        else
+                            TrainingFragment.uncheckSelectedSpieler(spielerList.get(position));
+
                         onSpielerClickListener.onSpielerClick();
+
                     });
 
 
-                    holder1.textViewName.setOnClickListener(v -> {
-                        selectSpieler(holder1, position);
-                        onSpielerClickListener.onSpielerClick();
-                    });
-
-                    holder1.textViewVname.setOnClickListener(v -> {
-                        selectSpieler(holder1, position);
-                        onSpielerClickListener.onSpielerClick();
-                    });
-
-                    holder1.checkBox.setOnClickListener(v -> {
-                        selectSpieler(holder1, position);
-                        onSpielerClickListener.onSpielerClick();
-                    });
-
-
-                    holder1.spielerBild.setOnTouchListener(new View.OnTouchListener() {
+                    spielerauswahlViewHolder.spielerBild.setOnTouchListener(new View.OnTouchListener() {
 
                         long then = 0;
 
@@ -189,7 +189,7 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
                             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if ((System.currentTimeMillis() - then) > 1200) {
                                     getSpielerUndStartSpielerseite(sortierungUser, position);
-                                    onSpielerClickListener.onSpielerClick();
+                                    //onSpielerClickListener.onSpielerClick();
                                     return true;
                                 }
                             }
@@ -199,8 +199,8 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
                     break;
 
                 case 1:
-                    AddSpielerViewHolder holder2 = (AddSpielerViewHolder) holder;
-                    holder2.button.setOnClickListener(v -> {
+                    AddSpielerViewHolder addSpielerViewHolder = (AddSpielerViewHolder) holder;
+                    addSpielerViewHolder.button.setOnClickListener(v -> {
                         onSpielerClickListener.onSpielerClick();
                         Intent intent = new Intent(context, AddSpielerActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -215,15 +215,9 @@ public class TrainingTunierSpielerauswahlFragment extends Fragment {
             return spielerList.size() + 1;
         }
 
-        private void selectSpieler(final SpielerauswahlViewHolder holder, final int position) {
+        private void selectSpieler(final SpielerauswahlViewHolder holder) {
 
-            if (TrainingFragment.spielerIstSelected(spielerList.get(position))) {
-                holder.checkBox.setChecked(false);
-                TrainingFragment.uncheckSelectedSpieler(spielerList.get(position));
-            } else {
-                holder.checkBox.setChecked(true);
-                TrainingFragment.addSelectedSpieler(spielerList.get(position));
-            }
+            holder.checkBox.setChecked(!holder.checkBox.isChecked());
         }
 
 

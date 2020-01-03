@@ -54,15 +54,30 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
     private final Context context;
     private final LayoutInflater inflate;
     private Spieler spieler;
+    private SpielerKontoListViewAdapter spielerKontoListViewAdapter;
+    private OnBuchungListener onBuchungListener;
+    private boolean auszahlung = false;
+    private boolean istAusgeklappt = false;
+
+    SpielerseiteKontodatenFragmentAdapter(Context context, ArrayList<Buchung> buchungList, Spieler spieler) {
+        this.inflate = LayoutInflater.from(context);
+        this.context = context;
+        this.buchungList = buchungList;
+        this.spieler = spieler;
+    }
+
+    @NotNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
+
+        View view = inflate.inflate(R.layout.fragment_spielerseite_kontodaten_item, parent, false);
+        return new ViewHolder(view);
+    }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         dataSource = DataSource.getInstance();
-
-        holder.ueberschrift1.setGravity(Gravity.CENTER);
-        holder.ueberschrift2.setGravity(Gravity.CENTER);
-        holder.ueberschrift3.setGravity(Gravity.CENTER);
 
         holder.auszahlungSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -106,20 +121,18 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                 if (spieler.getHat_buchung_mm() != null) { //Wenn Buchungen für den Spieler vorhanden sind...
 
-                    System.out.println("1");
                     Buchung buchung = dataSource.getNeusteBuchungZuSpieler(spieler);
 
                     kto_saldo_alt = buchung.getKto_saldo_neu(); //der vorherige Kto_Saldo_neu ist der neue Kto_Saldo_alt
                     kto_saldo_neu = kto_saldo_alt + bu_btr;
-                    dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999);
+                    dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999, null, -999);
 
                 } else { //Wenn keine Buchung vorhaden ist, ist der Startsaldo 0
 
-                    System.out.println("2");
 
                     kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
                     kto_saldo_neu = kto_saldo_alt + bu_btr;
-                    dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999);
+                    dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999, null, -999);
 
                 }
                 spieler = dataSource.updateHatBuchungenMM(spieler);
@@ -147,26 +160,19 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                         buchungListKlein.add(buchungListNeu.get(i));
                     }
                     spielerKontoListViewAdapter.updateBuchungen(buchungListKlein);
+                    Utilities.setListViewHeightNachInhalt(holder.buchungListView);
 
                     holder.mehrBuchungen.setOnClickListener(v -> {
-                        ArrayList<Buchung> buchungListGross = new ArrayList<>();
 
                         if (!istAusgeklappt) {
 
                             istAusgeklappt = true;
                             holder.mehrBuchungen.setImageResource(R.drawable.icon_up_arrow);
 
-                            if (buchungListNeu.size() > 10) {
-                                for (int i = 0; i < 10; i++) {
-                                    buchungListGross.add(buchungListNeu.get(i));
-                                }
-                                spielerKontoListViewAdapter.updateBuchungen(buchungListGross);
-                                holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 10));
+                            spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
+                            Utilities.setListViewHeightNachInhalt(holder.buchungListView);
+                            holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
 
-                            } else {
-                                spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
-                                holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
-                            }
 
                         } else {
                             ArrayList<Buchung> buchungListKleinNeu = new ArrayList<>();
@@ -179,6 +185,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                                 buchungListKleinNeu.add(buchungListNeu.get(i));
                             }
                             spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
+                            Utilities.setListViewHeightNachInhalt(holder.buchungListView);
                             holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 5));
                         }
                     });
@@ -210,9 +217,9 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             }
             spielerKontoListViewAdapter = new SpielerKontoListViewAdapter(context, buchungListKlein);
             holder.buchungListView.setAdapter(spielerKontoListViewAdapter);
+            Utilities.setListViewHeightNachInhalt(holder.buchungListView);
 
             holder.mehrBuchungen.setOnClickListener(v -> {
-                ArrayList<Buchung> buchungListGross = new ArrayList<>();
 
                 if (!istAusgeklappt) {
 
@@ -220,17 +227,9 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                     holder.mehrBuchungen.setImageResource(R.drawable.icon_up_arrow);
 
 
-                    if (buchungList.size() > 10) {
-                        for (int i = 0; i < 10; i++) {
-                            buchungListGross.add(buchungList.get(i));
-                        }
-                        spielerKontoListViewAdapter.updateBuchungen(buchungListGross);
-                        holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungList.size() - 10));
-
-                    } else {
-                        spielerKontoListViewAdapter.updateBuchungen(buchungList);
-                        holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
-                    }
+                    spielerKontoListViewAdapter.updateBuchungen(buchungList);
+                    Utilities.setListViewHeightNachInhalt(holder.buchungListView);
+                    holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
 
                 } else {
                     ArrayList<Buchung> buchungListKleinNeu = new ArrayList<>();
@@ -244,6 +243,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                         buchungListKleinNeu.add(buchungList.get(i));
                     }
                     spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
+                    Utilities.setListViewHeightNachInhalt(holder.buchungListView);
 
                 }
             });
@@ -253,33 +253,11 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         } else {
             spielerKontoListViewAdapter = new SpielerKontoListViewAdapter(context, buchungList);
             holder.buchungListView.setAdapter(spielerKontoListViewAdapter);
+            Utilities.setListViewHeightNachInhalt(holder.buchungListView);
+
         }
 
 
-    }
-
-    private SpielerKontoListViewAdapter spielerKontoListViewAdapter;
-    private OnBuchungListener onBuchungListener;
-    private boolean auszahlung = false;
-    private boolean istAusgeklappt = false;
-
-    SpielerseiteKontodatenFragmentAdapter(Context context, ArrayList<Buchung> buchungList, Spieler spieler) {
-        this.inflate = LayoutInflater.from(context);
-        this.context = context;
-        this.buchungList = buchungList;
-        this.spieler = spieler;
-    }
-
-    @NotNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
-
-        View view = inflate.inflate(R.layout.fragment_spielerseite_kontodaten_item, parent, false);
-        return new ViewHolder(view);
-    }
-
-    public interface OnBuchungListener {
-        void onBuchung(String saldo);
     }
 
     @Override
@@ -305,7 +283,131 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         }
     }
 
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
+        final ListView buchungListView;
+        final EditText editTextAddBuchung;
+        final FloatingActionButton buttonAddBuchung;
+        final Switch auszahlungSwitch;
+        final ImageButton mehrBuchungen;
+        final TextView mehrBuchungenText;
+
+
+        ViewHolder(View view) {
+            super(view);
+            buchungListView = view.findViewById(R.id.listView_buchungen);
+            editTextAddBuchung = view.findViewById(R.id.fragment_kontodaten_editText_addBuchung);
+            buttonAddBuchung = view.findViewById(R.id.fragment_spielerkonto_addButton);
+            auszahlungSwitch = view.findViewById(R.id.fragment_kontodaten_editText_switch);
+            mehrBuchungen = view.findViewById(R.id.mehrBuchungen);
+            mehrBuchungenText = view.findViewById(R.id.mehrBuchungenText);
+        }
+
+    }
+
+    public class SpielerKontoListViewAdapter extends BaseAdapter {
+
+        private final DecimalFormat df = new DecimalFormat("0.00");
+        private ArrayList<Buchung> buchungList;
+        private Activity activity = null;
+        private Fragment fragment = null;
+        private Context context;
+
+
+        SpielerKontoListViewAdapter(Context context, ArrayList<Buchung> buchungList) {
+            super();
+            this.context = context;
+            this.buchungList = buchungList;
+        }
+
+        @Override
+        public int getCount() {
+            return buchungList.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return buchungList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @SuppressLint("InflateParams")
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+
+            SpielerseiteKontodatenFragmentAdapter.SpielerKontoListViewAdapter.ViewHolder holder;
+            LayoutInflater inflater;
+            if (activity == null && fragment == null)
+                inflater = LayoutInflater.from(context);
+            else if (context == null && fragment == null)
+                inflater = activity.getLayoutInflater();
+            else
+                inflater = fragment.getLayoutInflater();
+
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.fragment_spielerseite_kontodaten_item_listview_row, null);
+                holder = new SpielerseiteKontodatenFragmentAdapter.SpielerKontoListViewAdapter.ViewHolder();
+                holder.buchungDatum = convertView.findViewById(R.id.datum);
+                holder.buchungBetrag = convertView.findViewById(R.id.betrag);
+                holder.ktoSaldoNeu = convertView.findViewById(R.id.saldo);
+                holder.buchungTyp = convertView.findViewById(R.id.typ);
+                convertView.setTag(holder);
+
+            } else {
+                holder = (SpielerseiteKontodatenFragmentAdapter.SpielerKontoListViewAdapter.ViewHolder) convertView.getTag();
+            }
+
+            Buchung buchung = buchungList.get(position);
+            holder.buchungDatum.setText(buchung.getBu_date());
+
+            if (buchung.getIst_manuell_mm() != null) {
+                holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(SpielerseiteActivity.resources, R.drawable.typ_manuell));
+            } else if (buchung.getIst_training_mm() != null) {
+                holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(SpielerseiteActivity.resources, R.drawable.typ_training));
+            } else if (buchung.getIst_tunier_mm() != null) {
+                holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(SpielerseiteActivity.resources, R.drawable.typ_tunier));
+            }
+
+            holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
+            holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
+
+
+            if (buchung.getBu_btr() < 0)
+                holder.buchungBetrag.setTextColor(Color.parseColor("#AE1732"));
+            else
+                holder.buchungBetrag.setTextColor(Color.parseColor("#86C06A"));
+
+
+            if (buchung.getKto_saldo_neu() < 0)
+                holder.ktoSaldoNeu.setTextColor(Color.parseColor("#AE1732"));
+            else
+                holder.ktoSaldoNeu.setTextColor(Color.parseColor("#1B1B1B"));
+
+            return convertView;
+        }
+
+        void updateBuchungen(ArrayList<Buchung> list) {
+            this.buchungList = list;
+            notifyDataSetChanged();
+        }
+
+        private class ViewHolder {
+            TextView buchungDatum;
+            TextView buchungBetrag;
+            TextView ktoSaldoNeu;
+            ImageView buchungTyp;
+        }
+
+    }
+
+    public interface OnBuchungListener {
+        void onBuchung(String saldo);
+    }
 
     private static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -367,140 +469,4 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
-        final ListView buchungListView;
-        final EditText editTextAddBuchung;
-        final FloatingActionButton buttonAddBuchung;
-        final Switch auszahlungSwitch;
-        final TextView ueberschrift1;
-        final TextView ueberschrift2;
-        final TextView ueberschrift3;
-        final TextView ueberschrift4;
-        final ImageButton mehrBuchungen;
-        final TextView mehrBuchungenText;
-
-
-        ViewHolder(View view) {
-            super(view);
-            buchungListView = view.findViewById(R.id.listView_buchungen);
-            editTextAddBuchung = view.findViewById(R.id.fragment_kontodaten_editText_addBuchung);
-            buttonAddBuchung = view.findViewById(R.id.fragment_spielerkonto_addButton);
-            auszahlungSwitch = view.findViewById(R.id.fragment_kontodaten_editText_switch);
-            ueberschrift1 = view.findViewById(R.id.fragment_spielerseite_kontodaten_item_ueberschrift1);
-            ueberschrift2 = view.findViewById(R.id.fragment_spielerseite_kontodaten_item_ueberschrift2);
-            ueberschrift3 = view.findViewById(R.id.fragment_spielerseite_kontodaten_item_ueberschrift3);
-            ueberschrift4 = view.findViewById(R.id.fragment_spielerseite_kontodaten_item_ueberschrift4);
-            mehrBuchungen = view.findViewById(R.id.mehrBuchungen);
-            mehrBuchungen.setVisibility(View.INVISIBLE);
-            mehrBuchungenText = view.findViewById(R.id.mehrBuchungenText);
-            mehrBuchungenText.setVisibility(View.INVISIBLE);
-        }
-
-    }
-
-    public class SpielerKontoListViewAdapter extends BaseAdapter {
-
-        private final DecimalFormat df = new DecimalFormat("0.00");
-        private ArrayList<Buchung> buchungList;
-        private Activity activity = null;
-        private Fragment fragment = null;
-        private Context context;
-
-
-        SpielerKontoListViewAdapter(Context context, ArrayList<Buchung> buchungList) {
-            super();
-            this.context = context;
-            this.buchungList = buchungList;
-        }
-
-        @Override
-        public int getCount() {
-            return buchungList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return buchungList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @SuppressLint("InflateParams")
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-
-            SpielerseiteKontodatenFragmentAdapter.SpielerKontoListViewAdapter.ViewHolder holder;
-            LayoutInflater inflater;
-            if (activity == null && fragment == null)
-                inflater = LayoutInflater.from(context);
-            else if (context == null && fragment == null)
-                inflater = activity.getLayoutInflater();
-            else
-                inflater = fragment.getLayoutInflater();
-
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.fragment_spielerseite_kontodaten_item_listview_row, null);
-                holder = new SpielerseiteKontodatenFragmentAdapter.SpielerKontoListViewAdapter.ViewHolder();
-                holder.buchungDatum = convertView.findViewById(R.id.datum);
-                holder.buchungBetrag = convertView.findViewById(R.id.betrag);
-                holder.ktoSaldoNeu = convertView.findViewById(R.id.saldo);
-                holder.buchungTyp = convertView.findViewById(R.id.typ);
-
-
-                convertView.setTag(holder);
-            } else {
-                holder = (SpielerseiteKontodatenFragmentAdapter.SpielerKontoListViewAdapter.ViewHolder) convertView.getTag();
-            }
-
-            Buchung buchung = buchungList.get(position);
-            holder.buchungDatum.setText(buchung.getBu_date());
-
-            if (buchung.getIst_manuell_mm() != null) {
-                holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(SpielerseiteActivity.resources, R.drawable.typ_manuell));
-            } else if (buchung.getIst_training_mm() != null) {
-                holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(SpielerseiteActivity.resources, R.drawable.typ_training));
-            } else if (buchung.getIst_tunier_mm() != null) {
-                holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(SpielerseiteActivity.resources, R.drawable.typ_tunier));
-            }
-
-            holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
-            holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
-
-            holder.buchungBetrag.setGravity(Gravity.END);
-            holder.buchungDatum.setGravity(Gravity.START);
-            holder.ktoSaldoNeu.setGravity(Gravity.END);
-            //holder.buchungTyp.setForegroundGravity(Gravity.CENTER);
-
-            if (buchung.getBu_btr() < 0)
-                holder.buchungBetrag.setTextColor(Color.parseColor("#AE1732"));
-            else
-                holder.buchungBetrag.setTextColor(Color.parseColor("#86C06A"));
-
-
-            if (buchung.getKto_saldo_neu() < 0)
-                holder.ktoSaldoNeu.setTextColor(Color.parseColor("#AE1732"));
-            else
-                holder.ktoSaldoNeu.setTextColor(Color.parseColor("#1B1B1B"));
-
-            return convertView;
-        }
-
-        void updateBuchungen(ArrayList<Buchung> list) {
-            this.buchungList = list;
-            notifyDataSetChanged();
-        }
-
-        private class ViewHolder {
-            TextView buchungDatum;
-            TextView buchungBetrag;
-            TextView ktoSaldoNeu;
-            ImageView buchungTyp;
-        }
-
-    }
 }

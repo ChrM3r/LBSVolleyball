@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "eu.merscher.lbsvolleyball"
         minSdkVersion 22
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
-        versionName "0.19.12 beta (Build 27122019)"
+        versionName "0.20.01 beta (Build 03012020)"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -55,12 +55,8 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.0'
     implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
     implementation 'de.siegmar:fastcsv:1.0.3'
-    implementation 'com.github.marcohc:robotocalendarview:3.6.1'
-    implementation 'io.github.inflationx:calligraphy3:3.1.1'
-    implementation 'uk.co.chrisjenx:calligraphy:2.3.0'
     implementation 'io.github.inflationx:viewpump:2.0.3'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.2.0-beta01'
 
 }

@@ -1,7 +1,7 @@
 <resources>
 
     <string name="API_KEY">AIzaSyBZNYEUwq0cg9s6jxKtKWwENI1wyvF977k</string>
-    <string name="APP_VERSION">Version 0.19.12 Build 27122019</string>
+    <string name="APP_VERSION">Version 0.20.01 Build 03012020</string>
     <string name="app_name">LBS Volleyball</string>
 
     <string name="spieltag">Spieltag</string>
@@ -90,6 +90,7 @@
 
     <string name="editText_errorMessage_empty">Das Feld darf nicht leer sein.</string>
     <string name="editText_errorMessage_bdate">Das Feld muss ein Datum im Format DD.MM.JJJJ enthalten.</string>
+    <string name="editText_errorMessage_bdate2">Der Tag darf nicht >31, der Monat nicht >12 sein.</string>
 
     <string name="editText_errorMessageMail">Die Mail-Adresse muss ein @ sowie einen Punkt enthalten. </string>
 
@@ -135,11 +136,29 @@
     <string name="teammitglieder">Teammitglieder</string>
     <string name="_15">15</string>
     <string name="teamkonto">Teamkonto</string>
+    <string name="auswertungen">Statistik</string>
     <string name="_37_50">37,50</string>
     <string name="_01_01_2001">01.01.2001</string>
     <string name="anzahl">Anzahl:</string>
     <string name="trainingsort_list_view">Trainingsort:</string>
     <string name="teilnehmer">Teilnehmer:</string>
     <string name="schlie_en">Schließen</string>
+    <string name="karte">Karte</string>
+    <string name="wann_wurde_gespielt">Wann wurde gespielt?</string>
+    <string name="heute">Heute</string>
+    <string name="button_training_hinzufuegen">Training hinzufügen!</string>
+    <string name="button_spielort_anlegen">Spielort anlegen</string>
+    <string name="spieler_mit_den_meisten_teilnahmen">Top 3 Spieler mit den meisten Teilnahmen:</string>
+    <string name="top_3_trainingsorte">Top 3 Spielorte mit den meisten Besuchen:</string>
+    <string name="spieleranzahl_je_training">Ø Spieleranzahl je Training:</string>
+    <string name="_10">10</string>
+    <string name="anzahl_der_spieler">Anzahl der Spieler:</string>
+    <string name="anzahl_der_trainings">Anzahl der Trainings:</string>
+    <string name="anzahl_der_trainingsorte">Anzahl der Trainingsorte:</string>
+    <string name="manuell">= Manuell</string>
+    <string name="training">= Training</string>
+    <string name="tunier">= Tunier</string>
+    <string name="spieler_geloescht">= Spieler gelöscht</string>
+    <string name="platzkosten">Platzkosten:</string>
 
 </resources>

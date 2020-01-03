@@ -254,6 +254,7 @@
                 android:layout_weight="3"
                 android:digits="01234567890,"
                 android:ems="10"
+                android:fontFamily="sans-serif-light"
                 android:hint="@string/betrag_0"
                 android:imeOptions="actionDone"
                 android:importantForAutofill="no"

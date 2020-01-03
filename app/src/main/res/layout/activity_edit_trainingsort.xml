@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/htab_appbar_add_edit_trainingsort"
+        android:id="@+id/htab_appbar_edit_trainingsort"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -15,7 +15,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/htab_collapse_toolbar_add_edit_trainingsort"
+            android:id="@+id/htab_collapse_toolbar_edit_trainingsort"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:fitsSystemWindows="true"
@@ -24,7 +24,7 @@
             app:titleEnabled="false">
 
             <ImageView
-                android:id="@+id/trainingsortbild_groß_add_edit"
+                android:id="@+id/trainingsortbild_groß_edit"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:alpha="0.6"
@@ -45,7 +45,7 @@
             </View>
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/htab_toolbar_add_edit_trainingsort"
+                android:id="@+id/htab_toolbar_edit_trainingsort"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_gravity="top"
@@ -54,7 +54,7 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
             <com.google.android.material.tabs.TabLayout
-                android:id="@+id/htab_tabs_add_edit_trainingsort"
+                android:id="@+id/htab_tabs_edit_trainingsort"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
@@ -69,10 +69,22 @@
 
 
     <androidx.viewpager.widget.ViewPager
-        android:id="@+id/add_edit_viewpager_trainingsort"
+        android:id="@+id/edit_viewpager_trainingsort"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <Button
+        android:id="@+id/fragment_edit_trainigsort_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="#AE1732"
+        android:shadowRadius="2"
+        android:text="@string/button_speichern"
+        android:textColor="@android:color/white" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

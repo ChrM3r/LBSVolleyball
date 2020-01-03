@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,7 +77,6 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
         return 1;
     }
 
-
     static class SpielerLoeschenAsyncTask extends AsyncTask<Void, Void, Void> {
 
         private final WeakReference<EditSpielerFragmentAdapter> activityReference;
@@ -119,8 +119,6 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
             void onLoeschenClick();
         }
     }
-
-
 
     static class SpielerUpdateAsyncTask extends AsyncTask<Void, Void, Spieler> {
 
@@ -249,6 +247,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
         final EditText editTextBdate;
         final EditText editTextMail;
         final Button buttonSpielerLoeschen;
+        final ImageButton buttonLBSMail;
 
         ViewHolder(final View view) {
             super(view);
@@ -257,6 +256,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
             editTextBdate = view.findViewById(R.id.editText_bdate_edit);
             editTextMail = view.findViewById(R.id.editText_mail_edit);
             buttonSpielerLoeschen = view.findViewById(R.id.fragment_edit_spieler_loeschen_button);
+            buttonLBSMail = view.findViewById(R.id.fragment_edit_spieler_button_lbsmail);
 
             editTextName.setText(spieler.getName());
             editTextVname.setText(spieler.getVname());
@@ -393,6 +393,27 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
             });
 
 
+            //LBS Mail einfügen
+            buttonLBSMail.setOnClickListener(v -> {
+
+                String name = editTextName.getText().toString().toLowerCase();
+                String vname = editTextVname.getText().toString().toLowerCase();
+
+                if (TextUtils.isEmpty(vname)) {
+                    editTextVname.setError(context.getString(R.string.editText_errorMessage_empty));
+                    return;
+                }
+
+                if (TextUtils.isEmpty(name)) {
+                    editTextName.setError(context.getString(R.string.editText_errorMessage_empty));
+                    return;
+                }
+
+                String lbsMail = vname + "." + name + "@lbs-ost.de";
+
+                editTextMail.setText(lbsMail);
+            });
+
             buttonSpielerLoeschen.setOnClickListener(v -> {
 
                 DataSource dataSource = DataSource.getInstance();
@@ -400,7 +421,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
 
                 neusteSpielerBuchung = dataSource.getNeusteBuchungZuSpieler(spieler);
 
-                if (neusteSpielerBuchung.getKto_saldo_neu() == null) {
+                if (neusteSpielerBuchung.getKto_saldo_neu() == null || Double.parseDouble(df.format(neusteSpielerBuchung.getKto_saldo_neu()).replace(",", ".")) == 0) {
 
                     AlertDialog.Builder dialog = new AlertDialog.Builder(context);
 
@@ -415,7 +436,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                                 context.startActivity(intent);
                             }).show();
 
-                } else if (neusteSpielerBuchung.getKto_saldo_neu() > 0) {
+                } else if (Double.parseDouble(df.format(neusteSpielerBuchung.getKto_saldo_neu()).replace(",", ".")) > 0) {
 
                     AlertDialog dialog = new AlertDialog.Builder(context).create();
 
@@ -435,7 +456,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                             Calendar kalender = Calendar.getInstance();
                             SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
-                            dataSource.createBuchungAufTeamkonto(bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999);
+                            dataSource.createBuchungAufTeamkonto(bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, null, null, -999, "X", spieler.getS_id());
 
 
                         } else {
@@ -447,7 +468,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                             Calendar kalender = Calendar.getInstance();
                             SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
-                            dataSource.createBuchungAufTeamkonto(bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999);
+                            dataSource.createBuchungAufTeamkonto(bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, null, null, -999, "X", spieler.getS_id());
 
                         }
 
@@ -472,7 +493,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                         Calendar kalender = Calendar.getInstance();
                         SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
-                        dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, (Long) null, "X", null, (Long) null);
+                        dataSource.createBuchung(spieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, null, null, -999, "X", spieler.getS_id());
 
                         new SpielerLoeschenAsyncTask(EditSpielerFragmentAdapter.this, spieler).execute();
                         onLoeschenClick.onLoeschenClick();
@@ -486,7 +507,7 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
                     dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Abbrechen", (dialoginterface, i) -> dialoginterface.cancel());
                     dialog.show();
 
-                } else if (neusteSpielerBuchung.getKto_saldo_neu() < 0) {
+                } else if (Double.parseDouble(df.format(neusteSpielerBuchung.getKto_saldo_neu()).replace(",", ".")) < 0) {
 
                     AlertDialog.Builder dialog = new AlertDialog.Builder(context);
 
@@ -524,11 +545,17 @@ public class EditSpielerFragmentAdapter extends RecyclerView.Adapter<EditSpieler
             } else if (bdate.split("\\.").length != 3) {
                 editTextBdate.setError(context.getString(R.string.editText_errorMessage_bdate));
                 return;
+
+            } else if (Integer.parseInt(bdate.split("\\.")[0]) > 31 || Integer.parseInt(bdate.split("\\.")[1]) > 12) {
+                editTextBdate.setError(context.getString(R.string.editText_errorMessage_bdate2));
+                return;
             }
 
-            if (!TextUtils.isEmpty(mail) && !mail.contains("@") && !mail.contains(".")) {
-                editTextBdate.setError(context.getString(R.string.editText_errorMessageMail));
-                return;
+            if (!TextUtils.isEmpty(mail)) {
+                if (!mail.contains("@") || !mail.split("@")[1].contains(".") || (mail.split("@")[1].split("\\.")[1] == null)) {
+                    editTextMail.setError(context.getString(R.string.editText_errorMessageMail));
+                    return;
+                }
             }
 
 

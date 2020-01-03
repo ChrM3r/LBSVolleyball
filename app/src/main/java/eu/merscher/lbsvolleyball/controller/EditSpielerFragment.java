@@ -39,7 +39,7 @@ public class EditSpielerFragment extends Fragment implements EditSpielerFragment
         this.adapter = adapter;
     }
 
-    public EditSpielerFragment(Spieler spieler) {
+    EditSpielerFragment(Spieler spieler) {
         this.spieler = spieler;
     }
 

@@ -1,5 +1,7 @@
 package eu.merscher.lbsvolleyball.controller;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -10,9 +12,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,7 +26,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -84,9 +88,15 @@ public class TrainingFragment extends Fragment {
         selectedSpieler.remove(spieler);
     }
 
+    private static ArrayList<Spieler> getSelectedSpieler() {
+        return selectedSpieler;
+    }
+
+    @SuppressLint("SetTextI18n")
     void onSpielerClick() {
 
         adapter.setBetragJeSpieler();
+        adapter.holder.anzahl_spieler.setText(Integer.toString(getSelectedSpieler().size()));
         adapter.holder.editTextPlatzkosten.clearFocus();
         adapter.holder.buttonAddSpieltag.requestFocus();
     }
@@ -130,23 +140,31 @@ public class TrainingFragment extends Fragment {
             private EditText editTextPlatzkosten;
             private TextView betragJeSpieler;
             private Switch kostenlosSwitch;
-            private CardView cardView_platzkosten;
             private Button trainingsort_anlegen;
             private ImageView mapView;
             private Spinner spinner;
+            private LinearLayout layout_platzkosten;
+            private DatePicker datePicker;
+            private Switch datumSwitch;
+            private TextView platzkosten_final;
+            private TextView anzahl_spieler;
 
             TrainingFragmentViewHolder(View view) {
+
                 super(view);
                 buttonAddSpieltag = view.findViewById(R.id.fragment_training_button_add_spieltag);
                 editTextPlatzkosten = view.findViewById(R.id.fragment_training_editText_platzkosten);
                 betragJeSpieler = view.findViewById(R.id.fragment_training_textview_betrag_je_spieler);
                 kostenlosSwitch = view.findViewById(R.id.fragment_training_kostenlosSwitch);
-                cardView_platzkosten = view.findViewById(R.id.training_kosten_card);
                 trainingsort_anlegen = view.findViewById(R.id.fragment_training_trainingsort_anlegen);
                 mapView = view.findViewById(R.id.fragment_training_mapView);
                 spinner = view.findViewById(R.id.fragment_training_spinner);
+                layout_platzkosten = view.findViewById(R.id.lin2);
+                datePicker = view.findViewById(R.id.fragment_training_datum);
+                datumSwitch = view.findViewById(R.id.fragment_training_heuteSwitch);
+                platzkosten_final = view.findViewById(R.id.fragment_training_textview_platzkosten_final);
+                anzahl_spieler = view.findViewById(R.id.fragment_training_textview_anzahl_spieler);
             }
-
         }
 
         @NotNull
@@ -169,8 +187,22 @@ public class TrainingFragment extends Fragment {
             DataSource dataSource = DataSource.getInstance();
             dataSource.open();
 
-            //Spielerauswahl
-            spielerAuswahlBefuellen();
+            //DatPicker
+            Calendar kalender = Calendar.getInstance();
+            holder.datePicker.updateDate(kalender.get(Calendar.YEAR), kalender.get(Calendar.MONTH), kalender.get(Calendar.DAY_OF_MONTH));
+
+            holder.datumSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+                if (isChecked) {
+
+                    holder.datePicker.updateDate(kalender.get(Calendar.YEAR), kalender.get(Calendar.MONTH), kalender.get(Calendar.DAY_OF_MONTH));
+                    holder.datePicker.setVisibility(View.GONE);
+
+                } else
+                    holder.datePicker.setVisibility(View.VISIBLE);
+
+            });
+            holder.datumSwitch.setChecked(true);
 
             //Platzkosten aus Einstellungen auslesen
             platzKostenErmittelnUndSetzen();
@@ -183,31 +215,19 @@ public class TrainingFragment extends Fragment {
                     kostenlos = true;
                     holder.betragJeSpieler.setText(resources.getText(R.string.betrag_0));
                     holder.editTextPlatzkosten.setText("");
-                    holder.editTextPlatzkosten.setEnabled(false);
-                    holder.editTextPlatzkosten.setFocusable(false);
+                    holder.platzkosten_final.setText(resources.getText(R.string.betrag_0));
 
-                    holder.cardView_platzkosten.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView_platzkosten.getLayoutParams().width, 88));
-                    holder.cardView_platzkosten.setMinimumHeight(88);
-
-                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView_platzkosten.getLayoutParams();
-                    layoutParams.setMargins(32, 32, 32, 0);
-
-                    holder.cardView_platzkosten.requestLayout();
+                    holder.layout_platzkosten.setVisibility(View.GONE);
 
                 } else {
                     kostenlos = false;
                     holder.editTextPlatzkosten.setEnabled(true);
                     holder.editTextPlatzkosten.setFocusableInTouchMode(true);
-                    holder.cardView_platzkosten.setLayoutParams(new LinearLayout.LayoutParams(holder.cardView_platzkosten.getLayoutParams().width, 256));
-                    holder.cardView_platzkosten.setMinimumHeight(256);
 
-                    LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) holder.cardView_platzkosten.getLayoutParams();
-                    layoutParams.setMargins(32, 32, 32, 0);
-                    holder.cardView_platzkosten.requestLayout();
+                    holder.layout_platzkosten.setVisibility(View.VISIBLE);
 
                     platzKostenErmittelnUndSetzen();
                     setBetragJeSpieler();
-
                 }
             });
 
@@ -217,6 +237,7 @@ public class TrainingFragment extends Fragment {
             //Textformat Platzkosten
             holder.editTextPlatzkosten.setOnFocusChangeListener((v, hasFocus) -> {
                 Utilities.formatNumericEditText(holder.editTextPlatzkosten);
+                holder.platzkosten_final.setText(holder.editTextPlatzkosten.getText());
                 setBetragJeSpieler();
 
             });
@@ -224,6 +245,9 @@ public class TrainingFragment extends Fragment {
 
             //Trainingsort
             trainigsorteSpinnerUndMapBefuellen();
+
+            //Spielerauswahl
+            spielerAuswahlBefuellen();
         }
 
 
@@ -255,7 +279,6 @@ public class TrainingFragment extends Fragment {
                 }
             }
 
-
             //SpielerauswahlFragment laden
             context.fm = context.getSupportFragmentManager();
             context.fragment = new TrainingTunierSpielerauswahlFragment(context, list, onSpielerClickListener, sortierungUser);
@@ -270,14 +293,25 @@ public class TrainingFragment extends Fragment {
 
             //Platzkosten
             String platzkostenUser = einstellungen.getString(einstellungen_platzkosten, "");
-            if (platzkostenUser != null) {
-                if (!platzkostenUser.isEmpty()) {
+            if (!platzkostenUser.equals("")) {
                     if (Double.parseDouble(platzkostenUser.replace(",", ".")) > 0) {
                         holder.editTextPlatzkosten.setText(df.format(Float.valueOf(platzkostenUser.replace(",", "."))).replace('.', ','));
+                        holder.platzkosten_final.setText(df.format(Float.valueOf(platzkostenUser.replace(",", "."))).replace('.', ','));
                         setBetragJeSpieler();
                     }
-                }
             } else holder.editTextPlatzkosten.setText("");
+
+            holder.editTextPlatzkosten.setOnEditorActionListener((v, actionId, event) -> {
+
+                if ((actionId == EditorInfo.IME_ACTION_DONE)) {
+
+                    InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService(Context.INPUT_METHOD_SERVICE);
+                    Objects.requireNonNull(imm).hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+
+            });
         }
 
         private void trainigsorteSpinnerUndMapBefuellen() {
@@ -339,6 +373,7 @@ public class TrainingFragment extends Fragment {
                 double platzkosten = Double.valueOf(holder.editTextPlatzkosten.getText().toString().replace(',', '.'));
                 int anzahl = selectedSpieler.size();
 
+
                 if (anzahl > 0) {
 
                     double betragDouble = platzkosten / anzahl;
@@ -351,6 +386,17 @@ public class TrainingFragment extends Fragment {
         }
 
         private void onSpieltagButtonClick() {
+
+
+            //Datum aus Picker ermittlen
+
+            int tag = holder.datePicker.getDayOfMonth();
+            int monat = holder.datePicker.getMonth();
+            int jahr = holder.datePicker.getYear();
+
+            Calendar kalender = Calendar.getInstance();
+            kalender.set(jahr, monat, tag);
+
 
 
             float platzkosten;
@@ -382,15 +428,16 @@ public class TrainingFragment extends Fragment {
 
                 for (int i = 0; i < selectedSpieler.size(); i++) {
                     if (i == selectedSpieler.size() - 1) {
-                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), bu_btr, platzkosten, trainings_id, trainingsort, true).execute();
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), bu_btr, platzkosten, trainings_id, trainingsort, true, kalender).execute();
                     } else
-                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), bu_btr, platzkosten, trainings_id, trainingsort, true).execute();
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), bu_btr, platzkosten, trainings_id, trainingsort, true, kalender).execute();
 
                 }
 
                 //Alles zurücksetzen
 
                 holder.editTextPlatzkosten.setText("");
+                holder.anzahl_spieler.setText("0");
                 platzKostenErmittelnUndSetzen();
                 selectedSpieler.clear();
                 holder.kostenlosSwitch.setChecked(false);
@@ -421,9 +468,9 @@ public class TrainingFragment extends Fragment {
                 for (int i = 0; i < selectedSpieler.size(); i++) {
 
                     if (i == selectedSpieler.size() - 1) {
-                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), 0, platzkosten, trainings_id, trainingsort, true).execute();
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), 0, platzkosten, trainings_id, trainingsort, true, kalender).execute();
                     } else
-                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), 0, platzkosten, trainings_id, trainingsort, true).execute();
+                        new SpieltagBuchenAsyncTask(this, selectedSpieler.get(i), 0, platzkosten, trainings_id, trainingsort, true, kalender).execute();
 
                 }
                 spielerAuswahlBefuellen();
@@ -457,8 +504,9 @@ public class TrainingFragment extends Fragment {
         private long trainings_id;
         private Trainingsort trainingsort;
         private boolean letzterSpieler;
+        private Calendar kalender;
 
-        SpieltagBuchenAsyncTask(TrainingFragmentAdapter context, Spieler spieler, double bu_btr, double platzkosten, long trainings_id, Trainingsort trainingsort, boolean letzterSpieler) {
+        SpieltagBuchenAsyncTask(TrainingFragmentAdapter context, Spieler spieler, double bu_btr, double platzkosten, long trainings_id, Trainingsort trainingsort, boolean letzterSpieler, Calendar kalender) {
             this.activityReference = new WeakReference<>(context);
             this.spieler = spieler;
             this.bu_btr = bu_btr;
@@ -466,13 +514,13 @@ public class TrainingFragment extends Fragment {
             this.trainings_id = trainings_id;
             this.trainingsort = trainingsort;
             this.letzterSpieler = letzterSpieler;
+            this.kalender = kalender;
         }
 
 
         @Override
         protected Buchung doInBackground(Void... args) {
 
-            Calendar kalender = Calendar.getInstance();
             SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
             DataSource dataSource = DataSource.getInstance();
@@ -489,7 +537,7 @@ public class TrainingFragment extends Fragment {
                     double kto_saldo_alt = dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
                     double kto_saldo_neu = kto_saldo_alt - bu_btr;
 
-                    buchung = dataSource.createBuchung(spieler.getS_id(), -bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", trainings_id, null, null, -999);
+                    buchung = dataSource.createBuchung(spieler.getS_id(), -bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", trainings_id, null, null, -999, null, -999);
                     spieler = dataSource.updateTeilnahmenSpieler(spieler);
                     dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), trainings_ort_id, spieler.getS_id(), platzkosten, null);
 
@@ -497,7 +545,7 @@ public class TrainingFragment extends Fragment {
 
                     double kto_saldo_neu = -bu_btr;
 
-                    buchung = dataSource.createBuchung(spieler.getS_id(), -bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", trainings_id, null, null, -999);
+                    buchung = dataSource.createBuchung(spieler.getS_id(), -bu_btr, 0, kto_saldo_neu, datumsformat.format(kalender.getTime()), "X", trainings_id, null, null, -999, null, -999);
                     spieler = dataSource.updateHatBuchungenMM(dataSource.updateTeilnahmenSpieler(spieler));
                     dataSource.createTraining(trainings_id, datumsformat.format(kalender.getTime()), trainings_ort_id, spieler.getS_id(), platzkosten, null);
                 }

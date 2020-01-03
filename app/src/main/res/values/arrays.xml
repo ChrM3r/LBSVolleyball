@@ -14,23 +14,23 @@
 
     <string-array name="backup">
         <item>@string/export_spieler</item>
-        <item>@string/import_spieler</item>
         <item>@string/export_buchung</item>
-        <item>@string/import_buchung</item>
         <item>@string/export_training</item>
-        <item>@string/import_training</item>
         <item>@string/export_trainingsort</item>
+        <item>@string/import_spieler</item>
+        <item>@string/import_buchung</item>
+        <item>@string/import_training</item>
         <item>@string/import_trainingsort</item>
     </string-array>
 
     <string-array name="backup_values">
         <item>exp_spieler</item>
-        <item>imp_spieler</item>
         <item>exp_buchung</item>
-        <item>imp_buchung</item>
         <item>exp_training</item>
-        <item>imp_training</item>
         <item>exp_trainingsort</item>
+        <item>imp_spieler</item>
+        <item>imp_buchung</item>
+        <item>imp_training</item>
         <item>imp_trainingsort</item>
     </string-array>
 

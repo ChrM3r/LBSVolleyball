@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <TableLayout
-
     xmlns:android="http://schemas.android.com/apk/res/android"
-
     android:id="@+id/relativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="24dp"
+    android:layout_marginTop="2dp"
     android:stretchColumns="1,2,3,4">
 
     <TableRow
@@ -15,56 +14,61 @@
 
         <TextView
             android:id="@+id/datum"
-            android:layout_width="100dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_column="1"
-            android:layout_gravity="start"
-            android:paddingStart="24dp"
+            android:layout_gravity="center"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:maxLines="1"
             android:paddingTop="3dp"
             android:paddingBottom="3dp"
-            android:singleLine="true"
             android:text="@string/textView_buchung_datum"
             android:textColor="#1B1B1B" />
 
 
         <TextView
             android:id="@+id/betrag"
-            android:layout_width="70dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_column="2"
-            android:layout_gravity="end"
+            android:layout_gravity="center"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:maxLines="1"
             android:paddingTop="3dp"
-            android:paddingEnd="24dp"
             android:paddingBottom="3dp"
-            android:singleLine="true"
             android:text="@string/textView_buchung_betrag"
             android:textColor="#1B1B1B" />
 
 
         <TextView
             android:id="@+id/saldo"
-            android:layout_width="70dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_column="3"
-            android:layout_gravity="end"
-            android:backgroundTint="#AE1732"
+            android:layout_gravity="center"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:maxLines="1"
             android:paddingTop="3dp"
-            android:paddingEnd="24dp"
             android:paddingBottom="3dp"
-            android:singleLine="true"
             android:text="@string/textView_kto_saldo_neu"
             android:textAlignment="center"
             android:textColor="#1B1B1B" />
 
         <ImageView
             android:id="@+id/typ"
-            android:layout_width="16dp"
+            android:layout_width="0dp"
             android:layout_height="16dp"
             android:layout_column="4"
             android:layout_gravity="center"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/todo"
             android:scaleType="centerInside"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:tint="@color/colorPrimary" />
     </TableRow>
 </TableLayout>

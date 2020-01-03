@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.DataSource;
@@ -52,13 +53,13 @@ public class TrainingVerwaltungAdapter extends BaseAdapter implements ListAdapte
         return 0;
     }
 
-    @SuppressLint("InflateParams")
+    @SuppressLint({"InflateParams", "SetTextI18n"})
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.activity_trainingverwaltung_list_view, null);
+            view = Objects.requireNonNull(inflater).inflate(R.layout.activity_trainingverwaltung_list_view, null);
         }
 
         dataSource = DataSource.getInstance();

@@ -34,6 +34,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Properties;
@@ -89,7 +90,7 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
         onEditFinish = this;
         resources = getResources();
         spieler = getIntent().getParcelableExtra("spieler");
-        setTitle(spieler.getVname() + " " + spieler.getName());
+        setTitle(Objects.requireNonNull(spieler).getVname() + " " + spieler.getName());
 
         findViewsById();
 
@@ -98,10 +99,12 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
 
         buchungList = dataSource.getAllBuchungZuSpieler(spieler);
         double kto_saldo_neu;
+        DecimalFormat df = new DecimalFormat("0.00");
+
         if (spieler.getHat_buchung_mm() == null)
             kto_saldo_neu = 0;
         else
-            kto_saldo_neu = dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu();
+            kto_saldo_neu = Double.parseDouble(df.format(dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu()).replace(",", "."));
 
         int teilnahmen = spieler.getTeilnahmen();
 
@@ -253,7 +256,7 @@ public class SpielerseiteActivity extends AppCompatActivity implements EditSpiel
                     Log.d("focus", "touchevent");
                     v.clearFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    Objects.requireNonNull(imm).hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         }

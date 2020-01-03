@@ -13,43 +13,46 @@
         android:id="@+id/activity_spieltag_spielerauswahl_item_bild"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_gravity="center"
         android:src="@drawable/avatar_m"
         app:civ_border_width="0dp" />
 
     <TextView
         android:id="@+id/activity_spieltag_spielerauswahl_item_vname"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="5sp"
+        android:layout_width="70dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
         android:layout_weight="1"
         android:gravity="center"
+        android:maxLines="1"
         android:text="@string/max"
         android:textColor="#1B1B1B"
-        app:autoSizeMaxTextSize="100sp"
+        app:autoSizeMaxTextSize="14sp"
         app:autoSizeMinTextSize="12sp"
         app:autoSizeStepGranularity="2sp"
         app:autoSizeTextType="uniform" />
 
     <TextView
         android:id="@+id/activity_spieltag_spielerauswahl_item_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="5sp"
+        android:layout_width="70dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
         android:layout_weight="1"
         android:gravity="center"
+        android:maxLines="1"
         android:text="@string/mustermann"
         android:textColor="#1B1B1B"
-        app:autoSizeMaxTextSize="100sp"
+        app:autoSizeMaxTextSize="14sp"
         app:autoSizeMinTextSize="12sp"
         app:autoSizeStepGranularity="1sp"
         app:autoSizeTextType="uniform" />
 
     <CheckBox
         android:id="@+id/activity_spieltag_spielerauswahl_item_checkbox"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp" />
+        android:layout_gravity="center" />
 
 </LinearLayout>

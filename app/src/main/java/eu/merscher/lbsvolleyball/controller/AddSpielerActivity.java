@@ -1,7 +1,6 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -82,23 +81,6 @@ public class AddSpielerActivity extends AppCompatActivity {
 
         findViewsById();
 
-        //Zurück-Zähler wieder default setzen
-        boolZurueck = false;
-
-        collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
-        collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
-
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
         //Foto hinzufügen und löschen
         spielerBild.setOnClickListener(v -> bildAusGalerieAuswaehlen());
         fotoAddButton.setOnClickListener(v -> bildAusGalerieAuswaehlen());
@@ -118,6 +100,23 @@ public class AddSpielerActivity extends AppCompatActivity {
             addSpieler = adapter.getAddSpielerFragment().getAddSpielerFragmentAdapter().getViewHolder();
             addSpieler.onAddSpieler();
         });
+
+        //Zurück-Zähler wieder default setzen
+        boolZurueck = false;
+
+        collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
+        collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
+
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         //Berechtigungen
         Utilities.berechtigungenPruefen(this);
@@ -181,6 +180,7 @@ public class AddSpielerActivity extends AppCompatActivity {
 
     }
 
+    //Bild aus Galerie auswählen und auf das Ergebnis reagieren
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -188,15 +188,11 @@ public class AddSpielerActivity extends AppCompatActivity {
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        ProgressDialog progressDialog = ProgressDialog.show(this,
-                "Einen kleinen Augenblick",
-                "");
-
         if (resultCode == Activity.RESULT_OK)
             if (requestCode == 1) {
                 Uri selectedImage = data.getData();
 
-                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                String[] filePathColumn = {MediaStore.Images.Media._ID};
                 Cursor cursor = getContentResolver().query(Objects.requireNonNull(selectedImage), filePathColumn, null, null, null);
                 Objects.requireNonNull(cursor).moveToFirst();
 
@@ -221,12 +217,8 @@ public class AddSpielerActivity extends AppCompatActivity {
                 this.spielerBild.setImageBitmap(spielerBild);
                 cursor.close();
             }
-        progressDialog.dismiss();
 
     }
-
-
-    //Bild aus Galerie auswählen und auf das Ergebnis reagieren
 
     private void bildAusGalerieAuswaehlen() {
 
@@ -274,7 +266,7 @@ public class AddSpielerActivity extends AppCompatActivity {
                     Log.d("focus", "touchevent");
                     v.clearFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    Objects.requireNonNull(imm).hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         }

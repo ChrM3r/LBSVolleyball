@@ -32,6 +32,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical|end"
                 android:clickable="false"
+                android:contentDescription="@string/todo"
                 android:longClickable="false"
                 android:scaleType="centerCrop" />
 

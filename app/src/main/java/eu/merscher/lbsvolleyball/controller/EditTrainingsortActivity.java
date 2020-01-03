@@ -4,10 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +21,10 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.tabs.TabLayout;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Trainingsort;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
@@ -30,16 +34,11 @@ public class EditTrainingsortActivity extends AppCompatActivity implements EditT
 
 
     private static String trainingsortFotoAlsString = null;
-    private ImageView trainingsortBild;
     private static EditTrainingsortFragment.OnEditFinish onEditFinish;
     private boolean boolZurueck;
 
     public static EditTrainingsortFragment.OnEditFinish getOnEditFinish() {
         return onEditFinish;
-    }
-
-    public static void setOnEditFinish(EditTrainingsortFragment.OnEditFinish onEditFinish) {
-        EditTrainingsortActivity.onEditFinish = onEditFinish;
     }
 
     public static String getTrainingsortFotoAlsString() {
@@ -58,23 +57,24 @@ public class EditTrainingsortActivity extends AppCompatActivity implements EditT
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_edit_trainingsort);
+        setContentView(R.layout.activity_edit_trainingsort);
 
         setTitle(R.string.button_trainingsort_aendern);
 
         onEditFinish = this;
 
-        Trainingsort trainingsort = getIntent().getExtras().getParcelable("trainingsort");
+        Trainingsort trainingsort = Objects.requireNonNull(getIntent().getExtras()).getParcelable("trainingsort");
 
-        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit_trainingsort);
-        Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit_trainingsort);
-        TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit_trainingsort);
-        ViewPager viewPager = findViewById(R.id.add_edit_viewpager_trainingsort);
-        trainingsortBild = findViewById(R.id.trainingsortbild_groß_add_edit);
+        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_edit_trainingsort);
+        Toolbar toolbar = findViewById(R.id.htab_toolbar_edit_trainingsort);
+        TabLayout tabLayout = findViewById(R.id.htab_tabs_edit_trainingsort);
+        ViewPager viewPager = findViewById(R.id.edit_viewpager_trainingsort);
+        Button trainingsort_Speichern = findViewById(R.id.fragment_edit_trainigsort_button);
+        ImageView trainingsortBild = findViewById(R.id.trainingsortbild_groß_edit);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
@@ -94,9 +94,8 @@ public class EditTrainingsortActivity extends AppCompatActivity implements EditT
 
         Bitmap trainingsortBildOriginal;
         Bitmap trainingsortBildScaled;
-        Uri uri;
 
-        if (trainingsort.getFoto().equals("avatar_map"))
+        if (Objects.requireNonNull(trainingsort).getFoto().equals("avatar_map"))
             trainingsortBildOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.avatar_map);
         else {
             trainingsortBildOriginal = BitmapFactory.decodeFile(trainingsort.getFoto());
@@ -109,6 +108,8 @@ public class EditTrainingsortActivity extends AppCompatActivity implements EditT
             trainingsortBildScaled = Utilities.scaleToFitWidth(trainingsortBildOriginal, width);
         }
         trainingsortBild.setImageBitmap(trainingsortBildScaled);
+
+        trainingsort_Speichern.setOnClickListener(v -> adapter.fragment.adapter.holder.onTrainingsortSpeichernClick());
     }
 
 
@@ -167,18 +168,21 @@ public class EditTrainingsortActivity extends AppCompatActivity implements EditT
 
         private final Context context;
         private final Trainingsort trainingsort;
+        EditTrainingsortFragment fragment;
 
 
-        public EditTrainingsortActivityPagerAdapter(Context context, Trainingsort trainingsort, FragmentManager fm) {
+        EditTrainingsortActivityPagerAdapter(Context context, Trainingsort trainingsort, FragmentManager fm) {
             super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             this.trainingsort = trainingsort;
             this.context = context;
         }
 
 
+        @NotNull
         @Override
         public Fragment getItem(int position) {
-            return new EditTrainingsortFragment(trainingsort);
+            fragment = new EditTrainingsortFragment(trainingsort);
+            return fragment;
         }
 
         // This determines the number of tabs

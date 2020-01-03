@@ -12,6 +12,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Spieler;
@@ -54,7 +55,7 @@ public class SpielerVerwaltungAdapter extends BaseAdapter implements ListAdapter
         View view = convertView;
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.activity_spielerverwaltung_list_view, null);
+            view = Objects.requireNonNull(inflater).inflate(R.layout.activity_spielerverwaltung_list_view, null);
         }
 
         TextView listSpielerName = view.findViewById(R.id.list_item_string);

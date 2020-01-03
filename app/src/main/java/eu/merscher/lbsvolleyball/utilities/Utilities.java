@@ -13,7 +13,11 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -324,43 +328,179 @@ public class Utilities {
         return bildNeu.getAbsolutePath();
     }
 
-    public static void csvExport(ArrayList<String> list) {
+    public static boolean csvExport(Context context, String typ, ArrayList<String> list) {
 
-        String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+        String baseDir = Objects.requireNonNull(context.getExternalFilesDir(null)).getAbsolutePath();
 
-        File file = new File(baseDir, "spieler_export.csv");
-        CsvWriter csvWriter = new CsvWriter();
+        boolean istExportiert = false;
 
-        try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
-            // header
-            for (String string : list) {
-                csvAppender.appendLine(string);
+        if (list.size() > 0) {
+            switch (typ) {
+                case "spieler": {
+                    File file = new File(baseDir, "spieler_export.csv");
+                    CsvWriter csvWriter = new CsvWriter();
+
+                    try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
+                        // header
+                        for (String string : list) {
+                            csvAppender.appendLine(string);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return istExportiert;
+
+                    }
+                    istExportiert = true;
+                    break;
+                }
+
+                case "buchung": {
+                    File file = new File(baseDir, "buchung_export.csv");
+                    CsvWriter csvWriter = new CsvWriter();
+
+                    try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
+                        // header
+                        for (String string : list) {
+                            csvAppender.appendLine(string);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return istExportiert;
+
+                    }
+                    istExportiert = true;
+                    break;
+                }
+
+                case "trainingsort": {
+                    File file = new File(baseDir, "trainingsort_export.csv");
+                    CsvWriter csvWriter = new CsvWriter();
+
+                    try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
+                        // header
+                        for (String string : list) {
+                            csvAppender.appendLine(string);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return istExportiert;
+
+                    }
+                    istExportiert = true;
+                    break;
+                }
+
+                case "training": {
+                    File file = new File(baseDir, "training_export.csv");
+                    CsvWriter csvWriter = new CsvWriter();
+
+                    try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
+                        // header
+                        for (String string : list) {
+                            csvAppender.appendLine(string);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return istExportiert;
+
+                    }
+                    istExportiert = true;
+                    break;
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
+        return istExportiert;
+
     }
 
-    public static ArrayList<String> csvImport() {
+    public static ArrayList<String> csvImport(Context context, String typ) {
 
-        String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+        String baseDir = Objects.requireNonNull(context.getExternalFilesDir(null)).getAbsolutePath();
 
-        File file = new File(baseDir, "spieler_export.csv");
+        switch (typ) {
+            case "spieler": {
+                File file = new File(baseDir, "spieler_export.csv");
 
-        CsvReader csvReader = new CsvReader();
-        ArrayList<String> spielerListString = new ArrayList<>();
+                CsvReader csvReader = new CsvReader();
+                ArrayList<String> spielerListString = new ArrayList<>();
 
-        try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
-            CsvRow row;
-            while ((row = csvParser.nextRow()) != null) {
+                try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
+                    CsvRow row;
+                    while ((row = csvParser.nextRow()) != null) {
 
-                List<String> list = row.getFields();
-                spielerListString.addAll(list);
+                        List<String> list = row.getFields();
+                        spielerListString.addAll(list);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                return spielerListString;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            case "buchung": {
+                File file = new File(baseDir, "buchung_export.csv");
+
+                CsvReader csvReader = new CsvReader();
+                ArrayList<String> buchungListString = new ArrayList<>();
+
+                try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
+                    CsvRow row;
+                    while ((row = csvParser.nextRow()) != null) {
+
+                        List<String> list = row.getFields();
+                        buchungListString.addAll(list);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                return buchungListString;
+            }
+
+            case "trainingsort": {
+                File file = new File(baseDir, "trainingsort_export.csv");
+
+                CsvReader csvReader = new CsvReader();
+                ArrayList<String> trainingsortListString = new ArrayList<>();
+
+                try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
+                    CsvRow row;
+                    while ((row = csvParser.nextRow()) != null) {
+
+                        List<String> list = row.getFields();
+                        trainingsortListString.addAll(list);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                return trainingsortListString;
+            }
+
+            case "training": {
+                File file = new File(baseDir, "training_export.csv");
+
+                CsvReader csvReader = new CsvReader();
+                ArrayList<String> trainingListString = new ArrayList<>();
+
+                try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
+                    CsvRow row;
+                    while ((row = csvParser.nextRow()) != null) {
+
+                        List<String> list = row.getFields();
+                        trainingListString.addAll(list);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                return trainingListString;
+            }
         }
-        return spielerListString;
+
+        return null;
     }
     public class SortName implements Comparator<Spieler> {
         @Override
@@ -516,6 +656,32 @@ public class Utilities {
                 }
             }
         }
+    }
+
+    public static void setListViewHeightNachInhalt(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            return;
+        }
+
+        int totalHeight = listView.getPaddingTop() + listView.getPaddingBottom();
+        int desiredWidth = listView.getWidth();
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+
+            if (listItem != null) {
+                // This next line is needed before you call measure or else you won't get measured height at all. The listitem needs to be drawn first to know the height.
+                listItem.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+                totalHeight += listItem.getMeasuredHeight();
+
+            }
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
 }
 

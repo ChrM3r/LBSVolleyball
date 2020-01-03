@@ -60,7 +60,7 @@ public class TrainingsortActivity extends AppCompatActivity implements EditSpiel
 
         resources = getResources();
         Trainingsort trainingsort = getIntent().getParcelableExtra("trainingsort");
-        setTitle(trainingsort.getName());
+        setTitle(Objects.requireNonNull(trainingsort).getName());
 
         findViewsById();
 
@@ -157,7 +157,7 @@ public class TrainingsortActivity extends AppCompatActivity implements EditSpiel
                     Log.d("focus", "touchevent");
                     v.clearFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    Objects.requireNonNull(imm).hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         }

@@ -21,7 +21,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Backup">
+    <PreferenceCategory android:title="Sichern und Wiederherstellen">
 
         <ListPreference
             android:defaultValue="true"
@@ -30,18 +30,6 @@
             android:key="einstellungen_backup"
             android:summary="Wählen Sie die Daten zum Sichern oder Wiederherstellen aus."
             android:title="Datenbank auswählen" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="Auswertungen">
-
-        <ListPreference
-            android:defaultValue="1"
-            android:entries="@array/auswertungen"
-            android:entryValues="@array/auswertungen_values"
-            android:key="list_preference_1"
-            android:summary="Dies ist aktuell nur ein Platzhalter für weitere Appfunktionen."
-            android:title="Spielerauswertungen" />
-
     </PreferenceCategory>
 
 

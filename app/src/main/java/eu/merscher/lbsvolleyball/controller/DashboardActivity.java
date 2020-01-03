@@ -3,6 +3,7 @@ package eu.merscher.lbsvolleyball.controller;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
@@ -28,11 +29,13 @@ public class DashboardActivity extends AppCompatActivity {
 
 
     private TextView spieleranzahl_textview;
+    private LinearLayout teamkonto_layout;
     private TextView teamkonto_textview;
     private CardView spieltag_cardview;
     private CardView spielerverwaltung_cardview;
     private CardView trainingsuebersicht_cardview;
     private CardView trainingsort_cardview;
+    private CardView auswertungen_cardView;
     private CardView einstellungen_cardview;
     private final DecimalFormat df = new DecimalFormat("0.00");
     private final DecimalFormat df_einzel = new DecimalFormat("0");
@@ -134,6 +137,14 @@ public class DashboardActivity extends AppCompatActivity {
         //Berechtigungen
         Utilities.berechtigungenPruefen(this);
 
+        //Dashboard-Header
+
+        teamkonto_layout.setOnClickListener(v -> {
+            Intent intent = new Intent(this, TeamkontoActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivityIfNeeded(intent, 0);
+        });
+
         //CardViews im Gittrnetz
         spieltag_cardview.setOnClickListener(v -> {
             Intent intent = new Intent(this, TrainingTunierActivity.class);
@@ -159,6 +170,12 @@ public class DashboardActivity extends AppCompatActivity {
             startActivityIfNeeded(intent, 0);
         });
 
+        auswertungen_cardView.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AuswertungenActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivityIfNeeded(intent, 0);
+        });
+
         einstellungen_cardview.setOnClickListener(v -> {
             Intent intent = new Intent(this, EinstellungenActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -169,11 +186,13 @@ public class DashboardActivity extends AppCompatActivity {
     private void findViewsById() {
 
         spieleranzahl_textview = findViewById(R.id.dashboard_textview_spieleranzahl);
+        teamkonto_layout = findViewById(R.id.dashboard_linLayout_teamkonto);
         teamkonto_textview = findViewById(R.id.dashboard_textview_teamkonto);
         spieltag_cardview = findViewById(R.id.dashboard_cardview_spieltag);
         spielerverwaltung_cardview = findViewById(R.id.dashboard_cardview_spielerverwaltung);
         trainingsuebersicht_cardview = findViewById(R.id.dashboard_cardview_trainingsuebersicht);
         trainingsort_cardview = findViewById(R.id.dashboard_cardview_trainingsortverwaltung);
+        auswertungen_cardView = findViewById(R.id.dashboard_cardview_auswertungen);
         einstellungen_cardview = findViewById(R.id.dashboard_cardview_einstellungen);
 
 

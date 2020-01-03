@@ -201,16 +201,4 @@
         android:text="@string/button_trainingsort_loeschen"
         android:textColor="@color/colorPrimary" />
 
-    <Button
-        android:id="@+id/fragment_edit_trainingsort_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="350dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:shadowRadius="2"
-        android:text="@string/button_speichern"
-        android:textColor="@android:color/white" />
-
 </RelativeLayout>

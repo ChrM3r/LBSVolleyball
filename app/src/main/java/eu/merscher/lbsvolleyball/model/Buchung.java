@@ -19,17 +19,19 @@ public class Buchung implements Parcelable {
     };
     private long bu_id;
     private long s_id;
-    private Double bu_btr;
-    private Double kto_saldo_alt;
-    private Double kto_saldo_neu;
+    private double bu_btr;
+    private double kto_saldo_alt;
+    private double kto_saldo_neu;
     private String bu_date;
     private String ist_training_mm;
-    private Long training_id;
+    private long training_id;
     private String ist_manuell_mm;
     private String ist_tunier_mm;
-    private Long tunier_id;
+    private long tunier_id;
+    private String ist_geloeschter_spieler_mm;
+    private long geloeschter_s_id;
 
-    public Buchung(long bu_nr, long s_id, Double bu_btr, Double kto_saldo_alt, Double kto_saldo_neu, String bu_date, String ist_training_mm, long training_id, String ist_manuell_mm, String ist_tunier_mm, long tunier_id) {
+    public Buchung(long bu_nr, long s_id, double bu_btr, double kto_saldo_alt, double kto_saldo_neu, String bu_date, String ist_training_mm, long training_id, String ist_manuell_mm, String ist_tunier_mm, long tunier_id, String ist_geloeschter_spieler_mm, long geloeschter_s_id) {
         this.bu_id = bu_nr;
         this.s_id = s_id;
         this.bu_btr = bu_btr;
@@ -41,6 +43,8 @@ public class Buchung implements Parcelable {
         this.ist_manuell_mm = ist_manuell_mm;
         this.ist_tunier_mm = ist_tunier_mm;
         this.tunier_id = tunier_id;
+        this.ist_geloeschter_spieler_mm = ist_geloeschter_spieler_mm;
+        this.geloeschter_s_id = geloeschter_s_id;
     }
 
     public Buchung(Parcel in) {
@@ -101,6 +105,14 @@ public class Buchung implements Parcelable {
 
     public long getTunier_id() {
         return tunier_id;
+    }
+
+    public String getIst_geloeschter_spieler_mm() {
+        return ist_geloeschter_spieler_mm;
+    }
+
+    public Long getGeloeschter_s_id() {
+        return geloeschter_s_id;
     }
 
     @SuppressLint("DefaultLocale")

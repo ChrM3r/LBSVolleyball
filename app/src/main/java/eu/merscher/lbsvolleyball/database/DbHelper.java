@@ -8,7 +8,7 @@ import android.util.Log;
 class DbHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "data.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
 
     //SpielerDB
@@ -67,6 +67,8 @@ class DbHelper extends SQLiteOpenHelper {
     static final String BUCHUNG_DATA_COLUMN_IST_MANUELL_MM = "ist_manuell_mm";
     static final String BUCHUNG_DATA_COLUMN_IST_TUNIER_MM = "ist_tunier_mm";
     static final String BUCHUNG_DATA_COLUMN_TUNIER_ID = "tunier_id";
+    static final String BUCHUNG_DATA_COLUMN_IST_GELOESCHTER_SPIELER_MM = "ist_geloeschter_spieler_mm";
+    static final String BUCHUNG_DATA_COLUMN_GELOESCHTER_S_ID = "geloeschter_s_id";
 
     private static final String BUCHUNG_DATA_SQL_CREATE =
             "CREATE TABLE " + TABLE_BUCHUNG_DATA +
@@ -81,6 +83,8 @@ class DbHelper extends SQLiteOpenHelper {
                     BUCHUNG_DATA_COLUMN_IST_MANUELL_MM + " CHAR(1)," +
                     BUCHUNG_DATA_COLUMN_IST_TUNIER_MM + " CHAR(1)," +
                     BUCHUNG_DATA_COLUMN_TUNIER_ID + " INTEGER," +
+                    BUCHUNG_DATA_COLUMN_IST_GELOESCHTER_SPIELER_MM + " CHAR(1)," +
+                    BUCHUNG_DATA_COLUMN_GELOESCHTER_S_ID + " INTEGER," +
                     "FOREIGN KEY (" + BUCHUNG_DATA_COLUMN_S_ID + ") REFERENCES " + TABLE_SPIELER_DATA + "(" + SPIELER_DATA_COLUMN_S_ID + ")," +
                     "FOREIGN KEY (" + BUCHUNG_DATA_COLUMN_TRAINING_ID + ") REFERENCES " + TABLE_TRAINING_DATA + "(" + TRAINING_DATA_COLUMN_TRAINING_ID + "));";
 
@@ -131,7 +135,13 @@ class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d(LOG_TAG, "Die Tabelle mit Versionsnummer " + oldVersion + " wird entfernt.");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPIELER_DATA);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BUCHUNG_DATA);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRAINING_DATA);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRAININGSORT_DATA);
 
+        onCreate(db);
     }
 }
 

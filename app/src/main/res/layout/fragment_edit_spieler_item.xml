@@ -180,6 +180,36 @@
                 android:textSize="16sp"
                 tools:ignore="LabelFor" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="48dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView5_edit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10sp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/fragment_edit_spieler_button_lbsmail"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="3"
+                android:background="#AE1732"
+                android:contentDescription="@string/todo"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/logo_lbs_trans_micro"
+                android:tint="@android:color/white" />
+        </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
     <Button

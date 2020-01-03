@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="2dp"
+    android:layout_marginBottom="2dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/auswertungen_Bild"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/avatar_m"
+        app:civ_border_width="0dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="false"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:layout_toEndOf="@+id/auswertungen_Bild">
+
+        <TextView
+            android:id="@+id/auswertugnen_Name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="16dp"
+            android:layout_weight="5"
+            android:gravity="center_vertical"
+            android:maxLines="2"
+            android:minLines="2"
+            android:text="@string/max_mustermann"
+            android:textColor="#1B1B1B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/auswertungen_Teilnahmen"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_vertical"
+            android:maxLines="2"
+            android:text="@string/_0"
+            android:textColor="@color/colorPrimary"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

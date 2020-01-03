@@ -197,7 +197,7 @@ public class EditSpielerActivity extends AppCompatActivity implements EditSpiele
             if (requestCode == 1) {
                 Uri selectedImage = data.getData();
 
-                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                String[] filePathColumn = {MediaStore.Images.Media._ID};
                 Cursor cursor = getContentResolver().query(Objects.requireNonNull(selectedImage), filePathColumn, null, null, null);
                 Objects.requireNonNull(cursor).moveToFirst();
 

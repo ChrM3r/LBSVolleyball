@@ -295,11 +295,17 @@ public class AddSpielerFragment extends Fragment {
                 } else if (bdate.split("\\.").length != 3) {
                     editTextBdate.setError(context.getString(R.string.editText_errorMessage_bdate));
                     return;
+
+                } else if (Integer.parseInt(bdate.split("\\.")[0]) > 31 || Integer.parseInt(bdate.split("\\.")[1]) > 12) {
+                    editTextBdate.setError(context.getString(R.string.editText_errorMessage_bdate2));
+                    return;
                 }
 
-                if (!TextUtils.isEmpty(mail) && !mail.contains("@") && !mail.contains(".")) {
-                    editTextBdate.setError(context.getString(R.string.editText_errorMessageMail));
-                    return;
+                if (!TextUtils.isEmpty(mail)) {
+                    if (!mail.contains("@") || !mail.split("@")[1].contains(".") || (mail.split("@")[1].split("\\.")[1] == null)) {
+                        editTextMail.setError(context.getString(R.string.editText_errorMessageMail));
+                        return;
+                    }
                 }
 
                 Spieler neuerSpieler;
@@ -342,7 +348,7 @@ public class AddSpielerFragment extends Fragment {
 
                     kto_saldo_alt = 0; //der vorherige Kto_Saldo_neu ist nicht vorhanden, da keine vorherige Buchung existiert, daher 0
                     kto_saldo_neu = kto_saldo_alt + bu_btr;
-                    dataSource.createBuchung(neuerSpieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999);
+                    dataSource.createBuchung(neuerSpieler.getS_id(), bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, "X", null, -999, null, -999);
                     dataSource.updateHatBuchungenMM(neuerSpieler);
                     dataSource.close();
                 }

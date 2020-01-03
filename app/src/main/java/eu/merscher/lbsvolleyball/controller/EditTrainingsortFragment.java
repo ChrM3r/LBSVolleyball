@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Objects;
+
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Trainingsort;
 
@@ -16,19 +18,25 @@ import eu.merscher.lbsvolleyball.model.Trainingsort;
 public class EditTrainingsortFragment extends Fragment implements EditTrainingsortFragmentAdapter.OnSpeichernClick, EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick {
 
     private final Trainingsort trainingsort;
-    public static EditTrainingsortFragmentAdapter.OnSpeichernClick onSpeichernClick;
-    public static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick onLoeschenClick;
 
-    public static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick getOnLoeschenClick() {
+    private static EditTrainingsortFragmentAdapter.OnSpeichernClick onSpeichernClick;
+    private static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick onLoeschenClick;
+    EditTrainingsortFragmentAdapter adapter;
+
+    static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick getOnLoeschenClick() {
         return onLoeschenClick;
     }
 
-    public static EditTrainingsortFragmentAdapter.OnSpeichernClick getOnSpeichernClick() {
+    static EditTrainingsortFragmentAdapter.OnSpeichernClick getOnSpeichernClick() {
         return onSpeichernClick;
     }
 
-    public EditTrainingsortFragment(Trainingsort trainingsort) {
+    EditTrainingsortFragment(Trainingsort trainingsort) {
         this.trainingsort = trainingsort;
+    }
+
+    public EditTrainingsortFragmentAdapter getAdapter() {
+        return adapter;
     }
 
     @Override
@@ -39,7 +47,7 @@ public class EditTrainingsortFragment extends Fragment implements EditTrainingso
         onSpeichernClick = this;
         onLoeschenClick = this;
 
-        EditTrainingsortFragmentAdapter adapter = new EditTrainingsortFragmentAdapter(getActivity(), trainingsort);
+        adapter = new EditTrainingsortFragmentAdapter(getActivity(), trainingsort);
         RecyclerView recyclerView = rootView.findViewById(R.id.fragment_add_edit_spieler_recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -52,13 +60,12 @@ public class EditTrainingsortFragment extends Fragment implements EditTrainingso
     @Override
     public void onSpeichernClick() {
 
-        System.out.println("onSpeicherClick");
-        getActivity().finish();
+        Objects.requireNonNull(getActivity()).finish();
     }
 
     @Override
     public void onLoeschenClick() {
-        getActivity().finish();
+        Objects.requireNonNull(getActivity()).finish();
         EditTrainingsortActivity.getOnEditFinish().onEditFinish();
 
     }

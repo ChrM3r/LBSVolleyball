@@ -6,21 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,13 +29,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
@@ -47,10 +48,7 @@ import eu.merscher.lbsvolleyball.utilities.Utilities;
 public class TrainingVerwaltungActivity extends AppCompatActivity {
 
     private ArrayList<Long> trainingIDList = new ArrayList<>();
-
-    public void setTrainingIDList(ArrayList<Long> list) {
-        trainingIDList = list;
-    }
+    private ArrayList<String> trainingsDatumList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +63,6 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getString(R.string.trainingsverwaltung));
 
-        //Spielerlistview
-        ListView trainingListView = findViewById(R.id.listview_training);
-        //trainingListView.setOnItemClickListener((parent, view, position, id) -> new GetSpielerAndStartSpielerseiteAsyncTask(TrainingVerwaltungActivity.this, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
     }
 
     @Override
@@ -98,7 +93,6 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         trainingIDList.clear();
 
         trainingIDList = dataSource.getAllTrainingsID();
-        ArrayList<String> trainingsDatumList = new ArrayList<>();
         ArrayList<String> trainingsortNameList = new ArrayList<>();
         ArrayList<Integer> trainingTeilnehmerAnzahl = new ArrayList<>();
         ArrayList<String> trainingBildList = new ArrayList<>();
@@ -116,31 +110,68 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         trainingListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
-        trainingListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showPopup(view, position);
-            }
-        });
+        trainingListView.setOnItemClickListener((parent, view, position, id) -> showPopup(position));
     }
 
-
-    public void showPopup(View anchorView, int position) {
+    @SuppressLint("InflateParams")
+    public void showPopup(int position) {
 
         View view = getLayoutInflater().inflate(R.layout.popup_trainingsverwaltung, null);
 
-        Dialog popupWindow = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
+        Dialog popupWindow = new Dialog(this, android.R.style.Theme_Material_Dialog_Alert);
 
         popupWindow.setContentView(view, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         popupWindow.setCancelable(true);
-        popupWindow.getWindow().setBackgroundDrawable(new ColorDrawable(Color.argb(100, 0, 0, 0)));
+        Objects.requireNonNull(popupWindow.getWindow()).getAttributes().windowAnimations = R.style.DialogTheme; //style id
+        popupWindow.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        //popupWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
         popupWindow.show();
 
 
         RecyclerView recyclerView = view.findViewById(R.id.popup_trainingsverwaltung_recyclerView);
         ImageView closeButton = view.findViewById(R.id.popup_close);
+        TextView header = view.findViewById(R.id.trainingverwaltung_datum_popup);
 
+        Calendar calendar = Calendar.getInstance();
+        String[] datumArray = trainingsDatumList.get(position).split("\\.");
+        // -1 weil Monat nur von 0-11 geht
+        calendar.set(Integer.parseInt(datumArray[2]), Integer.parseInt(datumArray[1]) - 1, Integer.parseInt(datumArray[0]));
+
+        int tag = calendar.get(Calendar.DAY_OF_WEEK);
+        String tagString;
+        switch (tag) {
+            default:
+                tagString = "Sonntag, ";
+                break;
+
+            case 2:
+                tagString = "Montag, ";
+                break;
+
+            case 3:
+                tagString = "Dienstag, ";
+                break;
+
+            case 4:
+                tagString = "Mittwoch, ";
+                break;
+
+            case 5:
+                tagString = "Donnerstag, ";
+                break;
+
+            case 6:
+                tagString = "Freitag, ";
+                break;
+
+            case 7:
+                tagString = "Samstag, ";
+                break;
+
+        }
+        header.setText(String.format("%s %s", tagString, trainingsDatumList.get(position)));
         closeButton.setOnClickListener(v -> popupWindow.cancel());
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -193,7 +224,7 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         @Override
         public TrainingUebersichtAdapter.ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
 
-            View view = inflate.inflate(R.layout.fragment_trainingsuebersicht, parent, false);
+            View view = inflate.inflate(R.layout.fragment_trainingsverwaltung_dialog, parent, false);
             return new TrainingUebersichtAdapter.ViewHolder(view);
         }
 
@@ -216,10 +247,22 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
             holder.platzkosten.setText(df.format(platzkosten).replace('.', ','));
             //Map
 
-            if (trainingsort.getFoto() != null)
+            if (trainingsort.getFoto() != null) {
                 holder.mapView.setImageBitmap(BitmapFactory.decodeFile(trainingsort.getFoto()));
-            else
+                holder.mapView.setOnClickListener(v -> {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(Locale.US, "https://www.google.com/maps/search/?api=1&query=%f,%f", trainingsort.getLatitude(), trainingsort.getLongitude())));
+                    startActivity(browserIntent);
+                });
+            } else {
                 holder.mapView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.avatar_map));
+                holder.mapView.setOnClickListener(v -> {
+                    Toast toast = Toast.makeText(context, "Es sind keine gültigen Ortsinformationen vorhanden.", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM, 0, 20);
+                    toast.show();
+                });
+            }
+
+
 
             //Teilnehmer
             holder.teilnehmerListView.setOnTouchListener((v, event) -> {
@@ -242,14 +285,8 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
             });
 
 
-            //Spielerseite aus Übersicht starteb
+            //Spielerseite aus Übersicht starten
             holder.teilnehmerListView.setOnItemClickListener((parent, view, position1, id) -> new GetSpielerAndStartSpielerseiteAsyncTask(context, position1, trainings_id).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
-        }
-
-        void clear() {
-            int size = spielerList.size();
-            spielerList.clear();
-            notifyItemRangeRemoved(0, size);
         }
 
 
@@ -348,7 +385,7 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
                 View view = convertView;
                 if (view == null) {
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    view = inflater.inflate(R.layout.fragment_trainingsuebersicht_list_view, null);
+                    view = Objects.requireNonNull(inflater).inflate(R.layout.fragment_trainingsuebersicht_list_view, null);
                 }
 
                 TextView listSpielerName = view.findViewById(R.id.fragment_trainingsuebersicht_list_view_name);
@@ -369,17 +406,6 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
 
         }
 
-    }
-
-    private static class NamedLocation {
-
-        public final String name;
-        final LatLng location;
-
-        NamedLocation(String name, LatLng location) {
-            this.name = name;
-            this.location = location;
-        }
     }
 
     static class GetSpielerAndStartSpielerseiteAsyncTask extends AsyncTask<Void, Void, ArrayList<Spieler>> {
@@ -420,6 +446,7 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
 
             Intent data = new Intent(activity, SpielerseiteActivity.class);
             data.putExtra("spieler", spieler);
+            data.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.startActivity(data);
 
         }

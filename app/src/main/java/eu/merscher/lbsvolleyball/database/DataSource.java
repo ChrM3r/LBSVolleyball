@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -19,7 +18,6 @@ import eu.merscher.lbsvolleyball.utilities.Utilities;
 public class DataSource {
 
     private static final String LOG_TAG = DataSource.class.getSimpleName();
-    private static final DecimalFormat df = new DecimalFormat("0.00");
 
     private static DataSource instance;
     private final DbHelper dbHelper;
@@ -48,7 +46,9 @@ public class DataSource {
             DbHelper.BUCHUNG_DATA_COLUMN_TRAINING_ID,
             DbHelper.BUCHUNG_DATA_COLUMN_IST_MANUELL_MM,
             DbHelper.BUCHUNG_DATA_COLUMN_IST_TUNIER_MM,
-            DbHelper.BUCHUNG_DATA_COLUMN_TUNIER_ID
+            DbHelper.BUCHUNG_DATA_COLUMN_TUNIER_ID,
+            DbHelper.BUCHUNG_DATA_COLUMN_IST_GELOESCHTER_SPIELER_MM,
+            DbHelper.BUCHUNG_DATA_COLUMN_GELOESCHTER_S_ID
     };
 
     //TrainingDB
@@ -115,13 +115,15 @@ public class DataSource {
         }
     }
 
+    //#############################################################################################################################################################################--BUCHUNG--
+
     //Buchung in Datenbank anlegen und gleichzeit als Objekt bereitstellen
 
-    public Buchung createBuchung(long u_id, double bu_btr, double kto_saldo_alt, double kto_saldo_neu, String bu_date, String ist_training_mm, long training_id, String ist_manuell_mm, String ist_tunier_mm, long tunier_id) {
+    public Buchung createBuchung(long s_id, double bu_btr, double kto_saldo_alt, double kto_saldo_neu, String bu_date, String ist_training_mm, long training_id, String ist_manuell_mm, String ist_tunier_mm, long tunier_id, String ist_geloeschter_spieler_mm, long geloeschter_s_id) {
 
         ContentValues values = new ContentValues();
 
-        values.put(DbHelper.BUCHUNG_DATA_COLUMN_S_ID, u_id);
+        values.put(DbHelper.BUCHUNG_DATA_COLUMN_S_ID, s_id);
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_BUBTR, bu_btr);
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_KTOSLDALT, kto_saldo_alt);
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_KTOSLDNEU, kto_saldo_neu);
@@ -131,6 +133,8 @@ public class DataSource {
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_IST_MANUELL_MM, ist_manuell_mm);
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_IST_TUNIER_MM, ist_tunier_mm);
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_TUNIER_ID, tunier_id);
+        values.put(DbHelper.BUCHUNG_DATA_COLUMN_IST_GELOESCHTER_SPIELER_MM, ist_geloeschter_spieler_mm);
+        values.put(DbHelper.BUCHUNG_DATA_COLUMN_GELOESCHTER_S_ID, geloeschter_s_id);
 
 
         long insertId = database.insert(DbHelper.TABLE_BUCHUNG_DATA, null, values);
@@ -149,7 +153,7 @@ public class DataSource {
 
     //Buchung in Datenbank anlegen und gleichzeit als Objekt bereitstellen
 
-    public Buchung createBuchungAufTeamkonto(double bu_btr, double kto_saldo_alt, double kto_saldo_neu, String bu_date, String ist_training_mm, long training_id, String ist_manuell_mm, String ist_tunier_mm, long tunier_id) {
+    public Buchung createBuchungAufTeamkonto(double bu_btr, double kto_saldo_alt, double kto_saldo_neu, String bu_date, String ist_training_mm, long training_id, String ist_manuell_mm, String ist_tunier_mm, long tunier_id, String ist_geloeschter_spieler_mm, long geloeschter_s_id) {
 
         ContentValues values = new ContentValues();
 
@@ -163,6 +167,8 @@ public class DataSource {
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_IST_MANUELL_MM, ist_manuell_mm);
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_IST_TUNIER_MM, ist_tunier_mm);
         values.put(DbHelper.BUCHUNG_DATA_COLUMN_TUNIER_ID, tunier_id);
+        values.put(DbHelper.BUCHUNG_DATA_COLUMN_IST_GELOESCHTER_SPIELER_MM, ist_geloeschter_spieler_mm);
+        values.put(DbHelper.BUCHUNG_DATA_COLUMN_GELOESCHTER_S_ID, geloeschter_s_id);
 
         long insertId = database.insert(DbHelper.TABLE_BUCHUNG_DATA, null, values);
 
@@ -193,6 +199,8 @@ public class DataSource {
         int idIst_manuell_mm = cursor.getColumnIndex(DbHelper.BUCHUNG_DATA_COLUMN_IST_MANUELL_MM);
         int idIst_tunier_mm = cursor.getColumnIndex(DbHelper.BUCHUNG_DATA_COLUMN_IST_TUNIER_MM);
         int idTunier_ID = cursor.getColumnIndex(DbHelper.BUCHUNG_DATA_COLUMN_TUNIER_ID);
+        int idIst_geloeschter_spieler_mm = cursor.getColumnIndex(DbHelper.BUCHUNG_DATA_COLUMN_IST_GELOESCHTER_SPIELER_MM);
+        int idGeloeschter_s_ID = cursor.getColumnIndex(DbHelper.BUCHUNG_DATA_COLUMN_GELOESCHTER_S_ID);
 
 
         long u_id = cursor.getLong(idUid);
@@ -206,12 +214,38 @@ public class DataSource {
         String ist_manuell_mm = cursor.getString(idIst_manuell_mm);
         String ist_tunier_mm = cursor.getString(idIst_tunier_mm);
         long tunier_id = cursor.getLong(idTunier_ID);
+        String ist_geloeschter_spieler_mm = cursor.getString(idIst_geloeschter_spieler_mm);
+        long geloeschter_s_id = cursor.getLong(idGeloeschter_s_ID);
 
-        return new Buchung(bu_id, u_id, bu_btr, kto_saldo_alt, kto_saldo_neu, bu_date, ist_training_mm, training_id, ist_manuell_mm, ist_tunier_mm, tunier_id);
+        return new Buchung(bu_id, u_id, bu_btr, kto_saldo_alt, kto_saldo_neu, bu_date, ist_training_mm, training_id, ist_manuell_mm, ist_tunier_mm, tunier_id, ist_geloeschter_spieler_mm, geloeschter_s_id);
 
 
     }
 
+    //Alle Buchungen aus Datenbank in eine Liste
+
+    public ArrayList<Buchung> getAllBuchungen() {
+
+
+        ArrayList<Buchung> buchungList = new ArrayList<>();
+
+        Cursor cursor = database.query(DbHelper.TABLE_BUCHUNG_DATA,
+                buchung_data_columns, null,
+                null, null, null, DbHelper.BUCHUNG_DATA_COLUMN_BU_ID + " DESC");
+
+        cursor.moveToFirst();
+        Buchung Buchung;
+
+        while (!cursor.isAfterLast()) {
+            Buchung = cursorToBuchung(cursor);
+            buchungList.add(Buchung);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return buchungList;
+    }
     //Alle Buchungen eines Spielers aus Datenbank in eine Liste
 
     public ArrayList<Buchung> getAllBuchungZuSpieler(Spieler spieler) {
@@ -251,7 +285,7 @@ public class DataSource {
             cursor.moveToLast();
             buchung = cursorToBuchung(cursor);
         } else
-            buchung = new Buchung(-999, -999, null, null, null, null, null, -999, null, null, -999);
+            buchung = new Buchung(-999, -999, 0, 0, 0, null, null, -999, null, null, -999, null, -999);
 
         cursor.close();
 
@@ -527,7 +561,7 @@ public class DataSource {
         ArrayList<Spieler> spielerList = new ArrayList<>();
 
         Cursor cursor = database.query(DbHelper.TABLE_SPIELER_DATA,
-                spieler_data_columns, null, null, null, null, null);
+                spieler_data_columns, null, null, null, null, DbHelper.SPIELER_DATA_COLUMN_S_ID);
 
         cursor.moveToFirst();
         Spieler spieler;
@@ -535,6 +569,31 @@ public class DataSource {
         while (!cursor.isAfterLast()) {
             spieler = cursorToSpieler(cursor);
             spielerList.add(spieler);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return spielerList;
+    }
+
+    //Beste Spieler (Teilnahmen) aus Datenbank in eine Liste
+
+    public ArrayList<Spieler> getBesteSpieler(int anzahl) {
+
+
+        ArrayList<Spieler> spielerList = new ArrayList<>();
+
+        Cursor cursor = database.query(DbHelper.TABLE_SPIELER_DATA,
+                spieler_data_columns, null, null, null, null, DbHelper.SPIELER_DATA_COLUMN_TEILNAHMEN + " DESC");
+
+        cursor.moveToFirst();
+        Spieler spieler;
+
+        while (!cursor.isAfterLast()) {
+            spieler = cursorToSpieler(cursor);
+            if (spielerList.size() < anzahl)
+                spielerList.add(spieler);
             cursor.moveToNext();
         }
 
@@ -636,7 +695,6 @@ public class DataSource {
 
         return spielerList;
     }
-
 
     //#############################################################################################################################################################################--TRAINING--
 
@@ -786,17 +844,14 @@ public class DataSource {
         Training training;
         ArrayList<Training> trainingList = new ArrayList<>();
 
-        if (cursor.moveToLast()) {
-            cursor.moveToFirst();
+        cursor.moveToFirst();
+
             while (!cursor.isAfterLast()) {
                 training = cursorToTraining(cursor);
                 trainingList.add(training);
                 cursor.moveToNext();
             }
-        } else {
-            training = new Training(-999, -999, null, -999, -999, -999, null);
-            trainingList.add(training);
-        }
+
 
         cursor.close();
 
@@ -1107,6 +1162,29 @@ public class DataSource {
 
         return new Trainingsort(db_id, name, strasse, plz, ort, foto, latitude, longitude, besuche);
 
+    }
+
+    public ArrayList<Trainingsort> getBesteTrainingsorte(int anzahl) {
+
+
+        ArrayList<Trainingsort> trainingsortList = new ArrayList<>();
+
+        Cursor cursor = database.query(DbHelper.TABLE_TRAININGSORT_DATA,
+                trainingsort_data_columns, null, null, null, null, DbHelper.TRAININGSORT_DATA_COLUMN_BESUCHE + " DESC");
+
+        cursor.moveToFirst();
+        Trainingsort trainingsort;
+
+        while (!cursor.isAfterLast()) {
+            trainingsort = cursorToTrainingsort(cursor);
+            if (trainingsortList.size() < anzahl)
+                trainingsortList.add(trainingsort);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return trainingsortList;
     }
 
     public ArrayList<Trainingsort> getAllTrainingsort() {

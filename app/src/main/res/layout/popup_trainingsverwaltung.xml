@@ -2,26 +2,54 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mainLyt"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_alignParentBottom="true"
+    android:background="#FFFFFF">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="#FFFFFF">
+        android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/popup_close"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:scaleType="centerCrop"
-            android:tint="#8B8B8B"
-            app:srcCompat="@drawable/icon_close" />
+            android:contentDescription="@string/todo"
+            android:src="@drawable/icon_spieltag"
+            android:tint="@color/colorPrimary" />
+
+        <TextView
+            android:id="@+id/trainingverwaltung_datum_popup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_weight="1"
+            android:text="@string/_01_01_2001"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/popup_close"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/todo"
+        android:scaleType="centerCrop"
+        android:tint="@color/colorPrimary"
+        app:srcCompat="@drawable/icon_close" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/popup_trainingsverwaltung_recyclerView"
@@ -30,5 +58,4 @@
             android:layout_below="@+id/popup_close"
             android:layout_marginTop="0dp" />
 
-    </RelativeLayout>
 </RelativeLayout>

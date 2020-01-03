@@ -1,7 +1,6 @@
 package eu.merscher.lbsvolleyball.controller;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,12 +19,10 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
 import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
@@ -37,7 +34,6 @@ public class TrainingTunierActivity extends AppCompatActivity implements Trainin
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private CollapsingToolbarLayout collapsingToolbar;
-    private NavigationView navigationView;
     private Toolbar toolbar;
 
     public TrainingTunierActivity() {
@@ -57,14 +53,6 @@ public class TrainingTunierActivity extends AppCompatActivity implements Trainin
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Lokalität laden
-        Locale locale = new Locale("de_DE");
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        getBaseContext().getResources().updateConfiguration(config,
-                getBaseContext().getResources().getDisplayMetrics());
-
         this.setContentView(R.layout.activity_training_tunier);
 
         findViewsById();
@@ -74,8 +62,6 @@ public class TrainingTunierActivity extends AppCompatActivity implements Trainin
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Spieltag erfassen");
-
-        //Toolbar
         ActionBar actionBar = getSupportActionBar();
         Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
 
@@ -95,7 +81,6 @@ public class TrainingTunierActivity extends AppCompatActivity implements Trainin
         viewPager = findViewById(R.id.viewpager_training_tunier);
         collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_training_tunier);
         tabLayout = findViewById(R.id.htab_tabs_training_tunier);
-        navigationView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.htab_toolbar_training_tunier);
     }
 
@@ -104,7 +89,6 @@ public class TrainingTunierActivity extends AppCompatActivity implements Trainin
     public void onResume() {
         super.onResume();
 
-        navigationView.setCheckedItem(R.id.nav_spieltag);
         //Pager und Fragmente laden
         TrainingTunierPagerAdapter adapter = new TrainingTunierPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(adapter);
@@ -125,7 +109,7 @@ public class TrainingTunierActivity extends AppCompatActivity implements Trainin
                     Log.d("focus", "touchevent");
                     v.clearFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    Objects.requireNonNull(imm).hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         }
@@ -151,8 +135,10 @@ public class TrainingTunierActivity extends AppCompatActivity implements Trainin
             if (position == 0) {
                 return new TrainingFragment();
             } else {
-                return new TunierFragment();
+                return new TrainingFragment();
+                //return new TunierFragment();
             }
+
 
         }
 

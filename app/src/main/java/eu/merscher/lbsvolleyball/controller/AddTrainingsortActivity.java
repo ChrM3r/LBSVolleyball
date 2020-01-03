@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
@@ -50,14 +51,15 @@ public class AddTrainingsortActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_edit_trainingsort);
+        setContentView(R.layout.activity_add_trainingsort);
 
         setTitle(R.string.button_trainingsort_anlegen);
 
-        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_edit_trainingsort);
-        Toolbar toolbar = findViewById(R.id.htab_toolbar_add_edit_trainingsort);
-        TabLayout tabLayout = findViewById(R.id.htab_tabs_add_edit_trainingsort);
-        ViewPager viewPager = findViewById(R.id.add_edit_viewpager_trainingsort);
+        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.htab_collapse_toolbar_add_trainingsort);
+        Toolbar toolbar = findViewById(R.id.htab_toolbar_add_trainingsort);
+        TabLayout tabLayout = findViewById(R.id.htab_tabs_add_trainingsort);
+        ViewPager viewPager = findViewById(R.id.add_viewpager_trainingsort);
+        Button trainingsortAendern = findViewById(R.id.fragment_add_trainigsort_button);
         collapsingToolbar.setExpandedTitleTextAppearance(R.style.Widget_Design_AppBarLayout);
         collapsingToolbar.setCollapsedTitleTextAppearance(R.style.Widget_Design_CollapsingToolbar);
 
@@ -69,6 +71,8 @@ public class AddTrainingsortActivity extends AppCompatActivity {
         AddTrainingsortActivityPagerAdapter adapter = new AddTrainingsortActivityPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
+
+        trainingsortAendern.setOnClickListener(v -> adapter.fragment.adapter.holder.onTrainingsortAendernClick());
     }
 
     //Zurück-Button
@@ -130,7 +134,7 @@ public class AddTrainingsortActivity extends AppCompatActivity {
                     Log.d("focus", "touchevent");
                     v.clearFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    Objects.requireNonNull(imm).hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         }
@@ -142,6 +146,7 @@ public class AddTrainingsortActivity extends AppCompatActivity {
     public class AddTrainingsortActivityPagerAdapter extends FragmentPagerAdapter {
 
         private final Context context;
+        AddTrainingsortFragment fragment;
 
         private AddTrainingsortActivityPagerAdapter(Context context, FragmentManager fm) {
             super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
@@ -151,7 +156,9 @@ public class AddTrainingsortActivity extends AppCompatActivity {
         @NotNull
         @Override
         public Fragment getItem(int position) {
-            return new AddTrainingsortFragment();
+
+            fragment = new AddTrainingsortFragment();
+            return fragment;
         }
 
         @Override

@@ -12,6 +12,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.model.Trainingsort;
@@ -52,7 +53,7 @@ public class TrainingsortVerwaltungAdapter extends BaseAdapter implements ListAd
         View view = convertView;
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.activity_trainingsortverwaltung_list_view, null);
+            view = Objects.requireNonNull(inflater).inflate(R.layout.activity_trainingsortverwaltung_list_view, null);
         }
 
         TextView trainingsortName = view.findViewById(R.id.trainingsort_name);
