@@ -38,7 +38,7 @@ import eu.merscher.lbsvolleyball.model.Trainingsort;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
-public class TrainingsortActivity extends AppCompatActivity implements EditSpielerFragment.OnEditFinish {
+public class TrainingsortActivity extends AppCompatActivity implements EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick {
 
 
     private ImageView trainingsortBild;
@@ -47,9 +47,14 @@ public class TrainingsortActivity extends AppCompatActivity implements EditSpiel
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private CollapsingToolbarLayout collapsingToolbar;
+    public static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick onLoeschenClick;
+
+    public static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick getOnLoeschenClick() {
+        return onLoeschenClick;
+    }
 
     @Override
-    public void onEditFinish() {
+    public void onLoeschenClick() {
         this.finish();
     }
 
@@ -57,6 +62,8 @@ public class TrainingsortActivity extends AppCompatActivity implements EditSpiel
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trainingsort);
+
+        onLoeschenClick = this;
 
         resources = getResources();
         Trainingsort trainingsort = getIntent().getParcelableExtra("trainingsort");

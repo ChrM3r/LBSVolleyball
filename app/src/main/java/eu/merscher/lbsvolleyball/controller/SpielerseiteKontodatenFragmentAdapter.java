@@ -19,6 +19,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -147,6 +148,10 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                 ArrayList<Buchung> buchungListNeu = dataSource.getAllBuchungZuSpieler(spieler);
                 SpielerseiteActivity.setBuchungList(buchungListNeu);
 
+
+                if (buchungListNeu.size() > 0)
+                    holder.cardView_legende.setVisibility(View.VISIBLE);
+
                 if (buchungListNeu.size() > 5) {
 
                     holder.mehrBuchungen.setVisibility(View.VISIBLE);
@@ -171,7 +176,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                             spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
                             Utilities.setListViewHeightNachInhalt(holder.buchungListView);
-                            holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
+                            holder.mehrBuchungenText.setVisibility(View.GONE);
 
 
                         } else {
@@ -186,12 +191,14 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                             }
                             spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
                             Utilities.setListViewHeightNachInhalt(holder.buchungListView);
+                            holder.mehrBuchungenText.setVisibility(View.VISIBLE);
                             holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungListNeu.size() - 5));
                         }
                     });
-                } else
+                } else {
                     spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
-
+                    Utilities.setListViewHeightNachInhalt(holder.buchungListView);
+                }
 
                 //Kto_Saldo_Neu auf Grundseitenfragment aktualisieren
                 onBuchungListener = SpielerseiteGrunddatenFragmentAdapter.getOnBuchungListener();
@@ -203,6 +210,12 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                 holder.auszahlungSwitch.setChecked(false);
             }
         });
+
+        holder.buchungListView.setOnItemClickListener(null);
+        holder.buchungListView.setEnabled(false);
+
+        if (buchungList.size() > 0)
+            holder.cardView_legende.setVisibility(View.VISIBLE);
 
         if (buchungList.size() > 5) {
 
@@ -229,12 +242,13 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                     spielerKontoListViewAdapter.updateBuchungen(buchungList);
                     Utilities.setListViewHeightNachInhalt(holder.buchungListView);
-                    holder.mehrBuchungenText.setText(SpielerseiteActivity.resources.getString(R.string.keine_weiteren_Buchungen));
+                    holder.mehrBuchungenText.setVisibility(View.GONE);
 
                 } else {
                     ArrayList<Buchung> buchungListKleinNeu = new ArrayList<>();
 
                     istAusgeklappt = false;
+                    holder.mehrBuchungenText.setVisibility(View.VISIBLE);
                     holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
                     holder.mehrBuchungenText.setText(String.format(SpielerseiteActivity.resources.getString(R.string.weitere_Buchungen), buchungList.size() - 5));
 
@@ -291,6 +305,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         final Switch auszahlungSwitch;
         final ImageButton mehrBuchungen;
         final TextView mehrBuchungenText;
+        final CardView cardView_legende;
 
 
         ViewHolder(View view) {
@@ -301,6 +316,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             auszahlungSwitch = view.findViewById(R.id.fragment_kontodaten_editText_switch);
             mehrBuchungen = view.findViewById(R.id.mehrBuchungen);
             mehrBuchungenText = view.findViewById(R.id.mehrBuchungenText);
+            cardView_legende = view.findViewById(R.id.cardView4);
         }
 
     }

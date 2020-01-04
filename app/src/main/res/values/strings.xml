@@ -1,7 +1,7 @@
 <resources>
 
     <string name="API_KEY">AIzaSyBZNYEUwq0cg9s6jxKtKWwENI1wyvF977k</string>
-    <string name="APP_VERSION">Version 0.20.01 Build 03012020</string>
+    <string name="APP_VERSION">Version 1.20.01 Build 04012020</string>
     <string name="app_name">LBS Volleyball</string>
 
     <string name="spieltag">Spieltag</string>
@@ -120,6 +120,7 @@
     <string name="keine_weiteren_Buchungen">Es sind keine weiteren Buchungen vorhanden"</string>
     <string name="dialogMessage_Ausgleichen">%s %s hat einen Kontostand von %s€. Bitte Konto vorher ausgleichen.</string>
     <string name="dialogMessage_wirklichLoeschen">Soll %s %s wirklich gelöscht werden? Diese Aktion kann nicht widerrufen werden.</string>
+    <string name="dialogMessage_wirklichLoeschenTraining">Soll das Training wirklich gelöscht werden? Diese Aktion kann nicht widerrufen werden.</string>
     <string name="dialogMessage_to_wirklichLoeschen">Soll %s wirklich gelöscht werden? Diese Aktion kann nicht widerrufen werden.</string>
     <string name="dialogMessage_BuchenBeiLoeschen">%s %s hat einen Kontostand von %s€. Soll der Betrag ausgezahlt oder auf das Teamkonto überwiesen werden?</string>
     <string name="hinzufuegen">hinzufügen</string>
@@ -160,5 +161,6 @@
     <string name="tunier">= Tunier</string>
     <string name="spieler_geloescht">= Spieler gelöscht</string>
     <string name="platzkosten">Platzkosten:</string>
+    <string name="training_loeschen">Training löschen</string>
 
 </resources>

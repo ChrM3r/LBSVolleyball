@@ -51,8 +51,6 @@ public class TrainingsortVerwaltungActivity extends AppCompatActivity {
         resources = getResources();
         shouldExecuteOnResume = false;
 
-        getTrainingsorteUndSetAdapter();
-
         FloatingActionButton fab = findViewById(R.id.floatingActionButton_trainingsort);
 
         fab.setOnClickListener(view -> {
@@ -70,6 +68,7 @@ public class TrainingsortVerwaltungActivity extends AppCompatActivity {
 
         initializeContextualActionBar();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -127,11 +126,7 @@ public class TrainingsortVerwaltungActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (shouldExecuteOnResume) {
-            getTrainingsorteUndSetAdapter();
-        } else
-            shouldExecuteOnResume = true;
-
+        getTrainingsorteUndSetAdapter();
     }
 
 

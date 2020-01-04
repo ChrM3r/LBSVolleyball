@@ -14,18 +14,19 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
+        android:backgroundTint="@android:color/white"
         android:clickable="true"
+        android:focusable="true"
         android:tint="@color/colorPrimary"
-        app:backgroundTint="@android:color/white"
+        app:borderWidth="0dp"
         app:fabCustomSize="60dp"
-        app:srcCompat="@drawable/icon_plus_white"
-        android:focusable="true" />
+        app:srcCompat="@drawable/icon_plus_white" />
 
     <TextView
         android:id="@+id/activity_spieltag_spielerauswahl_item_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="5sp"
+        android:layout_gravity="center"
         android:layout_weight="1"
         android:gravity="center"
         android:text="@string/spieler"
@@ -39,7 +40,7 @@
         android:id="@+id/activity_spieltag_spielerauswahl_item_vname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="5sp"
+        android:layout_gravity="center"
         android:layout_weight="1"
         android:gravity="center"
         android:text="@string/hinzufuegen"

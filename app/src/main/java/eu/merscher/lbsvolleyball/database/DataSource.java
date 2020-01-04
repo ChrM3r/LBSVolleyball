@@ -231,7 +231,7 @@ public class DataSource {
 
         Cursor cursor = database.query(DbHelper.TABLE_BUCHUNG_DATA,
                 buchung_data_columns, null,
-                null, null, null, DbHelper.BUCHUNG_DATA_COLUMN_BU_ID + " DESC");
+                null, null, null, DbHelper.BUCHUNG_DATA_COLUMN_BU_DATE + " DESC");
 
         cursor.moveToFirst();
         Buchung Buchung;
@@ -250,12 +250,13 @@ public class DataSource {
 
     public ArrayList<Buchung> getAllBuchungZuSpieler(Spieler spieler) {
 
-
         ArrayList<Buchung> buchungList = new ArrayList<>();
+        String date = DbHelper.BUCHUNG_DATA_COLUMN_BU_DATE;
+        String date_substr = "substr(" + date + ",7,4)|| '-' || substr(" + date + ",4,2)|| '-' || substr(" + date + ",1,2)";
 
         Cursor cursor = database.query(DbHelper.TABLE_BUCHUNG_DATA,
                 buchung_data_columns, DbHelper.BUCHUNG_DATA_COLUMN_S_ID + "=" + spieler.getS_id(),
-                null, null, null, DbHelper.BUCHUNG_DATA_COLUMN_BU_ID + " DESC");
+                null, null, null, "DATE(" + date_substr + ") DESC, " + DbHelper.BUCHUNG_DATA_COLUMN_BU_ID + " DESC");
 
         cursor.moveToFirst();
         Buchung Buchung;
@@ -298,10 +299,12 @@ public class DataSource {
 
 
         ArrayList<Buchung> BuchungList = new ArrayList<>();
+        String date = DbHelper.BUCHUNG_DATA_COLUMN_BU_DATE;
+        String date_substr = "substr(" + date + ",7,4)|| '-' || substr(" + date + ",4,2)|| '-' || substr(" + date + ",1,2)";
 
         Cursor cursor = database.query(DbHelper.TABLE_BUCHUNG_DATA,
                 buchung_data_columns, DbHelper.BUCHUNG_DATA_COLUMN_S_ID + "= -1",
-                null, null, null, DbHelper.BUCHUNG_DATA_COLUMN_BU_ID + " DESC");
+                null, null, null, "DATE(" + date_substr + ") DESC, " + DbHelper.BUCHUNG_DATA_COLUMN_BU_ID + " DESC");
 
         cursor.moveToFirst();
         Buchung Buchung;
@@ -463,6 +466,51 @@ public class DataSource {
         return spieler;
     }
 
+    //Spieler Teilnahmen updaten
+    public Spieler updateMinusTeilnahmenSpieler(Spieler s) {
+
+        Cursor cursor = database.query(DbHelper.TABLE_SPIELER_DATA,
+                spieler_data_columns, DbHelper.SPIELER_DATA_COLUMN_S_ID + "=" + s.getS_id(),
+                null, null, null, null);
+
+        cursor.moveToFirst();
+
+        int idTeilnahmen = cursor.getColumnIndex(DbHelper.SPIELER_DATA_COLUMN_TEILNAHMEN);
+        int teilnahmen = cursor.getInt(idTeilnahmen);
+        cursor.close();
+
+        teilnahmen--;
+
+        ContentValues values = new ContentValues();
+        values.put(DbHelper.SPIELER_DATA_COLUMN_NAME, s.getName());
+        values.put(DbHelper.SPIELER_DATA_COLUMN_VNAME, s.getVname());
+        values.put(DbHelper.SPIELER_DATA_COLUMN_BDATE, s.getBdate());
+        values.put(DbHelper.SPIELER_DATA_COLUMN_TEILNAHMEN, teilnahmen);
+        values.put(DbHelper.SPIELER_DATA_COLUMN_FOTO, s.getFoto());
+        values.put(DbHelper.SPIELER_DATA_COLUMN_MAIL, s.getMail());
+        values.put(DbHelper.SPIELER_DATA_COLUMN_HAT_BUCHUNG_MM, s.getHat_buchung_mm());
+
+
+        database.update(DbHelper.TABLE_SPIELER_DATA,
+                values,
+                DbHelper.SPIELER_DATA_COLUMN_S_ID + "=" + s.getS_id(),
+                null);
+
+        Cursor cursor1 = database.query(DbHelper.TABLE_SPIELER_DATA,
+                spieler_data_columns, DbHelper.SPIELER_DATA_COLUMN_S_ID + "=" + s.getS_id(),
+                null, null, null, null);
+
+        cursor1.moveToFirst();
+        Spieler spieler = cursorToSpieler(cursor1);
+
+        cursor1.close();
+
+        Log.d(LOG_TAG, "DataSource: " + spieler.toString() + " Update");
+
+
+        return spieler;
+    }
+
     //Spieler Foto updaten
     public Spieler updateFotoSpieler(Spieler s, String newFoto) {
 
@@ -589,13 +637,41 @@ public class DataSource {
 
         cursor.moveToFirst();
         Spieler spieler;
+        int zaehler_gesamt = 0;
+        int zaehler_unterschied = 0;
 
         while (!cursor.isAfterLast()) {
-            spieler = cursorToSpieler(cursor);
-            if (spielerList.size() < anzahl)
-                spielerList.add(spieler);
-            cursor.moveToNext();
+
+            //+1 weil er sonst vom drittplazierten nur den ersten Eintrag anzeigt
+            if (zaehler_unterschied != anzahl + 1) {
+
+                spieler = cursorToSpieler(cursor);
+
+                if (spielerList.size() > 0) {
+
+                    spielerList.add(spieler);
+
+                    if (spieler.getTeilnahmen() < spielerList.get(zaehler_gesamt).getTeilnahmen()) {
+
+                        zaehler_gesamt++;
+                        zaehler_unterschied++;
+
+                    } else if (spieler.getTeilnahmen() == spielerList.get(zaehler_gesamt).getTeilnahmen())
+
+                        zaehler_gesamt++;
+
+                } else {
+
+                    spielerList.add(spieler);
+                    zaehler_unterschied++;
+                }
+                cursor.moveToNext();
+            } else
+                cursor.moveToNext();
         }
+        //Hier wird der überschuessige Eintrag am Ende entfernt
+        if (zaehler_unterschied == anzahl + 1)
+            spielerList.remove(zaehler_gesamt);
 
         cursor.close();
 
@@ -750,6 +826,17 @@ public class DataSource {
         return new Training(db_id, trainings_id, trainings_dtm, trainings_ort_id, trainings_tn, platzkosten, ist_kostenlos_mm);
     }
 
+    // Training löschen
+    public void deleteTraining(long trainings_id) {
+
+
+        database.delete(DbHelper.TABLE_TRAINING_DATA,
+                DbHelper.TRAINING_DATA_COLUMN_TRAINING_ID + "=" + trainings_id,
+                null);
+
+        Log.d(LOG_TAG, "Eintrag gelöscht! ID: " + trainings_id + " Training");
+    }
+
     public long getNeusteTrainingsID() {
 
 
@@ -809,9 +896,13 @@ public class DataSource {
 
     public ArrayList<Long> getAllTrainingsID() {
 
+        String date = DbHelper.TRAINING_DATA_COLUMN_TRAININGS_DTM;
+        String date_substr = "substr(" + date + ",7,4)|| '-' || substr(" + date + ",4,2)|| '-' || substr(" + date + ",1,2)";
+
+
         Cursor cursor = database.query(DbHelper.TABLE_TRAINING_DATA,
                 training_data_columns, null,
-                null, null, null, DbHelper.TRAINING_DATA_COLUMN_TRAINING_ID + " DESC");
+                null, null, null, "DATE(" + date_substr + ") DESC, " + DbHelper.TRAINING_DATA_COLUMN_TRAINING_ID + " DESC");
 
         Training training;
         ArrayList<Long> trainingIDList = new ArrayList<>();
@@ -1104,6 +1195,52 @@ public class DataSource {
         return trainingsort;
     }
 
+    //Trainingsort Besuche updaten
+    public Trainingsort updateMinusBesucheTrainingsort(Trainingsort t) {
+
+        Cursor cursor = database.query(DbHelper.TABLE_TRAININGSORT_DATA,
+                trainingsort_data_columns, DbHelper.TRAININGSORT_DATA_COLUMN_DBID + "=" + t.getTo_id(),
+                null, null, null, null);
+
+        cursor.moveToFirst();
+
+        int idBesuche = cursor.getColumnIndex(DbHelper.TRAININGSORT_DATA_COLUMN_BESUCHE);
+        int besuche = cursor.getInt(idBesuche);
+        cursor.close();
+
+        besuche--;
+
+        ContentValues values = new ContentValues();
+        values.put(DbHelper.SPIELER_DATA_COLUMN_NAME, t.getName());
+        values.put(DbHelper.TRAININGSORT_DATA_COLUMN_STRASSE, t.getStrasse());
+        values.put(DbHelper.TRAININGSORT_DATA_COLUMN_PLZ, t.getPlz());
+        values.put(DbHelper.TRAININGSORT_DATA_COLUMN_ORT, t.getOrt());
+        values.put(DbHelper.TRAININGSORT_DATA_COLUMN_FOTO, t.getFoto());
+        values.put(DbHelper.TRAININGSORT_DATA_COLUMN_LATITUDE, t.getLatitude());
+        values.put(DbHelper.TRAININGSORT_DATA_COLUMN_LONGITUDE, t.getLongitude());
+        values.put(DbHelper.TRAININGSORT_DATA_COLUMN_BESUCHE, besuche);
+
+
+        database.update(DbHelper.TABLE_TRAININGSORT_DATA,
+                values,
+                DbHelper.TRAININGSORT_DATA_COLUMN_DBID + "=" + t.getTo_id(),
+                null);
+
+        Cursor cursor1 = database.query(DbHelper.TABLE_TRAININGSORT_DATA,
+                trainingsort_data_columns, DbHelper.TRAININGSORT_DATA_COLUMN_DBID + "=" + t.getTo_id(),
+                null, null, null, null);
+
+        cursor1.moveToFirst();
+        Trainingsort trainingsort = cursorToTrainingsort(cursor1);
+
+        cursor1.close();
+
+        Log.d(LOG_TAG, "DataSource: " + trainingsort.toString() + " Update");
+
+
+        return trainingsort;
+    }
+
     //Trainingsort Foto updaten
     public Trainingsort updateFotoTrainingsort(Trainingsort t, String newFoto) {
 
@@ -1174,13 +1311,43 @@ public class DataSource {
 
         cursor.moveToFirst();
         Trainingsort trainingsort;
+        int zaehler_gesamt = 0;
+        int zaehler_unterschied = 0;
 
         while (!cursor.isAfterLast()) {
-            trainingsort = cursorToTrainingsort(cursor);
-            if (trainingsortList.size() < anzahl)
-                trainingsortList.add(trainingsort);
-            cursor.moveToNext();
+
+            //+1 weil er sonst vom drittplazierten nur den ersten Eintrag anzeigt
+            if (zaehler_unterschied != anzahl + 1) {
+
+                trainingsort = cursorToTrainingsort(cursor);
+
+                if (trainingsortList.size() > 0) {
+
+                    trainingsortList.add(trainingsort);
+
+                    if (trainingsort.getBesuche() < trainingsortList.get(zaehler_gesamt).getBesuche()) {
+
+                        zaehler_gesamt++;
+                        zaehler_unterschied++;
+
+                    } else if (trainingsort.getBesuche() == trainingsortList.get(zaehler_gesamt).getBesuche())
+
+                        zaehler_gesamt++;
+
+                } else {
+
+                    trainingsortList.add(trainingsort);
+                    zaehler_unterschied++;
+                }
+
+                cursor.moveToNext();
+            } else
+                cursor.moveToNext();
         }
+        //Hier wird der überschuessige Eintrag am Ende entfernt
+        if (zaehler_unterschied == anzahl + 1)
+            trainingsortList.remove(zaehler_gesamt);
+        cursor.close();
 
         cursor.close();
 

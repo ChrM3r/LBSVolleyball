@@ -3,8 +3,7 @@
     android:id="@+id/mainLyt"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_alignParentBottom="true"
-    android:background="#FFFFFF">
+    android:background="@drawable/dialog_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,11 +50,11 @@
         android:tint="@color/colorPrimary"
         app:srcCompat="@drawable/icon_close" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/popup_trainingsverwaltung_recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/popup_close"
-            android:layout_marginTop="0dp" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/popup_trainingsverwaltung_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/popup_close"
+        android:layout_marginTop="0dp" />
 
 </RelativeLayout>

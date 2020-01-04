@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -40,6 +43,7 @@ import java.util.Objects;
 
 import eu.merscher.lbsvolleyball.R;
 import eu.merscher.lbsvolleyball.database.DataSource;
+import eu.merscher.lbsvolleyball.model.Buchung;
 import eu.merscher.lbsvolleyball.model.Spieler;
 import eu.merscher.lbsvolleyball.model.Trainingsort;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
@@ -49,20 +53,13 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
 
     private ArrayList<Long> trainingIDList = new ArrayList<>();
     private ArrayList<String> trainingsDatumList = new ArrayList<>();
+    private Context context;
+    private Dialog dialogTrainingUebersicht;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trainingsverwaltung);
-
-
-        //Toolbar
-        Toolbar toolbar = findViewById(R.id.activity_trainingverwaltung_toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getString(R.string.trainingsverwaltung));
-
     }
 
     @Override
@@ -78,6 +75,16 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
     public void onResume() {
 
         super.onResume();
+
+        context = this;
+        //Toolbar
+        Toolbar toolbar = findViewById(R.id.activity_trainingverwaltung_toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getString(R.string.trainingsverwaltung));
+
+        //Adapter setzten
         getTrainingUndSetAdapter();
 
         //Berechtigungen
@@ -110,24 +117,24 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         trainingListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
-        trainingListView.setOnItemClickListener((parent, view, position, id) -> showPopup(position));
+        trainingListView.setOnItemClickListener((parent, view, position, id) -> zeigeTrainingDetailsDialog(position));
     }
 
     @SuppressLint("InflateParams")
-    public void showPopup(int position) {
+    public void zeigeTrainingDetailsDialog(int position) {
 
         View view = getLayoutInflater().inflate(R.layout.popup_trainingsverwaltung, null);
 
-        Dialog popupWindow = new Dialog(this, android.R.style.Theme_Material_Dialog_Alert);
+        dialogTrainingUebersicht = new Dialog(this, android.R.style.Theme_Material_Dialog_Alert);
 
-        popupWindow.setContentView(view, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        popupWindow.setCancelable(true);
-        Objects.requireNonNull(popupWindow.getWindow()).getAttributes().windowAnimations = R.style.DialogTheme; //style id
-        popupWindow.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialogTrainingUebersicht.setContentView(view, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        dialogTrainingUebersicht.setCancelable(true);
+        Objects.requireNonNull(dialogTrainingUebersicht.getWindow()).getAttributes().windowAnimations = R.style.DialogTheme; //style id
+        dialogTrainingUebersicht.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         //popupWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
-        popupWindow.show();
+        dialogTrainingUebersicht.show();
 
 
         RecyclerView recyclerView = view.findViewById(R.id.popup_trainingsverwaltung_recyclerView);
@@ -172,7 +179,7 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
 
         }
         header.setText(String.format("%s %s", tagString, trainingsDatumList.get(position)));
-        closeButton.setOnClickListener(v -> popupWindow.cancel());
+        closeButton.setOnClickListener(v -> dialogTrainingUebersicht.cancel());
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
@@ -180,21 +187,21 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         DataSource dataSource = DataSource.getInstance();
         dataSource.open();
 
-
+        TrainingUebersichtAdapter adapter;
         long trainings_id = trainingIDList.get(position);
 
         if (trainings_id != -999) {
             double platzkosten = dataSource.getPlatzkostenZuTrainingsId(trainings_id);
             Trainingsort trainingsort = dataSource.getTrainingsortZuTrainingsId(trainings_id);
 
-            recyclerView.setAdapter(new TrainingUebersichtAdapter(getApplicationContext(), trainings_id, platzkosten, trainingsort));
+            adapter = new TrainingUebersichtAdapter(context, trainings_id, platzkosten, trainingsort);
+            recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setHasFixedSize(true);
             layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
+
         }
-
-
     }
 
     public class TrainingUebersichtAdapter extends RecyclerView.Adapter<TrainingUebersichtAdapter.ViewHolder> {
@@ -210,6 +217,7 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         private ArrayList<Bitmap> spielerFotos = new ArrayList<>();
         private ArrayList<String> spielerNamen = new ArrayList<>();
         private ArrayList<Spieler> spielerList = new ArrayList<>();
+
 
 
         TrainingUebersichtAdapter(Context context, long trainings_id, double platzkosten, Trainingsort trainingsort) {
@@ -244,7 +252,8 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
 
             //Platzkosten
 
-            holder.platzkosten.setText(df.format(platzkosten).replace('.', ','));
+            String platzkostenString = df.format(platzkosten).replace('.', ',') + " EUR";
+            holder.platzkosten.setText(platzkostenString);
             //Map
 
             if (trainingsort.getFoto() != null) {
@@ -287,6 +296,48 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
 
             //Spielerseite aus Übersicht starten
             holder.teilnehmerListView.setOnItemClickListener((parent, view, position1, id) -> new GetSpielerAndStartSpielerseiteAsyncTask(context, position1, trainings_id).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
+
+
+            //Training löschen
+            holder.training_loeschen_button.setOnClickListener(v -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.Theme_AppCompat_Light_Dialog);
+
+                builder.setTitle("Achtung")
+                        .setMessage(getResources().getString(R.string.dialogMessage_wirklichLoeschenTraining))
+                        .setNegativeButton("Abbrechen", (dialog1, which) -> dialog1.cancel())
+                        .setPositiveButton("Ja", (dialog12, i) -> {
+
+                            DataSource dataSource = DataSource.getInstance();
+                            Calendar kalender = Calendar.getInstance();
+                            SimpleDateFormat datumsformat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
+
+                            ArrayList<Spieler> teilnehmer = dataSource.getSpielerZuTrainingsId(trainings_id);
+
+                            int anzahl_teilnehmer = teilnehmer.size();
+                            double bu_btr = platzkosten / anzahl_teilnehmer;
+
+                            for (Spieler s : teilnehmer) {
+                                Buchung neusteBuchung;
+
+                                if (s.getS_id() != -999) {
+                                    if (platzkosten > 0) {
+                                        neusteBuchung = dataSource.getNeusteBuchungZuSpieler(s);
+                                        dataSource.createBuchung(s.getS_id(), bu_btr, neusteBuchung.getKto_saldo_neu(), neusteBuchung.getKto_saldo_neu() + bu_btr, datumsformat.format(kalender.getTime()), "X", trainings_id, null, null, -999, null, -999);
+                                    }
+                                    dataSource.updateMinusTeilnahmenSpieler(s);
+                                }
+                            }
+
+                            if (trainingsort.getTo_id() != -999)
+                                dataSource.updateMinusBesucheTrainingsort(trainingsort);
+
+                            dataSource.deleteTraining(trainings_id);
+                            dialog12.cancel();
+                            dialogTrainingUebersicht.cancel();
+                            getTrainingUndSetAdapter();
+
+                        }).show();
+            });
         }
 
 
@@ -337,6 +388,8 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
             final TextView platzkosten;
             final ListView teilnehmerListView;
             final ImageView mapView;
+            Button training_loeschen_button;
+
 
 
             ViewHolder(View view) {
@@ -345,6 +398,8 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
                 platzkosten = view.findViewById(R.id.fragment_trainingsuebersicht_textView_platzkosten);
                 mapView = view.findViewById(R.id.fragment_trainingsuebersicht_mapView);
                 teilnehmerListView = view.findViewById(R.id.fragment_trainingsuebersicht_listView);
+                training_loeschen_button = view.findViewById(R.id.training_dialog_loeschen_button);
+
             }
 
         }

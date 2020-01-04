@@ -18,6 +18,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -131,6 +132,9 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
                 ArrayList<Buchung> buchungListNeu = dataSource.getAllBuchungZuTeamkonto();
                 SpielerseiteActivity.setBuchungList(buchungListNeu);
 
+                if (buchungListNeu.size() > 0)
+                    holder.cardView_legende.setVisibility(View.VISIBLE);
+
                 if (buchungListNeu.size() > 5) {
 
                     holder.mehrBuchungen.setVisibility(View.VISIBLE);
@@ -157,7 +161,7 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
                             spielerKontoListViewAdapter.updateBuchungen(buchungListNeu);
                             Utilities.setListViewHeightNachInhalt(holder.buchungListView);
 
-                            holder.mehrBuchungenText.setText(context.getResources().getString(R.string.keine_weiteren_Buchungen));
+                            holder.mehrBuchungenText.setVisibility(View.GONE);
 
 
                         } else {
@@ -172,7 +176,7 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
                             }
                             spielerKontoListViewAdapter.updateBuchungen(buchungListKleinNeu);
                             Utilities.setListViewHeightNachInhalt(holder.buchungListView);
-
+                            holder.mehrBuchungenText.setVisibility(View.VISIBLE);
                             holder.mehrBuchungenText.setText(String.format(context.getResources().getString(R.string.weitere_Buchungen), buchungListNeu.size() - 5));
                         }
                     });
@@ -188,6 +192,12 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
                 holder.auszahlungSwitch.setChecked(false);
             }
         });
+
+        holder.buchungListView.setOnItemClickListener(null);
+        holder.buchungListView.setEnabled(false);
+
+        if (buchungList.size() > 0)
+            holder.cardView_legende.setVisibility(View.VISIBLE);
 
         if (buchungList.size() > 5) {
 
@@ -213,7 +223,7 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
                     holder.mehrBuchungen.setImageResource(R.drawable.icon_up_arrow);
                     spielerKontoListViewAdapter.updateBuchungen(buchungList);
                     Utilities.setListViewHeightNachInhalt(holder.buchungListView);
-                    holder.mehrBuchungenText.setText(context.getResources().getString(R.string.keine_weiteren_Buchungen));
+                    holder.mehrBuchungenText.setVisibility(View.GONE);
 
 
                 } else {
@@ -221,6 +231,7 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
 
                     istAusgeklappt = false;
                     holder.mehrBuchungen.setImageResource(R.drawable.icon_down_arrow);
+                    holder.mehrBuchungenText.setVisibility(View.VISIBLE);
                     holder.mehrBuchungenText.setText(String.format(context.getResources().getString(R.string.weitere_Buchungen), buchungList.size() - 5));
 
 
@@ -275,9 +286,9 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
         final EditText editTextAddBuchung;
         final FloatingActionButton buttonAddBuchung;
         final Switch auszahlungSwitch;
-
         final ImageButton mehrBuchungen;
         final TextView mehrBuchungenText;
+        final CardView cardView_legende;
 
 
         ViewHolder(View view) {
@@ -289,6 +300,7 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
             buttonAddBuchung = view.findViewById(R.id.teamkonto_addButton);
             mehrBuchungen = view.findViewById(R.id.mehrBuchungen_teamkonto);
             mehrBuchungenText = view.findViewById(R.id.mehrBuchungenText_teamkonto);
+            cardView_legende = view.findViewById(R.id.card5_teamkonto);
         }
 
     }

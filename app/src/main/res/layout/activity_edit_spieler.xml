@@ -10,7 +10,6 @@
         android:id="@+id/htab_appbar_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -37,7 +36,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:alpha="0.3"
+                android:alpha="0.2"
                 android:background="@android:color/black"
                 android:fitsSystemWindows="true">
 
@@ -70,10 +69,10 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
                 android:clickable="true"
+                android:focusable="true"
                 android:src="@drawable/icon_plus_white"
                 android:tint="@android:color/white"
-                app:fabSize="mini"
-                android:focusable="true" />
+                app:fabSize="mini" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/activity_edit_spieler_foto_loeschen_button"
@@ -83,10 +82,10 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginBottom="16dp"
                 android:clickable="true"
+                android:focusable="true"
                 android:src="@drawable/icon_delete_2"
                 android:tint="@android:color/white"
-                app:fabSize="mini"
-                android:focusable="true" />
+                app:fabSize="mini" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>

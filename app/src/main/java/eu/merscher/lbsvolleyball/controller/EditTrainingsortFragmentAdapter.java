@@ -55,6 +55,7 @@ public class EditTrainingsortFragmentAdapter extends RecyclerView.Adapter<EditTr
     }
 
 
+
     @NotNull
     @Override
     public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
@@ -77,7 +78,7 @@ public class EditTrainingsortFragmentAdapter extends RecyclerView.Adapter<EditTr
 
     static class TrainingsortLoeschenAsyncTask extends AsyncTask<Void, Void, Void> {
 
-        public final WeakReference<EditTrainingsortFragmentAdapter> activityReference;
+        private final WeakReference<EditTrainingsortFragmentAdapter> activityReference;
 
         private final Trainingsort trainingsort;
 
@@ -106,9 +107,6 @@ public class EditTrainingsortFragmentAdapter extends RecyclerView.Adapter<EditTr
 
         @Override
         protected void onPostExecute(Void v) {
-
-            EditTrainingsortFragment.getOnLoeschenClick().onLoeschenClick();
-
         }
 
         //Interface für den Löschen-Button um die darunterliegenden Activitys auf Klick zu beenden
@@ -154,9 +152,8 @@ public class EditTrainingsortFragmentAdapter extends RecyclerView.Adapter<EditTr
                         .setPositiveButton("Ja", (dialog1, i) -> {
                             new TrainingsortLoeschenAsyncTask(EditTrainingsortFragmentAdapter.this, trainingsort).execute();
                             EditTrainingsortFragment.getOnLoeschenClick().onLoeschenClick();
+                            TrainingsortActivity.getOnLoeschenClick().onLoeschenClick();
 
-                            Intent intent = new Intent(context, TrainingsortVerwaltungActivity.class);
-                            context.startActivity(intent);
                         }).show();
 
             });
