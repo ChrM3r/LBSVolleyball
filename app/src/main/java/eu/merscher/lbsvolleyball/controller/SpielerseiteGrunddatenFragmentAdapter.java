@@ -24,6 +24,7 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
     private int teilnahmen;
     private final LayoutInflater inflate;
     private ViewHolder holder;
+    private Context context;
     private static SpielerseiteKontodatenFragmentAdapter.OnBuchungListener onBuchungListener;
 
 
@@ -33,14 +34,21 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
 
     SpielerseiteGrunddatenFragmentAdapter(Context context, Spieler spieler, double kto_saldo_neu, int teilnahmen) {
         this.inflate = LayoutInflater.from(context);
+        this.context = context;
         this.spieler = spieler;
         this.kto_saldo_neu = kto_saldo_neu;
         this.teilnahmen = teilnahmen;
     }
 
     @Override
-    public void onBuchung(String saldo) {
-        holder.textViewKtoSaldo.setText(saldo.replace('.', ','));
+    public void onBuchung(double saldo) {
+
+        String ktoSaldoString = df.format(saldo);
+
+        if ((ktoSaldoString.equals("-0,00") || ktoSaldoString.equals("0,00")) && (saldo != 0)) {
+            holder.textViewKtoSaldo.setText(context.getResources().getString(R.string.rund_0));
+        } else
+            holder.textViewKtoSaldo.setText(ktoSaldoString.replace(".", ","));
     }
 
     @NotNull
@@ -64,7 +72,12 @@ public class SpielerseiteGrunddatenFragmentAdapter extends RecyclerView.Adapter<
         holder.textViewBdate.setText(spieler.getBdate());
         if (spieler.getMail() != null)
             holder.textViewMail.setText(spieler.getMail());
-        holder.textViewKtoSaldo.setText(ktoSaldoAlsString.replace('.', ','));
+
+        if ((ktoSaldoAlsString.equals("-0,00") || ktoSaldoAlsString.equals("0,00")) && (kto_saldo_neu != 0)) {
+            holder.textViewKtoSaldo.setText(context.getResources().getString(R.string.rund_0));
+        } else
+            holder.textViewKtoSaldo.setText(ktoSaldoAlsString.replace(".", ","));
+
         holder.textViewTeilnahmen.setText(teilnahmenAlsString);
     }
 

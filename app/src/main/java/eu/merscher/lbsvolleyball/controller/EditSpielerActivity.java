@@ -30,7 +30,6 @@ import com.google.android.material.tabs.TabLayout;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -205,17 +204,15 @@ public class EditSpielerActivity extends AppCompatActivity implements EditSpiele
 
                 userFotoAlsString = cursor.getString(columnIndex);
 
-                Uri uri;
-                Bitmap spielerBildNeu = BitmapFactory.decodeFile(userFotoAlsString);
 
                 try {
-                    uri = Uri.fromFile(new File(userFotoAlsString));
-                    spielerBildNeu = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), uri);
+                    Bitmap spielerBildNeu = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), selectedImage);
                     userFotoAlsString = Utilities.bildSpeichern(getApplicationContext(), spielerBildNeu);
+                    spielerBild.setImageBitmap(spielerBildNeu);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                spielerBild.setImageBitmap(spielerBildNeu);
                 cursor.close();
             }
 

@@ -60,13 +60,18 @@ public class AuswertungenActivity extends AppCompatActivity {
         dataSource.open();
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
         AuswertungenFragmentAdapter adapter = new AuswertungenFragmentAdapter(this);
         RecyclerView recyclerView = findViewById(R.id.recyclerView_auswertungen);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
-
 
     //Zurück-Button
     @Override

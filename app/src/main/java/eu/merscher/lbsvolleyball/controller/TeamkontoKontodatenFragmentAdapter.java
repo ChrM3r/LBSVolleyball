@@ -68,8 +68,18 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
 
         DecimalFormat df = new DecimalFormat("0.00");
 
-        if (dataSource.getNeusteBuchungZuTeamkonto() != null)
-            holder.kontosaldo.setText(df.format(dataSource.getNeusteBuchungZuTeamkonto().getKto_saldo_neu()));
+        if (dataSource.getNeusteBuchungZuTeamkonto() != null) {
+
+            double kto_saldo_neu = dataSource.getNeusteBuchungZuTeamkonto().getKto_saldo_neu();
+            String ktoSaldoString = df.format(kto_saldo_neu).replace(".", ",");
+
+            if ((ktoSaldoString.equals("-0,00") || ktoSaldoString.equals("0,00")) && (kto_saldo_neu != 0)) {
+                holder.kontosaldo.setText(context.getResources().getString(R.string.rund_0));
+            } else
+                holder.kontosaldo.setText(ktoSaldoString);
+        } else
+            holder.kontosaldo.setText(context.getResources().getString(R.string.betrag_0));
+
 
         holder.auszahlungSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -132,8 +142,11 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
                 ArrayList<Buchung> buchungListNeu = dataSource.getAllBuchungZuTeamkonto();
                 SpielerseiteActivity.setBuchungList(buchungListNeu);
 
-                if (buchungListNeu.size() > 0)
+                if (buchungListNeu.size() > 0) {
                     holder.cardView_legende.setVisibility(View.VISIBLE);
+                    holder.cardView_header.setVisibility(View.VISIBLE);
+                    holder.cardView_listview.setVisibility(View.VISIBLE);
+                }
 
                 if (buchungListNeu.size() > 5) {
 
@@ -196,8 +209,11 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
         holder.buchungListView.setOnItemClickListener(null);
         holder.buchungListView.setEnabled(false);
 
-        if (buchungList.size() > 0)
+        if (buchungList.size() > 0) {
             holder.cardView_legende.setVisibility(View.VISIBLE);
+            holder.cardView_header.setVisibility(View.VISIBLE);
+            holder.cardView_listview.setVisibility(View.VISIBLE);
+        }
 
         if (buchungList.size() > 5) {
 
@@ -289,6 +305,8 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
         final ImageButton mehrBuchungen;
         final TextView mehrBuchungenText;
         final CardView cardView_legende;
+        final CardView cardView_header;
+        final CardView cardView_listview;
 
 
         ViewHolder(View view) {
@@ -301,6 +319,8 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
             mehrBuchungen = view.findViewById(R.id.mehrBuchungen_teamkonto);
             mehrBuchungenText = view.findViewById(R.id.mehrBuchungenText_teamkonto);
             cardView_legende = view.findViewById(R.id.card5_teamkonto);
+            cardView_header = view.findViewById(R.id.card3_teamkonto);
+            cardView_listview = view.findViewById(R.id.card2_teamkonto);
         }
 
     }
@@ -375,8 +395,23 @@ public class TeamkontoKontodatenFragmentAdapter extends RecyclerView.Adapter<Tea
             else if (buchung.getIst_geloeschter_spieler_mm() != null)
                 holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.typ_spieler_geloescht));
 
-            holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
-            holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
+
+            if ((df.format(buchung.getBu_btr()).equals("-0,00") || df.format(buchung.getBu_btr()).equals("0,00")) && !(df.format(buchung.getKto_saldo_neu()).equals("-0,00") || df.format(buchung.getKto_saldo_neu()).equals("0,00")) && (buchung.getBu_btr() != 0 && buchung.getKto_saldo_neu() != 0)) {
+                holder.buchungBetrag.setText(context.getResources().getString(R.string.rund_0));
+                holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
+
+            } else if (!(df.format(buchung.getBu_btr()).equals("-0,00") || df.format(buchung.getBu_btr()).equals("0,00")) && (df.format(buchung.getKto_saldo_neu()).equals("-0,00") || df.format(buchung.getKto_saldo_neu()).equals("0,00")) && (buchung.getBu_btr() != 0 && buchung.getKto_saldo_neu() != 0)) {
+                holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
+                holder.ktoSaldoNeu.setText(context.getResources().getString(R.string.rund_0));
+
+            } else if ((df.format(buchung.getBu_btr()).equals("-0,00") || df.format(buchung.getBu_btr()).equals("0,00")) && (df.format(buchung.getKto_saldo_neu()).equals("-0,00") || df.format(buchung.getKto_saldo_neu()).equals("0,00")) && (buchung.getBu_btr() != 0 && buchung.getKto_saldo_neu() != 0)) {
+                holder.buchungBetrag.setText(context.getResources().getString(R.string.rund_0));
+                holder.ktoSaldoNeu.setText(context.getResources().getString(R.string.rund_0));
+
+            } else {
+                holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
+                holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
+            }
 
 
             if (buchung.getBu_btr() < 0)

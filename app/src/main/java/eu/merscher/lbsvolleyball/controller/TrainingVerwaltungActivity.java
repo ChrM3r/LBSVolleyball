@@ -132,10 +132,6 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
         Objects.requireNonNull(dialogTrainingUebersicht.getWindow()).getAttributes().windowAnimations = R.style.DialogTheme; //style id
         dialogTrainingUebersicht.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
-        //popupWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-        dialogTrainingUebersicht.show();
-
 
         RecyclerView recyclerView = view.findViewById(R.id.popup_trainingsverwaltung_recyclerView);
         ImageView closeButton = view.findViewById(R.id.popup_close);
@@ -202,6 +198,8 @@ public class TrainingVerwaltungActivity extends AppCompatActivity {
 
 
         }
+
+        dialogTrainingUebersicht.show();
     }
 
     public class TrainingUebersichtAdapter extends RecyclerView.Adapter<TrainingUebersichtAdapter.ViewHolder> {

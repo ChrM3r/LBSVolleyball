@@ -6,7 +6,6 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -200,21 +199,21 @@ public class AddSpielerActivity extends AppCompatActivity {
 
                 userFotoAlsString = cursor.getString(columnIndex);
 
-                Bitmap spielerBild = BitmapFactory.decodeFile(userFotoAlsString);
 
                 try {
-                    spielerBild = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), selectedImage);
-                    new UserFotoUmspeichernAsyncTask(this, spielerBild).execute();
+                    Bitmap spielerBildNeu = Utilities.handleSamplingAndRotationBitmap(getApplicationContext(), selectedImage);
+                    new UserFotoUmspeichernAsyncTask(this, spielerBildNeu).execute();
 
                     ContextWrapper cw = new ContextWrapper(getApplicationContext());
                     File ordner = cw.getDir("profilbilder", Context.MODE_PRIVATE);
                     userFotoAlsString = ordner.getAbsolutePath() + File.separator + "temp.png";
                     Log.d("Foto auswaehlen", userFotoAlsString);
+                    this.spielerBild.setImageBitmap(spielerBildNeu);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                this.spielerBild.setImageBitmap(spielerBild);
                 cursor.close();
             }
 

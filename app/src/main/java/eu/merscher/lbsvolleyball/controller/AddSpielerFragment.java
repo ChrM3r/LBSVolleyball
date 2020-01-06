@@ -296,7 +296,7 @@ public class AddSpielerFragment extends Fragment {
                     editTextBdate.setError(context.getString(R.string.editText_errorMessage_bdate));
                     return;
 
-                } else if (Integer.parseInt(bdate.split("\\.")[0]) > 31 || Integer.parseInt(bdate.split("\\.")[1]) > 12) {
+                } else if (Integer.parseInt(bdate.split("\\.")[0]) > 31 || Integer.parseInt(bdate.split("\\.")[1]) > 12 || Integer.parseInt(bdate.split("\\.")[0]) < 1 || Integer.parseInt(bdate.split("\\.")[1]) < 1) {
                     editTextBdate.setError(context.getString(R.string.editText_errorMessage_bdate2));
                     return;
                 }

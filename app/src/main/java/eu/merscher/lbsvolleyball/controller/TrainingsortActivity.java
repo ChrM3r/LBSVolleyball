@@ -38,7 +38,7 @@ import eu.merscher.lbsvolleyball.model.Trainingsort;
 import eu.merscher.lbsvolleyball.utilities.Utilities;
 
 
-public class TrainingsortActivity extends AppCompatActivity implements EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick {
+public class TrainingsortActivity extends AppCompatActivity implements EditTrainingsortFragment.TrainingsortLoeschenAsyncTask.OnLoeschenClick {
 
 
     private ImageView trainingsortBild;
@@ -47,9 +47,9 @@ public class TrainingsortActivity extends AppCompatActivity implements EditTrain
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private CollapsingToolbarLayout collapsingToolbar;
-    public static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick onLoeschenClick;
+    public static EditTrainingsortFragment.TrainingsortLoeschenAsyncTask.OnLoeschenClick onLoeschenClick;
 
-    public static EditTrainingsortFragmentAdapter.TrainingsortLoeschenAsyncTask.OnLoeschenClick getOnLoeschenClick() {
+    public static EditTrainingsortFragment.TrainingsortLoeschenAsyncTask.OnLoeschenClick getOnLoeschenClick() {
         return onLoeschenClick;
     }
 

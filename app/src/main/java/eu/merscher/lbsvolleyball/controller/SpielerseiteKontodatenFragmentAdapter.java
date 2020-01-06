@@ -149,8 +149,11 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                 SpielerseiteActivity.setBuchungList(buchungListNeu);
 
 
-                if (buchungListNeu.size() > 0)
+                if (buchungListNeu.size() > 0) {
                     holder.cardView_legende.setVisibility(View.VISIBLE);
+                    holder.cardView_header.setVisibility(View.VISIBLE);
+                    holder.cardView_listview.setVisibility(View.VISIBLE);
+                }
 
                 if (buchungListNeu.size() > 5) {
 
@@ -202,7 +205,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
 
                 //Kto_Saldo_Neu auf Grundseitenfragment aktualisieren
                 onBuchungListener = SpielerseiteGrunddatenFragmentAdapter.getOnBuchungListener();
-                onBuchungListener.onBuchung(df.format(dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu()));
+                onBuchungListener.onBuchung(dataSource.getNeusteBuchungZuSpieler(spieler).getKto_saldo_neu());
 
                 holder.editTextAddBuchung.setText("");
                 holder.editTextAddBuchung.clearFocus();
@@ -214,8 +217,11 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         holder.buchungListView.setOnItemClickListener(null);
         holder.buchungListView.setEnabled(false);
 
-        if (buchungList.size() > 0)
+        if (buchungList.size() > 0) {
             holder.cardView_legende.setVisibility(View.VISIBLE);
+            holder.cardView_header.setVisibility(View.VISIBLE);
+            holder.cardView_listview.setVisibility(View.VISIBLE);
+        }
 
         if (buchungList.size() > 5) {
 
@@ -306,6 +312,9 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
         final ImageButton mehrBuchungen;
         final TextView mehrBuchungenText;
         final CardView cardView_legende;
+        final CardView cardView_header;
+        final CardView cardView_listview;
+
 
 
         ViewHolder(View view) {
@@ -317,6 +326,9 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
             mehrBuchungen = view.findViewById(R.id.mehrBuchungen);
             mehrBuchungenText = view.findViewById(R.id.mehrBuchungenText);
             cardView_legende = view.findViewById(R.id.cardView4);
+            cardView_header = view.findViewById(R.id.cardView3);
+            cardView_listview = view.findViewById(R.id.cardView2);
+
         }
 
     }
@@ -389,8 +401,23 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
                 holder.buchungTyp.setImageBitmap(BitmapFactory.decodeResource(SpielerseiteActivity.resources, R.drawable.typ_tunier));
             }
 
-            holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
-            holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
+            if ((df.format(buchung.getBu_btr()).equals("-0,00") || df.format(buchung.getBu_btr()).equals("0,00")) && !(df.format(buchung.getKto_saldo_neu()).equals("-0,00") || df.format(buchung.getKto_saldo_neu()).equals("0,00")) && (buchung.getBu_btr() != 0 && buchung.getKto_saldo_neu() != 0)) {
+                holder.buchungBetrag.setText(context.getResources().getString(R.string.rund_0));
+                holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
+
+            } else if (!(df.format(buchung.getBu_btr()).equals("-0,00") || df.format(buchung.getBu_btr()).equals("0,00")) && (df.format(buchung.getKto_saldo_neu()).equals("-0,00") || df.format(buchung.getKto_saldo_neu()).equals("0,00")) && (buchung.getBu_btr() != 0 && buchung.getKto_saldo_neu() != 0)) {
+                holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
+                holder.ktoSaldoNeu.setText(context.getResources().getString(R.string.rund_0));
+
+            } else if ((df.format(buchung.getBu_btr()).equals("-0,00") || df.format(buchung.getBu_btr()).equals("0,00")) && (df.format(buchung.getKto_saldo_neu()).equals("-0,00") || df.format(buchung.getKto_saldo_neu()).equals("0,00")) && (buchung.getBu_btr() != 0 && buchung.getKto_saldo_neu() != 0)) {
+                holder.buchungBetrag.setText(context.getResources().getString(R.string.rund_0));
+                holder.ktoSaldoNeu.setText(context.getResources().getString(R.string.rund_0));
+
+            } else {
+                holder.buchungBetrag.setText(df.format(buchung.getBu_btr()));
+                holder.ktoSaldoNeu.setText(df.format(buchung.getKto_saldo_neu()));
+            }
+
 
 
             if (buchung.getBu_btr() < 0)
@@ -422,7 +449,7 @@ public class SpielerseiteKontodatenFragmentAdapter extends RecyclerView.Adapter<
     }
 
     public interface OnBuchungListener {
-        void onBuchung(String saldo);
+        void onBuchung(double saldo);
     }
 
     private static class EMailSendenAsyncTask extends AsyncTask<Void, Void, Void> {

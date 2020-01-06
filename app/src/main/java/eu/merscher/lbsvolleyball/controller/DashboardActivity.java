@@ -205,15 +205,22 @@ public class DashboardActivity extends AppCompatActivity {
         dataSource.open();
 
         int spieleranzahl = dataSource.getAllSpieler().size();
-        double teamkonto;
 
-        if (dataSource.getNeusteBuchungZuTeamkonto() != null)
-            teamkonto = dataSource.getNeusteBuchungZuTeamkonto().getKto_saldo_neu();
-        else
-            teamkonto = 0;
+        if (dataSource.getNeusteBuchungZuTeamkonto() != null) {
+
+            double kto_saldo_neu = dataSource.getNeusteBuchungZuTeamkonto().getKto_saldo_neu();
+            String ktoSaldoString = df.format(kto_saldo_neu).replace(".", ",");
+
+            if ((ktoSaldoString.equals("-0,00") || ktoSaldoString.equals("0,00")) && (kto_saldo_neu != 0)) {
+                teamkonto_textview.setText(getResources().getString(R.string.rund_0));
+            } else
+                teamkonto_textview.setText(ktoSaldoString);
+
+        } else
+            teamkonto_textview.setText(getResources().getString(R.string.betrag_0));
+
 
         spieleranzahl_textview.setText(df_einzel.format(spieleranzahl));
-        teamkonto_textview.setText(df.format(teamkonto));
 
     }
 
