@@ -1,5 +1,6 @@
 package eu.merscher.lbsvolleyball.controller;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -77,13 +78,13 @@ public class EditSpielerFragment extends Fragment {
 
     }
 
-    public void onSpeichernClick() {
+    private void onSpeichernClick() {
 
         System.out.println("onSpeicherClick");
         Objects.requireNonNull(getActivity()).finish();
     }
 
-    public void onLoeschenClick() {
+    private void onLoeschenClick() {
         Objects.requireNonNull(getActivity()).finish();
         onEditFinish.onEditFinish();
 
@@ -337,8 +338,8 @@ public class EditSpielerFragment extends Fragment {
                                         dataSource.createBuchungAufTeamkonto(bu_btr, kto_saldo_alt, kto_saldo_neu, datumsformat.format(kalender.getTime()), null, -999, null, null, -999, "X", spieler.getS_id());
 
                                     }
-                                    Intent intent = new Intent(context, SpielerVerwaltungActivity.class);
-                                    context.startActivity(intent);
+                                    ((Activity) context).finish();
+
                                 }).show();
 
                     } else if (Double.parseDouble(df.format(neusteSpielerBuchung.getKto_saldo_neu()).replace(",", ".")) > 0) {
@@ -376,9 +377,8 @@ public class EditSpielerFragment extends Fragment {
                             onLoeschenClick();
 
                             System.out.println("Teamkonto");
-                            Intent intent = new Intent(context, SpielerVerwaltungActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            context.startActivity(intent);
+                            ((Activity) context).finish();
+
                         });
                         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Bar", (dialoginterface, i) -> {
 
@@ -407,9 +407,7 @@ public class EditSpielerFragment extends Fragment {
 
                             System.out.println("Bar");
 
-                            Intent intent = new Intent(context, SpielerVerwaltungActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            context.startActivity(intent);
+                            ((Activity) context).finish();
                         });
                         dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Abbrechen", (dialoginterface, i) -> dialoginterface.cancel());
                         dialog.show();
